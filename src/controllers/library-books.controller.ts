@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { RowDataPacket } from "mysql2";
+import { bookQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { ApiError, parseId, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
 import {
@@ -136,10 +137,9 @@ export const listSchoolBooks = async (req: Request, res: Response) => {
 
 export const getSchoolBook = async (req: Request, res: Response) => {
   const bookId = parseId(req.params.bookId, "도서 ID");
-  const [rows] = await pool.query<RowDataPacket[]>(
-    "SELECT library_number AS libraryNumber FROM books WHERE id = ? AND library_number LIKE 'DLS:%'",
-    [bookId]
-  );
+
+  const q1 = bookQueries.findDlsBookLibraryNumber(bookId);
+  const [rows] = await pool.query<RowDataPacket[]>(q1.sql, q1.values);
   const speciesKey = String(rows[0]?.libraryNumber ?? "").split(":")[1];
   if (!speciesKey) {
     throw new ApiError(404, 4042, "도서를 찾을 수 없습니다.");
@@ -147,11 +147,10 @@ export const getSchoolBook = async (req: Request, res: Response) => {
 
   const book = await getDlsBookDetail(String(bookId), speciesKey);
   await syncDlsBooks([book]);
+
+  const q2 = bookQueries.findUserFavorite(req.userId!, bookId);
   const [favorites] = req.userId
-    ? await pool.query<RowDataPacket[]>(
-        "SELECT 1 FROM favorites WHERE user_id = ? AND book_id = ?",
-        [req.userId, bookId]
-      )
+    ? await pool.query<RowDataPacket[]>(q2.sql, q2.values)
     : [[] as RowDataPacket[], []];
 
   sendSuccess(res, 200, "도서 상세 조회 성공", {

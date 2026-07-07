@@ -1,59 +1,27 @@
 import { Request, Response } from "express";
 import { RowDataPacket } from "mysql2";
+import { loanQueries, meQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { ApiError, sendSuccess } from "../lib/api";
 
 export const getMe = async (req: Request, res: Response) => {
-  await pool.query(
-    "UPDATE loans SET status = 'OVERDUE' WHERE user_id = ? AND status = 'BORROWED' AND due_date < CURRENT_DATE",
-    [req.userId]
-  );
+  const q1 = loanQueries.markUserOverdueLoans(req.userId!);
+  await pool.query(q1.sql, q1.values);
 
-  const [users] = await pool.query<RowDataPacket[]>(`
-    SELECT
-      id AS userId,
-      email,
-      name,
-      department,
-      gender,
-      due_date_reminder AS dueDateReminder,
-      new_book_reminder AS newBookReminder
-    FROM users
-    WHERE id = ?
-  `, [req.userId]);
+  const q2 = meQueries.findUserProfile(req.userId!);
+  const [users] = await pool.query<RowDataPacket[]>(q2.sql, q2.values);
   const user = users[0];
   if (!user) {
     throw new ApiError(401, 4010, "인증이 필요합니다.");
   }
 
-  const [summaries] = await pool.query<RowDataPacket[]>(`
-    SELECT
-      COUNT(*) AS currentLoanCount,
-      COALESCE(SUM(status = 'OVERDUE'), 0) AS overdueCount,
-      MIN(due_date) AS nearestDueDate,
-      DATEDIFF(MIN(due_date), CURRENT_DATE) AS nearestDueDday
-    FROM loans
-    WHERE user_id = ? AND status IN ('BORROWED', 'OVERDUE')
-  `, [req.userId]);
-  const [currentLoans] = await pool.query<RowDataPacket[]>(`
-    SELECT
-      l.id AS loanId,
-      b.id AS bookId,
-      b.title,
-      l.due_date AS dueDate,
-      DATEDIFF(l.due_date, CURRENT_DATE) AS dDay,
-      l.extension_count = 0 AND l.status = 'BORROWED' AS extensionAvailable
-    FROM loans l
-    JOIN books b ON b.id = l.book_id
-    WHERE l.user_id = ? AND l.status IN ('BORROWED', 'OVERDUE')
-    ORDER BY l.due_date ASC
-  `, [req.userId]);
+  const q3 = meQueries.getLoanSummary(req.userId!);
+  const [summaries] = await pool.query<RowDataPacket[]>(q3.sql, q3.values);
 
-  const {
-    dueDateReminder,
-    newBookReminder,
-    ...profile
-  } = user;
+  const q4 = meQueries.listUserCurrentLoans(req.userId!);
+  const [currentLoans] = await pool.query<RowDataPacket[]>(q4.sql, q4.values);
+
+  const { dueDateReminder, newBookReminder, ...profile } = user;
   sendSuccess(res, 200, "마이페이지 조회 성공", {
     user: profile,
     loanSummary: {
@@ -85,25 +53,15 @@ export const updateNotificationSettings = async (req: Request, res: Response) =>
     throw new ApiError(400, 4001, "알림 설정 값이 올바르지 않습니다.");
   }
 
-  const updates: string[] = [];
-  const params: unknown[] = [];
-  if (dueDateReminder !== undefined) {
-    updates.push("due_date_reminder = ?");
-    params.push(dueDateReminder);
-  }
-  if (newBookReminder !== undefined) {
-    updates.push("new_book_reminder = ?");
-    params.push(newBookReminder);
-  }
-  await pool.query(`UPDATE users SET ${updates.join(", ")} WHERE id = ?`, [
-    ...params,
-    req.userId
-  ]);
+  const updates: Record<string, unknown> = {};
+  if (dueDateReminder !== undefined) updates.due_date_reminder = dueDateReminder;
+  if (newBookReminder !== undefined) updates.new_book_reminder = newBookReminder;
 
-  const [users] = await pool.query<RowDataPacket[]>(
-    "SELECT due_date_reminder AS dueDateReminder, new_book_reminder AS newBookReminder FROM users WHERE id = ?",
-    [req.userId]
-  );
+  const q1 = meQueries.updateNotificationSettings(updates, req.userId!);
+  await pool.query(q1.sql, q1.values);
+
+  const q2 = meQueries.findNotificationSettings(req.userId!);
+  const [users] = await pool.query<RowDataPacket[]>(q2.sql, q2.values);
   sendSuccess(res, 200, "알림 설정이 변경되었습니다.", {
     dueDateReminder: Boolean(users[0].dueDateReminder),
     newBookReminder: Boolean(users[0].newBookReminder)

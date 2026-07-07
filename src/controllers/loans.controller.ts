@@ -1,22 +1,14 @@
 import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
-import { env } from "../config/env";
+import { loanQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { ApiError, parseId, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
 import { getDlsBookDetail } from "../services/dls";
-
-type LoanRow = RowDataPacket & {
-  id: number;
-  user_id: number;
-  due_date: string;
-  status: "BORROWED" | "RETURNED" | "OVERDUE";
-  extension_count: number;
-};
+import { LoanRow } from "../types/loan.types";
 
 const updateOverdueLoans = async () => {
-  await pool.query(
-    "UPDATE loans SET status = 'OVERDUE' WHERE status = 'BORROWED' AND due_date < CURRENT_DATE"
-  );
+  const q = loanQueries.markOverdueLoans();
+  await pool.query(q.sql, q.values);
 };
 
 export const createLoan = async (req: Request, res: Response) => {
@@ -25,10 +17,9 @@ export const createLoan = async (req: Request, res: Response) => {
 
   try {
     await connection.beginTransaction();
-    const [books] = await connection.query<RowDataPacket[]>(
-      "SELECT id, title, total_quantity, library_number FROM books WHERE id = ? FOR UPDATE",
-      [bookId]
-    );
+
+    const q1 = loanQueries.findBookForLoan(bookId);
+    const [books] = await connection.query<RowDataPacket[]>(q1.sql, q1.values);
     const book = books[0];
     if (!book) {
       throw new ApiError(404, 4042, "도서를 찾을 수 없습니다.");
@@ -46,18 +37,14 @@ export const createLoan = async (req: Request, res: Response) => {
       }
     }
 
-    const [existing] = await connection.query<RowDataPacket[]>(
-      "SELECT id FROM loans WHERE user_id = ? AND book_id = ? AND status IN ('BORROWED', 'OVERDUE') LIMIT 1",
-      [req.userId, bookId]
-    );
+    const q2 = loanQueries.findActiveLoanByUserAndBook(req.userId!, bookId);
+    const [existing] = await connection.query<RowDataPacket[]>(q2.sql, q2.values);
     if (existing[0]) {
       throw new ApiError(409, 4093, "이미 대출 중인 도서입니다.", { bookId });
     }
 
-    const [activeRows] = await connection.query<RowDataPacket[]>(
-      "SELECT COUNT(*) AS loanedQuantity FROM loans WHERE book_id = ? AND status IN ('BORROWED', 'OVERDUE')",
-      [bookId]
-    );
+    const q3 = loanQueries.countActiveLoansByBook(bookId);
+    const [activeRows] = await connection.query<RowDataPacket[]>(q3.sql, q3.values);
     const availableQuantity = Number(book.total_quantity) - Number(activeRows[0].loanedQuantity);
     if (availableQuantity < 1) {
       throw new ApiError(409, 4092, "현재 대출 가능한 재고가 없습니다.", {
@@ -66,14 +53,11 @@ export const createLoan = async (req: Request, res: Response) => {
       });
     }
 
-    const [result] = await connection.query<ResultSetHeader>(
-      `INSERT INTO loans (user_id, book_id, borrowed_at, due_date) VALUES (?, ?, CURRENT_DATE, DATE_ADD(CURRENT_DATE, INTERVAL ${env.loanDays} DAY))`,
-      [req.userId, bookId]
-    );
-    const [loans] = await connection.query<RowDataPacket[]>(
-      "SELECT id AS loanId, book_id AS bookId, borrowed_at AS borrowedAt, due_date AS dueDate, status FROM loans WHERE id = ?",
-      [result.insertId]
-    );
+    const q4 = loanQueries.insertLoan(req.userId!, bookId);
+    const [result] = await connection.query<ResultSetHeader>(q4.sql, q4.values);
+
+    const q5 = loanQueries.findLoanById(result.insertId);
+    const [loans] = await connection.query<RowDataPacket[]>(q5.sql, q5.values);
     await connection.commit();
 
     sendSuccess(res, 200, "대출 신청이 완료되었습니다.", {
@@ -94,14 +78,12 @@ export const extendLoan = async (req: Request, res: Response) => {
 
   try {
     await connection.beginTransaction();
-    await connection.query(
-      "UPDATE loans SET status = 'OVERDUE' WHERE id = ? AND status = 'BORROWED' AND due_date < CURRENT_DATE",
-      [loanId]
-    );
-    const [loans] = await connection.query<LoanRow[]>(
-      "SELECT id, user_id, due_date, status, extension_count FROM loans WHERE id = ? AND user_id = ? FOR UPDATE",
-      [loanId, req.userId]
-    );
+
+    const q1 = loanQueries.markSingleLoanOverdue(loanId);
+    await connection.query(q1.sql, q1.values);
+
+    const q2 = loanQueries.findLoanForExtension(loanId, req.userId!);
+    const [loans] = await connection.query<LoanRow[]>(q2.sql, q2.values);
     const loan = loans[0];
     if (!loan) {
       throw new ApiError(404, 4043, "대출 정보를 찾을 수 없습니다.");
@@ -119,14 +101,11 @@ export const extendLoan = async (req: Request, res: Response) => {
       });
     }
 
-    await connection.query(
-      `UPDATE loans SET due_date = DATE_ADD(due_date, INTERVAL ${env.extensionDays} DAY), extension_count = extension_count + 1 WHERE id = ?`,
-      [loanId]
-    );
-    const [updated] = await connection.query<RowDataPacket[]>(
-      "SELECT due_date AS newDueDate, extension_count AS extensionCount FROM loans WHERE id = ?",
-      [loanId]
-    );
+    const q3 = loanQueries.extendLoanDueDate(loanId);
+    await connection.query(q3.sql, q3.values);
+
+    const q4 = loanQueries.findExtendedLoan(loanId);
+    const [updated] = await connection.query<RowDataPacket[]>(q4.sql, q4.values);
     await connection.commit();
 
     sendSuccess(res, 200, "대출 기간이 연장되었습니다.", {
@@ -146,22 +125,8 @@ export const extendLoan = async (req: Request, res: Response) => {
 
 export const listCurrentLoans = async (req: Request, res: Response) => {
   await updateOverdueLoans();
-  const [items] = await pool.query<RowDataPacket[]>(`
-    SELECT
-      l.id AS loanId,
-      b.id AS bookId,
-      b.title,
-      b.author,
-      l.borrowed_at AS borrowedAt,
-      l.due_date AS dueDate,
-      DATEDIFF(l.due_date, CURRENT_DATE) AS dDay,
-      l.extension_count = 0 AND l.status = 'BORROWED' AS extensionAvailable,
-      l.status
-    FROM loans l
-    JOIN books b ON b.id = l.book_id
-    WHERE l.user_id = ? AND l.status IN ('BORROWED', 'OVERDUE')
-    ORDER BY l.due_date ASC
-  `, [req.userId]);
+  const q = loanQueries.listCurrentLoans(req.userId!);
+  const [items] = await pool.query<RowDataPacket[]>(q.sql, q.values);
 
   sendSuccess(res, 200, "현재 대출 목록 조회 성공", {
     items: items.map((item) => ({
@@ -180,30 +145,11 @@ export const listLoanHistory = async (req: Request, res: Response) => {
     throw new ApiError(400, 4001, "대출 상태 값이 올바르지 않습니다.");
   }
 
-  const condition = status === "ALL" ? "" : "AND l.status = ?";
-  const params = status === "ALL" ? [req.userId] : [req.userId, status];
-  const [countRows] = await pool.query<RowDataPacket[]>(
-    `SELECT COUNT(*) AS totalCount FROM loans l WHERE l.user_id = ? ${condition}`,
-    params
-  );
-  const [items] = await pool.query<RowDataPacket[]>(
-    `
-      SELECT
-        l.id AS loanId,
-        b.id AS bookId,
-        b.title,
-        l.borrowed_at AS borrowedAt,
-        l.due_date AS dueDate,
-        l.returned_at AS returnedAt,
-        l.status
-      FROM loans l
-      JOIN books b ON b.id = l.book_id
-      WHERE l.user_id = ? ${condition}
-      ORDER BY l.borrowed_at DESC, l.id DESC
-      LIMIT ? OFFSET ?
-    `,
-    [...params, size, (page - 1) * size]
-  );
+  const q1 = loanQueries.countLoanHistory(req.userId!, status);
+  const [countRows] = await pool.query<RowDataPacket[]>(q1.sql, q1.values);
+
+  const q2 = loanQueries.listLoanHistory(req.userId!, status, size, (page - 1) * size);
+  const [items] = await pool.query<RowDataPacket[]>(q2.sql, q2.values);
   const totalCount = Number(countRows[0].totalCount);
 
   sendSuccess(res, 200, "대출 히스토리 조회 성공", {

@@ -2,18 +2,13 @@ import { randomInt } from "node:crypto";
 import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { env } from "../config/env";
+import { authQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { ApiError, sendSuccess } from "../lib/api";
 import { hashPassword, verifyPassword } from "../lib/password";
 import { createAccessToken, createRefreshToken, hashToken } from "../lib/token";
 import { sendPasswordResetCode } from "../services/mail";
-
-type UserRow = RowDataPacket & {
-  id: number;
-  email: string;
-  name: string;
-  password_hash: string;
-};
+import { UserRow } from "../types/user.types";
 
 const passwordPattern = /^(?=.*[a-zA-Z])(?=.*[!@#$%^&?~])[a-zA-Z!@#$%^&?~]{6,15}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -55,9 +50,8 @@ export const register = async (req: Request, res: Response) => {
     throw new ApiError(422, 4220, "성별 값이 올바르지 않습니다.", { field: "gender" });
   }
 
-  const [existing] = await pool.query<RowDataPacket[]>("SELECT id FROM users WHERE email = ?", [
-    normalizedEmail
-  ]);
+  const q1 = authQueries.findUserIdByEmail(normalizedEmail);
+  const [existing] = await pool.query<RowDataPacket[]>(q1.sql, q1.values);
   if (existing.length > 0) {
     throw new ApiError(409, 4091, "이미 사용 중인 이메일입니다.");
   }
@@ -65,10 +59,8 @@ export const register = async (req: Request, res: Response) => {
   const passwordHash = await hashPassword(password);
   let result: ResultSetHeader;
   try {
-    [result] = await pool.query<ResultSetHeader>(
-      "INSERT INTO users (email, name, department, gender, password_hash) VALUES (?, ?, ?, ?, ?)",
-      [normalizedEmail, name.trim(), department.trim(), gender, passwordHash]
-    );
+    const q2 = authQueries.insertUser(normalizedEmail, name.trim(), department.trim(), gender, passwordHash);
+    [result] = await pool.query<ResultSetHeader>(q2.sql, q2.values);
   } catch (error) {
     if ((error as { code?: string }).code === "ER_DUP_ENTRY") {
       throw new ApiError(409, 4091, "이미 사용 중인 이메일입니다.");
@@ -96,10 +88,8 @@ export const login = async (req: Request, res: Response) => {
     });
   }
 
-  const [users] = await pool.query<UserRow[]>(
-    "SELECT id, email, name, password_hash FROM users WHERE email = ?",
-    [loginId.toLowerCase()]
-  );
+  const q1 = authQueries.findUserForLogin(loginId.toLowerCase());
+  const [users] = await pool.query<UserRow[]>(q1.sql, q1.values);
   const user = users[0];
   if (!user || !(await verifyPassword(password, user.password_hash))) {
     throw new ApiError(401, 4011, "아이디 또는 비밀번호가 올바르지 않습니다.");
@@ -108,10 +98,8 @@ export const login = async (req: Request, res: Response) => {
   const accessToken = createAccessToken(user.id);
   const refreshToken = createRefreshToken();
   const refreshExpiresAt = new Date(Date.now() + env.refreshTokenExpiresIn * 1000);
-  await pool.query(
-    "INSERT INTO refresh_tokens (user_id, token_hash, expires_at) VALUES (?, ?, ?)",
-    [user.id, hashToken(refreshToken), refreshExpiresAt]
-  );
+  const q2 = authQueries.insertRefreshToken(user.id, hashToken(refreshToken), refreshExpiresAt);
+  await pool.query(q2.sql, q2.values);
 
   sendSuccess(res, 200, "로그인 성공", {
     userId: user.id,
@@ -131,23 +119,21 @@ export const sendResetEmail = async (req: Request, res: Response) => {
   }
 
   const normalizedEmail = email.toLowerCase();
-  const [users] = await pool.query<UserRow[]>("SELECT id, email FROM users WHERE email = ?", [
-    normalizedEmail
-  ]);
+  const q1 = authQueries.findUserByEmailForReset(normalizedEmail);
+  const [users] = await pool.query<UserRow[]>(q1.sql, q1.values);
   const user = users[0];
   if (!user) {
     throw new ApiError(404, 4041, "가입된 이메일을 찾을 수 없습니다.");
   }
 
   const code = randomInt(100000, 1000000).toString();
-  const [codeResult] = await pool.query<ResultSetHeader>(
-    "INSERT INTO password_reset_codes (user_id, code_hash, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))",
-    [user.id, hashToken(code)]
-  );
+  const q2 = authQueries.insertResetCode(user.id, hashToken(code));
+  const [codeResult] = await pool.query<ResultSetHeader>(q2.sql, q2.values);
   try {
     await sendPasswordResetCode(normalizedEmail, code);
   } catch (error) {
-    await pool.query("DELETE FROM password_reset_codes WHERE id = ?", [codeResult.insertId]);
+    const q3 = authQueries.deleteResetCode(codeResult.insertId);
+    await pool.query(q3.sql, q3.values);
     throw error;
   }
 
@@ -183,31 +169,29 @@ export const resetPassword = async (req: Request, res: Response) => {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    const [users] = await connection.query<UserRow[]>(
-      "SELECT id, email FROM users WHERE email = ? FOR UPDATE",
-      [email.toLowerCase()]
-    );
+
+    const q1 = authQueries.findUserByEmailForUpdate(email.toLowerCase());
+    const [users] = await connection.query<UserRow[]>(q1.sql, q1.values);
     const user = users[0];
     if (!user) {
       throw new ApiError(401, 4012, "인증 코드가 올바르지 않거나 만료되었습니다.");
     }
 
-    const [codes] = await connection.query<RowDataPacket[]>(
-      "SELECT id FROM password_reset_codes WHERE user_id = ? AND code_hash = ? AND used_at IS NULL AND expires_at >= NOW() ORDER BY id DESC LIMIT 1 FOR UPDATE",
-      [user.id, hashToken(verificationCode)]
-    );
+    const q2 = authQueries.findValidResetCode(user.id, hashToken(verificationCode));
+    const [codes] = await connection.query<RowDataPacket[]>(q2.sql, q2.values);
     if (!codes[0]) {
       throw new ApiError(401, 4012, "인증 코드가 올바르지 않거나 만료되었습니다.");
     }
 
-    await connection.query("UPDATE users SET password_hash = ? WHERE id = ?", [
-      await hashPassword(newPassword),
-      user.id
-    ]);
-    await connection.query("UPDATE password_reset_codes SET used_at = NOW() WHERE id = ?", [
-      codes[0].id
-    ]);
-    await connection.query("UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = ?", [user.id]);
+    const q3 = authQueries.updatePasswordHash(await hashPassword(newPassword), user.id);
+    await connection.query(q3.sql, q3.values);
+
+    const q4 = authQueries.markResetCodeUsed(codes[0].id);
+    await connection.query(q4.sql, q4.values);
+
+    const q5 = authQueries.revokeRefreshTokens(user.id);
+    await connection.query(q5.sql, q5.values);
+
     await connection.commit();
 
     sendSuccess(res, 200, "비밀번호가 변경되었습니다.", { email: user.email });

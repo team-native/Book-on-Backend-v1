@@ -1,22 +1,9 @@
 import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
+import { bookQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { ApiError, parseId, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
-
-type BookRow = RowDataPacket & {
-  bookId: number;
-  loanAvailable: number;
-  favorite?: number;
-};
-
-const bookAvailabilitySql = `
-  LEFT JOIN (
-    SELECT book_id, COUNT(*) AS loaned_quantity
-    FROM loans
-    WHERE status IN ('BORROWED', 'OVERDUE')
-    GROUP BY book_id
-  ) active_loans ON active_loans.book_id = b.id
-`;
+import { BookRow } from "../types/book.types";
 
 const serializeBook = (book: BookRow) => ({
   ...book,
@@ -26,16 +13,15 @@ const serializeBook = (book: BookRow) => ({
 
 export const addFavorite = async (req: Request, res: Response) => {
   const bookId = parseId(req.params.bookId, "도서 ID");
-  const [books] = await pool.query<RowDataPacket[]>("SELECT id FROM books WHERE id = ?", [bookId]);
+  const q1 = bookQueries.findBookById(bookId);
+  const [books] = await pool.query<RowDataPacket[]>(q1.sql, q1.values);
   if (!books[0]) {
     throw new ApiError(404, 4042, "도서를 찾을 수 없습니다.");
   }
 
   try {
-    await pool.query<ResultSetHeader>("INSERT INTO favorites (user_id, book_id) VALUES (?, ?)", [
-      req.userId,
-      bookId
-    ]);
+    const q2 = bookQueries.insertFavorite(req.userId!, bookId);
+    await pool.query<ResultSetHeader>(q2.sql, q2.values);
   } catch (error) {
     if ((error as { code?: string }).code === "ER_DUP_ENTRY") {
       throw new ApiError(409, 4096, "이미 관심 도서로 등록된 책입니다.", { bookId });
@@ -47,39 +33,20 @@ export const addFavorite = async (req: Request, res: Response) => {
 
 export const removeFavorite = async (req: Request, res: Response) => {
   const bookId = parseId(req.params.bookId, "도서 ID");
-  await pool.query("DELETE FROM favorites WHERE user_id = ? AND book_id = ?", [
-    req.userId,
-    bookId
-  ]);
+  const q = bookQueries.deleteFavorite(req.userId!, bookId);
+  await pool.query(q.sql, q.values);
   sendSuccess(res, 200, "관심 도서 등록이 해제되었습니다.", { bookId, favorite: false });
 };
 
 export const listFavoriteBooks = async (req: Request, res: Response) => {
   const page = parsePositiveInteger(req.query.page, 1);
   const size = parsePositiveInteger(req.query.size, 20, 100);
-  const [countRows] = await pool.query<RowDataPacket[]>(
-    "SELECT COUNT(*) AS totalCount FROM favorites WHERE user_id = ?",
-    [req.userId]
-  );
-  const [books] = await pool.query<BookRow[]>(
-    `
-      SELECT
-        b.id AS bookId,
-        b.title,
-        b.author,
-        b.library_number AS libraryNumber,
-        b.total_quantity - COALESCE(active_loans.loaned_quantity, 0) AS availableQuantity,
-        b.total_quantity > COALESCE(active_loans.loaned_quantity, 0) AS loanAvailable,
-        f.created_at AS favoritedAt
-      FROM favorites f
-      JOIN books b ON b.id = f.book_id
-      ${bookAvailabilitySql}
-      WHERE f.user_id = ?
-      ORDER BY f.created_at DESC
-      LIMIT ? OFFSET ?
-    `,
-    [req.userId, size, (page - 1) * size]
-  );
+
+  const q1 = bookQueries.countFavorites(req.userId!);
+  const [countRows] = await pool.query<RowDataPacket[]>(q1.sql, q1.values);
+
+  const q2 = bookQueries.listFavoriteBooks(req.userId!, size, (page - 1) * size);
+  const [books] = await pool.query<BookRow[]>(q2.sql, q2.values);
   const totalCount = Number(countRows[0].totalCount);
 
   sendSuccess(res, 200, "관심 도서 목록 조회 성공", {

@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { RowDataPacket } from "mysql2";
+import { publicQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { ApiError, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
 import { enrichDlsBooks, getDlsPopularBooks, serializeDlsBook } from "../services/dls";
@@ -7,15 +8,12 @@ import { enrichDlsBooks, getDlsPopularBooks, serializeDlsBook } from "../service
 export const listNotices = async (req: Request, res: Response) => {
   const page = parsePositiveInteger(req.query.page, 1);
   const size = parsePositiveInteger(req.query.size, 10, 100);
-  const [countRows] = await pool.query<RowDataPacket[]>(
-    "SELECT COUNT(*) AS totalCount FROM notices"
-  );
-  const [items] = await pool.query<RowDataPacket[]>(`
-    SELECT id AS noticeId, title, summary, created_at AS createdAt
-    FROM notices
-    ORDER BY created_at DESC, id DESC
-    LIMIT ? OFFSET ?
-  `, [size, (page - 1) * size]);
+
+  const q1 = publicQueries.countNotices();
+  const [countRows] = await pool.query<RowDataPacket[]>(q1.sql, q1.values);
+
+  const q2 = publicQueries.listNotices(size, (page - 1) * size);
+  const [items] = await pool.query<RowDataPacket[]>(q2.sql, q2.values);
   const totalCount = Number(countRows[0].totalCount);
 
   sendSuccess(res, 200, "공지사항 목록 조회 성공", {
@@ -34,19 +32,8 @@ export const getReaderRankings = async (req: Request, res: Response) => {
     throw new ApiError(400, 4001, "연도 값이 올바르지 않습니다.");
   }
 
-  const [rows] = await pool.query<RowDataPacket[]>(`
-    SELECT
-      u.id AS userId,
-      u.name,
-      u.department,
-      COUNT(l.id) AS loanCount
-    FROM users u
-    JOIN loans l ON l.user_id = u.id
-    WHERE YEAR(l.borrowed_at) = ?
-    GROUP BY u.id
-    ORDER BY loanCount DESC, u.id ASC
-    LIMIT ?
-  `, [year, limit]);
+  const q = publicQueries.getReaderRankings(year, limit);
+  const [rows] = await pool.query<RowDataPacket[]>(q.sql, q.values);
 
   sendSuccess(res, 200, "다독 학생 랭킹 조회 성공", {
     year,
@@ -61,18 +48,9 @@ export const getReaderRankings = async (req: Request, res: Response) => {
 
 export const getHome = async (req: Request, res: Response) => {
   const limit = parsePositiveInteger(req.query.limit, 5, 20);
-  const [banners] = await pool.query<RowDataPacket[]>(`
-    SELECT
-      id,
-      title,
-      content_type AS contentType,
-      image_url AS imageUrl,
-      target_url AS targetUrl
-    FROM banners
-    WHERE active = TRUE
-    ORDER BY display_order ASC, id DESC
-    LIMIT ?
-  `, [limit]);
+
+  const q = publicQueries.listBanners(limit);
+  const [banners] = await pool.query<RowDataPacket[]>(q.sql, q.values);
   const popularBooks = (await getDlsPopularBooks()).slice(0, 1);
   const recommendations = await enrichDlsBooks(popularBooks);
 

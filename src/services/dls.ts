@@ -1,80 +1,18 @@
 import { RowDataPacket } from "mysql2";
 import { env } from "../config/env";
+import { bookQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { ApiError } from "../lib/api";
+import {
+  DlsBook,
+  DlsBookState,
+  DlsCategory,
+  DlsEnvelope,
+  DlsSearchResult,
+  SearchOptions,
+} from "../types/dls.types";
 
-type DlsEnvelope<T> = {
-  status: string;
-  message: string;
-  data: T;
-};
-
-export type DlsCategory = {
-  lCategoryCode: string;
-  lCategoryDesc: string;
-};
-
-export type DlsBook = {
-  bookKey: string;
-  speciesKey: string;
-  provCode: string;
-  neisCode: string;
-  title: string;
-  author: string;
-  publisher: string;
-  pubYear: string;
-  coverUrl: string;
-  isbn: string;
-  regNo?: string;
-  classNo?: string;
-  callNo?: string;
-  locationName?: string;
-  regDate?: string;
-  status?: string;
-  description?: string;
-  count?: string;
-  categoryInfo?: {
-    lcode?: string;
-    ldesc?: string;
-    mcode?: string;
-    mdesc?: string;
-    scode?: string;
-    sdesc?: string;
-  };
-  kdcInfo?: {
-    lcode?: string;
-    ldesc?: string;
-    mcode?: string;
-    mdesc?: string;
-    scode?: string;
-    sdesc?: string;
-  };
-};
-
-export type DlsBookState = {
-  coverUrl: string;
-  status: string;
-  locationName: string;
-  returnPlanDate: string;
-};
-
-type DlsSearchResult = {
-  allTotalCount: number;
-  totalCount: number;
-  totalPage: number;
-  bookList: DlsBook[];
-};
-
-type SearchOptions = {
-  keyword?: string;
-  searchType?: "TITLE" | "AUTHOR" | "PUBLISHER";
-  categoryCode?: string;
-  kdcCode?: string;
-  page?: number;
-  size?: number;
-  sort?: "SCORE" | "RECENT" | "TITLE" | "AUTHOR" | "PUBLISHER" | "PUBYEAR";
-  order?: "ASC" | "DESC";
-};
+export type { DlsBook, DlsBookState, DlsCategory };
 
 const request = async <T>(path: string, init?: RequestInit) => {
   let response: globalThis.Response;
@@ -180,7 +118,8 @@ const getLocalDlsCategoryId = async () => {
   if (dlsCategoryId !== undefined) {
     return dlsCategoryId;
   }
-  const [rows] = await pool.query<RowDataPacket[]>("SELECT id FROM categories WHERE code = 'IT'");
+  const q = bookQueries.findDlsCategoryId();
+  const [rows] = await pool.query<RowDataPacket[]>(q.sql, q.values);
   if (!rows[0]) {
     throw new ApiError(500, 5002, "도서 카테고리가 준비되지 않았습니다.");
   }
@@ -198,32 +137,18 @@ export const syncDlsBooks = async (books: DlsBook[]) => {
     if (!Number.isSafeInteger(bookId)) {
       throw new ApiError(502, 5021, "학교 도서 식별자가 올바르지 않습니다.");
     }
-    return pool.query(
-      `
-        INSERT INTO books (
-          id, title, author, publisher,
-          category_id, library_number, description, cover_image_url, total_quantity, registered_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
-        ON DUPLICATE KEY UPDATE
-          title = VALUES(title),
-          author = VALUES(author),
-          publisher = VALUES(publisher),
-          description = COALESCE(VALUES(description), description),
-          cover_image_url = COALESCE(NULLIF(VALUES(cover_image_url), ''), cover_image_url),
-          registered_at = VALUES(registered_at)
-      `,
-      [
-        bookId,
-        book.title,
-        book.author || "",
-        book.publisher || "",
-        categoryId,
-        `DLS:${book.speciesKey}:${book.regNo || book.bookKey}`,
-        book.description || null,
-        book.coverUrl || null,
-        parseDate(book)
-      ]
+    const q = bookQueries.upsertBook(
+      bookId,
+      book.title,
+      book.author || "",
+      book.publisher || "",
+      categoryId,
+      `DLS:${book.speciesKey}:${book.regNo || book.bookKey}`,
+      book.description || null,
+      book.coverUrl || null,
+      parseDate(book)
     );
+    return pool.query(q.sql, q.values);
   }));
 };
 

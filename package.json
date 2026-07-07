@@ -16,13 +16,15 @@
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "mysql2": "^3.11.5",
-    "nodemailer": "^9.0.1"
+    "nodemailer": "^9.0.1",
+    "sql-bricks": "^3.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.2",
     "@types/nodemailer": "^8.0.1",
+    "@types/sql-bricks": "^2.0.5",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }

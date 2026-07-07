@@ -25,8 +25,8 @@ export const env = {
   adminApiKey: process.env.ADMIN_API_KEY,
   accessTokenExpiresIn: Number(process.env.ACCESS_TOKEN_EXPIRES_IN ?? 3600),
   refreshTokenExpiresIn: Number(process.env.REFRESH_TOKEN_EXPIRES_IN ?? 2592000),
-  loanDays: parseInt(process.env.LOAN_DAYS ?? "14", 10) || 14,
-  extensionDays: parseInt(process.env.EXTENSION_DAYS ?? "7", 10) || 7,
+  loanDays: Math.max(1, parseInt(process.env.LOAN_DAYS ?? "14", 10) || 14),
+  extensionDays: Math.max(1, parseInt(process.env.EXTENSION_DAYS ?? "7", 10) || 7),
   mysql: {
     host: getRequiredEnv("MYSQL_HOST"),
     port: getNumberEnv("MYSQL_PORT"),

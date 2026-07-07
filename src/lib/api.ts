@@ -21,6 +21,14 @@ export const asyncHandler = (
   Promise.resolve(handler(req, res, next)).catch(next);
 };
 
+export const parseId = (value: string, label: string): number => {
+  const id = Number(value);
+  if (!Number.isSafeInteger(id) || id < 1) {
+    throw new ApiError(400, 4001, `${label}가 올바르지 않습니다.`);
+  }
+  return id;
+};
+
 export const parsePositiveInteger = (value: unknown, fallback: number, maximum?: number) => {
   if (value === undefined) {
     return fallback;

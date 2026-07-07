@@ -63,10 +63,18 @@ export const register = async (req: Request, res: Response) => {
   }
 
   const passwordHash = await hashPassword(password);
-  const [result] = await pool.query<ResultSetHeader>(
-    "INSERT INTO users (email, name, department, gender, password_hash) VALUES (?, ?, ?, ?, ?)",
-    [normalizedEmail, name.trim(), department.trim(), gender, passwordHash]
-  );
+  let result: ResultSetHeader;
+  try {
+    [result] = await pool.query<ResultSetHeader>(
+      "INSERT INTO users (email, name, department, gender, password_hash) VALUES (?, ?, ?, ?, ?)",
+      [normalizedEmail, name.trim(), department.trim(), gender, passwordHash]
+    );
+  } catch (error) {
+    if ((error as { code?: string }).code === "ER_DUP_ENTRY") {
+      throw new ApiError(409, 4091, "이미 사용 중인 이메일입니다.");
+    }
+    throw error;
+  }
 
   sendSuccess(res, 201, "회원가입 성공", {
     userId: result.insertId,
@@ -132,11 +140,16 @@ export const sendResetEmail = async (req: Request, res: Response) => {
   }
 
   const code = randomInt(100000, 1000000).toString();
-  await pool.query(
+  const [codeResult] = await pool.query<ResultSetHeader>(
     "INSERT INTO password_reset_codes (user_id, code_hash, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))",
     [user.id, hashToken(code)]
   );
-  await sendPasswordResetCode(normalizedEmail, code);
+  try {
+    await sendPasswordResetCode(normalizedEmail, code);
+  } catch (error) {
+    await pool.query("DELETE FROM password_reset_codes WHERE id = ?", [codeResult.insertId]);
+    throw error;
+  }
 
   sendSuccess(res, 200, "비밀번호 재설정 인증 메일을 발송했습니다.", {
     email: normalizedEmail,

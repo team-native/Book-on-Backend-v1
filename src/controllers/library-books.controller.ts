@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { RowDataPacket } from "mysql2";
 import { pool } from "../db/pool";
-import { ApiError, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
+import { ApiError, parseId, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
 import {
   DlsBook,
   enrichDlsBooks,
@@ -20,14 +20,6 @@ const categoryAliases: Record<string, string> = {
   IT: "컴퓨터",
   ART: "예술/대중문화",
   SOCIETY: "사회과학"
-};
-
-const parseBookId = (value: string) => {
-  const bookId = Number(value);
-  if (!Number.isSafeInteger(bookId) || bookId < 1) {
-    throw new ApiError(400, 4001, "도서 ID가 올바르지 않습니다.");
-  }
-  return bookId;
 };
 
 const resolveCategory = async (value: string) => {
@@ -143,7 +135,7 @@ export const listSchoolBooks = async (req: Request, res: Response) => {
 };
 
 export const getSchoolBook = async (req: Request, res: Response) => {
-  const bookId = parseBookId(String(req.params.bookId));
+  const bookId = parseId(req.params.bookId, "도서 ID");
   const [rows] = await pool.query<RowDataPacket[]>(
     "SELECT library_number AS libraryNumber FROM books WHERE id = ? AND library_number LIKE 'DLS:%'",
     [bookId]

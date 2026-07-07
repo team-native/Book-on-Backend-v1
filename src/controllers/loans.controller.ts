@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { env } from "../config/env";
 import { pool } from "../db/pool";
-import { ApiError, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
+import { ApiError, parseId, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
 import { getDlsBookDetail } from "../services/dls";
 
 type LoanRow = RowDataPacket & {
@@ -11,14 +11,6 @@ type LoanRow = RowDataPacket & {
   due_date: string;
   status: "BORROWED" | "RETURNED" | "OVERDUE";
   extension_count: number;
-};
-
-const parseId = (value: string, label: string) => {
-  const id = Number(value);
-  if (!Number.isInteger(id) || id < 1) {
-    throw new ApiError(400, 4001, `${label}가 올바르지 않습니다.`);
-  }
-  return id;
 };
 
 const updateOverdueLoans = async () => {
@@ -97,7 +89,7 @@ export const createLoan = async (req: Request, res: Response) => {
 };
 
 export const extendLoan = async (req: Request, res: Response) => {
-  const loanId = parseId(String(req.params.loanId), "대출 ID");
+  const loanId = parseId(req.params.loanId, "대출 ID");
   const connection = await pool.getConnection();
 
   try {
@@ -114,14 +106,11 @@ export const extendLoan = async (req: Request, res: Response) => {
     if (!loan) {
       throw new ApiError(404, 4043, "대출 정보를 찾을 수 없습니다.");
     }
-    if (loan.status === "OVERDUE") {
-      throw new ApiError(409, 4095, "연체 중인 도서는 연장할 수 없습니다.", {
-        loanId,
-        status: loan.status
-      });
-    }
     if (loan.status !== "BORROWED") {
-      throw new ApiError(409, 4095, "현재 대출 중인 도서만 연장할 수 있습니다.", { loanId });
+      const message = loan.status === "OVERDUE"
+        ? "연체 중인 도서는 연장할 수 없습니다."
+        : "현재 대출 중인 도서만 연장할 수 있습니다.";
+      throw new ApiError(409, 4095, message, { loanId, status: loan.status });
     }
     if (loan.extension_count > 0) {
       throw new ApiError(409, 4094, "이미 연장한 대출입니다.", {

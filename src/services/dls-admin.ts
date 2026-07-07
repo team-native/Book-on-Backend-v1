@@ -95,6 +95,21 @@ const requestHeaders = (includeSession: boolean) => {
   return headers;
 };
 
+const appendQuery = (path: string, query?: Query) => {
+  if (!query) {
+    return path;
+  }
+  const url = new URL(path, env.dlsAdmin.baseUrl);
+  for (const [key, value] of Object.entries(query)) {
+    if (Array.isArray(value)) {
+      value.forEach((item) => url.searchParams.append(key, item));
+    } else if (value !== undefined) {
+      url.searchParams.set(key, value);
+    }
+  }
+  return `${url.pathname}${url.search}`;
+};
+
 const fetchDls = async (path: string, init?: RequestInit) => {
   let response: Response;
   try {
@@ -177,21 +192,6 @@ const parseResponse = async (response: Response) => {
     return response.json();
   }
   return response.text();
-};
-
-const appendQuery = (path: string, query?: Query) => {
-  if (!query) {
-    return path;
-  }
-  const url = new URL(path, env.dlsAdmin.baseUrl);
-  for (const [key, value] of Object.entries(query)) {
-    if (Array.isArray(value)) {
-      value.forEach((item) => url.searchParams.append(key, item));
-    } else if (value !== undefined) {
-      url.searchParams.set(key, value);
-    }
-  }
-  return `${url.pathname}${url.search}`;
 };
 
 const requestWithSession = async (path: string, query?: Query, retry = true): Promise<unknown> => {

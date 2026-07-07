@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { pool } from "../db/pool";
-import { ApiError, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
+import { ApiError, parseId, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
 
 type BookRow = RowDataPacket & {
   bookId: number;
@@ -24,16 +24,8 @@ const serializeBook = (book: BookRow) => ({
   ...(book.favorite === undefined ? {} : { favorite: Boolean(book.favorite) })
 });
 
-const parseBookId = (value: string) => {
-  const bookId = Number(value);
-  if (!Number.isInteger(bookId) || bookId < 1) {
-    throw new ApiError(400, 4001, "도서 ID가 올바르지 않습니다.");
-  }
-  return bookId;
-};
-
 export const addFavorite = async (req: Request, res: Response) => {
-  const bookId = parseBookId(String(req.params.bookId));
+  const bookId = parseId(req.params.bookId, "도서 ID");
   const [books] = await pool.query<RowDataPacket[]>("SELECT id FROM books WHERE id = ?", [bookId]);
   if (!books[0]) {
     throw new ApiError(404, 4042, "도서를 찾을 수 없습니다.");
@@ -54,7 +46,7 @@ export const addFavorite = async (req: Request, res: Response) => {
 };
 
 export const removeFavorite = async (req: Request, res: Response) => {
-  const bookId = parseBookId(String(req.params.bookId));
+  const bookId = parseId(req.params.bookId, "도서 ID");
   await pool.query("DELETE FROM favorites WHERE user_id = ? AND book_id = ?", [
     req.userId,
     bookId

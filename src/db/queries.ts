@@ -39,7 +39,7 @@ export const authQueries = {
       sb.insertInto("refresh_tokens").values({
         user_id: userId,
         token_hash: tokenHash,
-        expires_at: expiresAt,
+        expires_at: expiresAt.toISOString(),
       })
     ),
 
@@ -47,7 +47,7 @@ export const authQueries = {
     toQ(sb.select("id, email").from("users").where({ email })),
 
   insertResetCode: (userId: number, codeHash: string): Q => ({
-    sql: "INSERT INTO password_reset_codes (user_id, code_hash, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 5 MINUTE))",
+    sql: "INSERT INTO password_reset_codes (user_id, code_hash, expires_at) VALUES (?, ?, datetime('now', '+5 minutes'))",
     values: [userId, codeHash],
   }),
 
@@ -55,12 +55,12 @@ export const authQueries = {
     toQ(sb.deleteFrom("password_reset_codes").where({ id })),
 
   findUserByEmailForUpdate: (email: string): Q => ({
-    sql: "SELECT id, email FROM users WHERE email = ? FOR UPDATE",
+    sql: "SELECT id, email FROM users WHERE email = ?",
     values: [email],
   }),
 
   findValidResetCode: (userId: number, codeHash: string): Q => ({
-    sql: "SELECT id FROM password_reset_codes WHERE user_id = ? AND code_hash = ? AND used_at IS NULL AND expires_at >= NOW() ORDER BY id DESC LIMIT 1 FOR UPDATE",
+    sql: "SELECT id FROM password_reset_codes WHERE user_id = ? AND code_hash = ? AND used_at IS NULL AND expires_at >= datetime('now') ORDER BY id DESC LIMIT 1",
     values: [userId, codeHash],
   }),
 
@@ -68,12 +68,12 @@ export const authQueries = {
     toQ(sb.update("users").set({ password_hash: passwordHash }).where({ id: userId })),
 
   markResetCodeUsed: (id: number): Q => ({
-    sql: "UPDATE password_reset_codes SET used_at = NOW() WHERE id = ?",
+    sql: "UPDATE password_reset_codes SET used_at = CURRENT_TIMESTAMP WHERE id = ?",
     values: [id],
   }),
 
   revokeRefreshTokens: (userId: number): Q => ({
-    sql: "UPDATE refresh_tokens SET revoked_at = NOW() WHERE user_id = ?",
+    sql: "UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE user_id = ?",
     values: [userId],
   }),
 };
@@ -146,13 +146,13 @@ export const bookQueries = {
         id, title, author, publisher,
         category_id, library_number, description, cover_image_url, total_quantity, registered_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
-      ON DUPLICATE KEY UPDATE
-        title = VALUES(title),
-        author = VALUES(author),
-        publisher = VALUES(publisher),
-        description = COALESCE(VALUES(description), description),
-        cover_image_url = COALESCE(NULLIF(VALUES(cover_image_url), ''), cover_image_url),
-        registered_at = VALUES(registered_at)
+      ON CONFLICT(id) DO UPDATE SET
+        title = excluded.title,
+        author = excluded.author,
+        publisher = excluded.publisher,
+        description = COALESCE(excluded.description, books.description),
+        cover_image_url = COALESCE(NULLIF(excluded.cover_image_url, ''), books.cover_image_url),
+        registered_at = excluded.registered_at
     `,
     values: [id, title, author, publisher, categoryId, libraryNumber, description, coverImageUrl, registeredAt],
   }),
@@ -177,7 +177,7 @@ export const loanQueries = {
   }),
 
   findBookForLoan: (bookId: number): Q => ({
-    sql: "SELECT id, title, total_quantity, library_number FROM books WHERE id = ? FOR UPDATE",
+    sql: "SELECT id, title, total_quantity, library_number FROM books WHERE id = ?",
     values: [bookId],
   }),
 
@@ -192,7 +192,7 @@ export const loanQueries = {
   }),
 
   insertLoan: (userId: number, bookId: number): Q => ({
-    sql: `INSERT INTO loans (user_id, book_id, borrowed_at, due_date) VALUES (?, ?, CURRENT_DATE, DATE_ADD(CURRENT_DATE, INTERVAL ${env.loanDays} DAY))`,
+    sql: `INSERT INTO loans (user_id, book_id, borrowed_at, due_date) VALUES (?, ?, date('now', 'localtime'), date('now', 'localtime', '+${env.loanDays} days'))`,
     values: [userId, bookId],
   }),
 
@@ -210,12 +210,12 @@ export const loanQueries = {
   }),
 
   findLoanForExtension: (loanId: number, userId: number): Q => ({
-    sql: "SELECT id, user_id, due_date, status, extension_count FROM loans WHERE id = ? AND user_id = ? FOR UPDATE",
+    sql: "SELECT id, user_id, due_date, status, extension_count FROM loans WHERE id = ? AND user_id = ?",
     values: [loanId, userId],
   }),
 
   extendLoanDueDate: (loanId: number): Q => ({
-    sql: `UPDATE loans SET due_date = DATE_ADD(due_date, INTERVAL ${env.extensionDays} DAY), extension_count = extension_count + 1 WHERE id = ?`,
+    sql: `UPDATE loans SET due_date = date(due_date, '+${env.extensionDays} days'), extension_count = extension_count + 1 WHERE id = ?`,
     values: [loanId],
   }),
 
@@ -233,7 +233,7 @@ export const loanQueries = {
         b.author,
         l.borrowed_at AS borrowedAt,
         l.due_date AS dueDate,
-        DATEDIFF(l.due_date, CURRENT_DATE) AS dDay,
+        CAST(julianday(l.due_date) - julianday(date('now', 'localtime')) AS INTEGER) AS dDay,
         l.extension_count = 0 AND l.status = 'BORROWED' AS extensionAvailable,
         l.status
       FROM loans l
@@ -299,7 +299,7 @@ export const meQueries = {
         COUNT(*) AS currentLoanCount,
         COALESCE(SUM(status = 'OVERDUE'), 0) AS overdueCount,
         MIN(due_date) AS nearestDueDate,
-        DATEDIFF(MIN(due_date), CURRENT_DATE) AS nearestDueDday
+        CAST(julianday(MIN(due_date)) - julianday(date('now', 'localtime')) AS INTEGER) AS nearestDueDday
       FROM loans
       WHERE user_id = ? AND status IN ('BORROWED', 'OVERDUE')
     `,
@@ -313,7 +313,7 @@ export const meQueries = {
         b.id AS bookId,
         b.title,
         l.due_date AS dueDate,
-        DATEDIFF(l.due_date, CURRENT_DATE) AS dDay,
+        CAST(julianday(l.due_date) - julianday(date('now', 'localtime')) AS INTEGER) AS dDay,
         l.extension_count = 0 AND l.status = 'BORROWED' AS extensionAvailable
       FROM loans l
       JOIN books b ON b.id = l.book_id
@@ -355,12 +355,12 @@ export const publicQueries = {
         COUNT(l.id) AS loanCount
       FROM users u
       JOIN loans l ON l.user_id = u.id
-      WHERE YEAR(l.borrowed_at) = ?
+      WHERE strftime('%Y', l.borrowed_at) = ?
       GROUP BY u.id
       ORDER BY loanCount DESC, u.id ASC
       LIMIT ?
     `,
-    values: [year, limit],
+    values: [String(year), limit],
   }),
 
   listBanners: (limit: number): Q => ({

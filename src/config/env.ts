@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import path from "node:path";
 
 dotenv.config();
 
@@ -6,14 +7,6 @@ const getRequiredEnv = (key: string) => {
   const value = (process.env[key] ?? "").trim();
   if (!value) {
     throw new Error(`${key} is required`);
-  }
-  return value;
-};
-
-const getNumberEnv = (key: string) => {
-  const value = Number(getRequiredEnv(key));
-  if (!Number.isFinite(value)) {
-    throw new Error(`${key} must be a number`);
   }
   return value;
 };
@@ -27,13 +20,8 @@ export const env = {
   refreshTokenExpiresIn: Number(process.env.REFRESH_TOKEN_EXPIRES_IN ?? 2592000),
   loanDays: Math.max(1, parseInt(process.env.LOAN_DAYS ?? "14", 10) || 14),
   extensionDays: Math.max(1, parseInt(process.env.EXTENSION_DAYS ?? "7", 10) || 7),
-  mysql: {
-    host: getRequiredEnv("MYSQL_HOST"),
-    port: getNumberEnv("MYSQL_PORT"),
-    user: getRequiredEnv("MYSQL_USER"),
-    password: process.env.MYSQL_PASSWORD ?? "",
-    database: getRequiredEnv("MYSQL_DATABASE"),
-    connectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT ?? 10)
+  sqlite: {
+    path: process.env.SQLITE_PATH ?? path.join(process.cwd(), "data", "book-on.sqlite")
   },
   smtp: {
     host: process.env.SMTP_HOST,

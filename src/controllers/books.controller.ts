@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { bookQueries } from "../db/queries";
 import { pool } from "../db/pool";
+import { ResultSetHeader, RowDataPacket } from "../db/types";
 import { ApiError, parseId, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
 import { BookRow } from "../types/book.types";
 
@@ -23,7 +23,12 @@ export const addFavorite = async (req: Request, res: Response) => {
     const q2 = bookQueries.insertFavorite(req.userId!, bookId);
     await pool.query<ResultSetHeader>(q2.sql, q2.values);
   } catch (error) {
-    if ((error as { code?: string }).code === "ER_DUP_ENTRY") {
+    const { code, message } = error as { code?: string; message?: string };
+    if (
+      code === "ER_DUP_ENTRY" ||
+      code?.startsWith("SQLITE_CONSTRAINT") ||
+      (code === "ERR_SQLITE_ERROR" && message?.includes("UNIQUE constraint failed"))
+    ) {
       throw new ApiError(409, 4096, "이미 관심 도서로 등록된 책입니다.", { bookId });
     }
     throw error;

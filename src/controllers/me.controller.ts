@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { RowDataPacket } from "mysql2";
 import { loanQueries, meQueries } from "../db/queries";
 import { pool } from "../db/pool";
+import { RowDataPacket } from "../db/types";
 import { ApiError, sendSuccess } from "../lib/api";
 
 export const getMe = async (req: Request, res: Response) => {

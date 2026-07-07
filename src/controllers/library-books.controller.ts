@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { RowDataPacket } from "mysql2";
 import { bookQueries } from "../db/queries";
 import { pool } from "../db/pool";
+import { RowDataPacket } from "../db/types";
 import { ApiError, parseId, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
 import {
   DlsBook,

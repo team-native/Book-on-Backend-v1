@@ -1,4 +1,4 @@
-import { RowDataPacket } from "mysql2";
+import { RowDataPacket } from "../db/types";
 
 export type BookRow = RowDataPacket & {
   bookId: number;

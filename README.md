@@ -10,14 +10,13 @@
 | 런타임 | Node.js |
 | 언어 | TypeScript |
 | 프레임워크 | Express.js |
-| 데이터베이스 | MySQL 8+ |
+| 데이터베이스 | SQLite |
 
 ## 서버 시작
 
 ### 요구사항
 
-- Node.js 20+
-- MySQL 8+
+- Node.js 24+
 
 ### 설치
 
@@ -37,7 +36,7 @@ cp .env.example .env
 
 | 변수 | 설명 |
 |------|------|
-| `MYSQL_HOST` / `MYSQL_USER` / `MYSQL_PASSWORD` / `MYSQL_DATABASE` | MySQL 접속 정보 |
+| `SQLITE_PATH` | SQLite DB 파일 경로 |
 | `JWT_SECRET` | JWT 서명용 비밀 키 (긴 무작위 문자열) |
 | `ADMIN_API_KEY` | 관리자 API 인증 키 (`JWT_SECRET`과 다른 값) |
 

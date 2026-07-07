@@ -1,9 +1,9 @@
 import { randomInt } from "node:crypto";
 import { Request, Response } from "express";
-import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { env } from "../config/env";
 import { authQueries } from "../db/queries";
 import { pool } from "../db/pool";
+import { ResultSetHeader, RowDataPacket } from "../db/types";
 import { ApiError, sendSuccess } from "../lib/api";
 import { hashPassword, verifyPassword } from "../lib/password";
 import { createAccessToken, createRefreshToken, hashToken } from "../lib/token";
@@ -62,7 +62,12 @@ export const register = async (req: Request, res: Response) => {
     const q2 = authQueries.insertUser(normalizedEmail, name.trim(), department.trim(), gender, passwordHash);
     [result] = await pool.query<ResultSetHeader>(q2.sql, q2.values);
   } catch (error) {
-    if ((error as { code?: string }).code === "ER_DUP_ENTRY") {
+    const { code, message } = error as { code?: string; message?: string };
+    if (
+      code === "ER_DUP_ENTRY" ||
+      code?.startsWith("SQLITE_CONSTRAINT") ||
+      (code === "ERR_SQLITE_ERROR" && message?.includes("UNIQUE constraint failed"))
+    ) {
       throw new ApiError(409, 4091, "이미 사용 중인 이메일입니다.");
     }
     throw error;

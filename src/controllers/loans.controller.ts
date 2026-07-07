@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { loanQueries } from "../db/queries";
 import { pool } from "../db/pool";
+import { ResultSetHeader, RowDataPacket } from "../db/types";
 import { ApiError, parseId, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
 import { getDlsBookDetail } from "../services/dls";
 import { LoanRow } from "../types/loan.types";

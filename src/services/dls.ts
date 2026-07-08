@@ -1,7 +1,7 @@
-import { RowDataPacket } from "mysql2";
 import { env } from "../config/env";
 import { bookQueries } from "../db/queries";
 import { pool } from "../db/pool";
+import { RowDataPacket } from "../db/types";
 import { ApiError } from "../lib/api";
 import {
   DlsBook,

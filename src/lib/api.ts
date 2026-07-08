@@ -21,7 +21,7 @@ export const asyncHandler = (
   Promise.resolve(handler(req, res, next)).catch(next);
 };
 
-export const parseId = (value: string, label: string): number => {
+export const parseId = (value: unknown, label: string): number => {
   const id = Number(value);
   if (!Number.isSafeInteger(id) || id < 1) {
     throw new ApiError(400, 4001, `${label}가 올바르지 않습니다.`);

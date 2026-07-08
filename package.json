@@ -15,7 +15,6 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "helmet": "^8.0.0",
-    "mysql2": "^3.11.5",
     "nodemailer": "^9.0.1",
     "sql-bricks": "^3.0.1"
   },

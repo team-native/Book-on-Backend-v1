@@ -40,6 +40,7 @@ export const env = {
   },
   dlsAdmin: {
     baseUrl: process.env.DLS_ADMIN_BASE_URL ?? "https://dls.edunet.net",
+    proxyBaseUrl: process.env.DLS_ADMIN_PROXY_BASE_URL ?? "http://127.0.0.1:8080",
     loginPagePath: process.env.DLS_ADMIN_LOGIN_PAGE_PATH ?? "",
     loginPath: process.env.DLS_ADMIN_LOGIN_PATH ?? "",
     loginMethod: (process.env.DLS_ADMIN_LOGIN_METHOD ?? "POST").toUpperCase(),

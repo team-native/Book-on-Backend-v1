@@ -7,12 +7,22 @@ type Cookie = {
 };
 
 type Query = Record<string, string | string[] | undefined>;
+type Primitive = string | number | boolean | null | undefined;
+type FormBody = Record<string, Primitive>;
+type DlsRawResponse = {
+  status?: string;
+  statusDescription?: string;
+  statusDescrition?: string;
+  message?: string;
+  [key: string]: unknown;
+};
 
 const cookies = new Map<string, Cookie>();
 let sessionExpiresAt = 0;
 let loginPromise: Promise<void> | undefined;
 
 const splitSetCookie = (value: string) => value.split(/,(?=\s*[^;,\s]+=)/);
+const proxyBaseUrl = env.dlsAdmin.proxyBaseUrl.replace(/\/+$/, "");
 
 const absorbCookies = (headers: Headers) => {
   const extended = headers as Headers & { getSetCookie?: () => string[] };
@@ -62,11 +72,7 @@ const cookieHeader = () => {
 };
 
 const assertBaseConfig = () => {
-  if (
-    !env.dlsAdmin.loginPath ||
-    !env.dlsAdmin.username ||
-    !env.dlsAdmin.password
-  ) {
+  if (!env.dlsAdmin.loginPath || !env.dlsAdmin.username || !env.dlsAdmin.password) {
     throw new ApiError(503, 5031, "DLS 관리자 로그인 설정이 필요합니다.");
   }
 };
@@ -129,6 +135,34 @@ const fetchDls = async (path: string, init?: RequestInit) => {
   return response;
 };
 
+const parseResponse = async (response: Response) => {
+  const contentType = response.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json") || contentType.includes("text/json")) {
+    return response.json();
+  }
+  const text = await response.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+};
+
+const ensureSuccessfulDlsResponse = (body: unknown) => {
+  if (!body || typeof body !== "object") {
+    return body;
+  }
+
+  const payload = body as DlsRawResponse;
+  const status = payload.status;
+  if (!status || status === "SUCCESS" || status === "OK") {
+    return body;
+  }
+
+  const message = payload.statusDescription || payload.statusDescrition || payload.message;
+  throw new ApiError(502, 5022, String(message || "DLS 응답이 올바르지 않습니다."));
+};
+
 const performLogin = async () => {
   assertBaseConfig();
   cookies.clear();
@@ -186,21 +220,10 @@ export const ensureDlsAdminSession = async () => {
   await loginPromise;
 };
 
-const parseResponse = async (response: Response) => {
-  const contentType = response.headers.get("content-type") ?? "";
-  if (contentType.includes("application/json")) {
-    return response.json();
-  }
-  return response.text();
-};
-
 const requestWithSession = async (path: string, query?: Query, retry = true): Promise<unknown> => {
   await ensureDlsAdminSession();
   const response = await fetchDls(appendQuery(path, query), { method: "GET" });
-  if (
-    (response.status === 401 || response.status === 403 || response.status >= 300 && response.status < 400) &&
-    retry
-  ) {
+  if ((response.status === 401 || response.status === 403 || (response.status >= 300 && response.status < 400)) && retry) {
     sessionExpiresAt = 0;
     cookies.clear();
     return requestWithSession(path, query, false);
@@ -209,6 +232,35 @@ const requestWithSession = async (path: string, query?: Query, retry = true): Pr
     throw new ApiError(502, 5022, `DLS 관리자 조회에 실패했습니다. (${response.status})`);
   }
   return parseResponse(response);
+};
+
+const requestPostForm = async (path: string, body: FormBody, retry = true) => {
+  await ensureDlsAdminSession();
+  const form = new URLSearchParams();
+  for (const [key, value] of Object.entries(body)) {
+    if (value !== undefined && value !== null) {
+      form.set(key, String(value));
+    }
+  }
+
+  const response = await fetchDls(path, {
+    method: "POST",
+    headers: {
+      "content-type": "application/x-www-form-urlencoded; charset=UTF-8"
+    },
+    body: form.toString()
+  });
+
+  if ((response.status === 401 || response.status === 403 || (response.status >= 300 && response.status < 400)) && retry) {
+    sessionExpiresAt = 0;
+    cookies.clear();
+    return requestPostForm(path, body, false);
+  }
+  if (!response.ok) {
+    throw new ApiError(502, 5022, `DLS 요청에 실패했습니다. (${response.status})`);
+  }
+
+  return ensureSuccessfulDlsResponse(await parseResponse(response));
 };
 
 const requirePath = (path: string, name: string) => {
@@ -226,9 +278,7 @@ const withIdentifier = (path: string, placeholder: string, param: string, value:
 };
 
 export const getDlsAdminSessionStatus = () => ({
-  configured: Boolean(
-    env.dlsAdmin.loginPath && env.dlsAdmin.username && env.dlsAdmin.password
-  ),
+  configured: Boolean(env.dlsAdmin.loginPath && env.dlsAdmin.username && env.dlsAdmin.password),
   active: sessionExpiresAt > Date.now() && Boolean(cookieHeader()),
   expiresAt: sessionExpiresAt > Date.now() ? new Date(sessionExpiresAt).toISOString() : null
 });
@@ -275,3 +325,70 @@ export const getDlsAdminBook = (bookId: string) => {
   );
   return requestWithSession(target.path, target.query);
 };
+
+const requestProxy = async (path: string, query?: Query) => {
+  const url = new URL(path, `${proxyBaseUrl}/`);
+  for (const [key, value] of Object.entries(query ?? {})) {
+    if (Array.isArray(value)) {
+      value.forEach((item) => url.searchParams.append(key, item));
+    } else if (value !== undefined) {
+      url.searchParams.set(key, value);
+    }
+  }
+
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      headers: {
+        accept: "application/json",
+        "user-agent": "Book-on/1.0"
+      },
+      signal: AbortSignal.timeout(env.dls.timeoutMs)
+    });
+  } catch {
+    throw new ApiError(502, 5021, "Book-on-DLS 서버에 연결할 수 없습니다.");
+  }
+
+  if (!response.ok) {
+    throw new ApiError(502, 5021, `Book-on-DLS 서버 요청에 실패했습니다. (${response.status})`);
+  }
+
+  return ensureSuccessfulDlsResponse(await parseResponse(response));
+};
+
+export const searchDlsUsersByName = (name: string) =>
+  requestProxy("/searchStudent", { name });
+
+export const getDlsCurrentLoans = (userKey: string, userNo: string) =>
+  requestProxy("/currentLoan", {
+    user_key: userKey,
+    user_no: userNo
+  });
+
+export const getDlsBookInfoByRegNos = (regNos: string) =>
+  requestProxy("/bookInfo", { reg_nos: regNos });
+
+export const searchDlsBooksByTitle = (query: string) =>
+  requestProxy("/searchBook", { query });
+
+export const getDlsLoanHistoryByUserKey = (
+  userKey: string,
+  startDate?: string,
+  endDate?: string
+) => {
+  const now = new Date();
+  const defaultEndDate = now.toISOString().slice(0, 10);
+  const defaultStartDate = `${now.getFullYear() - 3}-03-01`;
+
+  return requestProxy("/loanHistory", {
+    user_key: userKey,
+    start_date: startDate || defaultStartDate,
+    end_date: endDate || defaultEndDate
+  });
+};
+
+export const extendDlsLoan = (userKey: string, loanKey: string) =>
+  requestProxy("/extendLoan", {
+    user_key: userKey,
+    loan_key: loanKey
+  });

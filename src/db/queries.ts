@@ -76,6 +76,57 @@ export const authQueries = {
     sql: "UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE user_id = ?",
     values: [userId],
   }),
+
+  upsertRead365Session: (
+    userId: number,
+    read365Id: string,
+    cookieHeader: string,
+    memberKey: string | null,
+    schoolKey: string | null,
+    accessToken: string | null,
+    refreshToken: string | null,
+    sessionExpiresAt: string
+  ): Q => ({
+    sql: `
+      INSERT INTO read365_sessions (
+        user_id, read365_id, cookie_header, member_key, school_key,
+        access_token, refresh_token, session_expires_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(user_id) DO UPDATE SET
+        read365_id = excluded.read365_id,
+        cookie_header = excluded.cookie_header,
+        member_key = excluded.member_key,
+        school_key = excluded.school_key,
+        access_token = excluded.access_token,
+        refresh_token = excluded.refresh_token,
+        session_expires_at = excluded.session_expires_at,
+        updated_at = CURRENT_TIMESTAMP
+    `,
+    values: [userId, read365Id, cookieHeader, memberKey, schoolKey, accessToken, refreshToken, sessionExpiresAt],
+  }),
+
+  findRead365SessionByUserId: (userId: number): Q => ({
+    sql: `
+      SELECT
+        user_id AS userId,
+        read365_id AS read365Id,
+        cookie_header AS cookieHeader,
+        member_key AS memberKey,
+        school_key AS schoolKey,
+        access_token AS accessToken,
+        refresh_token AS refreshToken,
+        session_expires_at AS sessionExpiresAt
+      FROM read365_sessions
+      WHERE user_id = ?
+      LIMIT 1
+    `,
+    values: [userId],
+  }),
+
+  deleteRead365SessionByUserId: (userId: number): Q => ({
+    sql: "DELETE FROM read365_sessions WHERE user_id = ?",
+    values: [userId],
+  }),
 };
 
 // Books

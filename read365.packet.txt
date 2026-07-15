@@ -1,0 +1,430 @@
+
+ -- login
+
+```
+POST /schome/auth/member/adminlogin HTTP/1.1
+Host: read365.edunet.net
+Cookie: AUTHCHK=F; build52=290; external=; LAST_COUNT_DATE=2026-07-14; JSESSIONID=817A13583219BC8513D4FCE5B44780F1.read365.edunet.net
+Content-Length: 48
+Sec-Ch-Ua-Platform: "Windows"
+Accept-Language: ko-KR,ko;q=0.9
+Accept: application/json, text/plain, */*
+Sec-Ch-Ua: "Not-A.Brand";v="24", "Chromium";v="146"
+Content-Type: application/json
+Sec-Ch-Ua-Mobile: ?0
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+Origin: https://read365.edunet.net
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Referer: https://read365.edunet.net/
+Accept-Encoding: gzip, deflate, br
+Priority: u=1, i
+Connection: keep-alive
+
+{"id":"junpyokim","password":"Kimjunpyo090106@"}
+```
+
+```
+{"status":"BAD_REQUEST","message":"학교 관리자 아이디가 아닙니다.","data":{"memberInfoVO":null,"status":"-2"}}
+```
+
+
+```
+POST /nsso-authweb/loginService.do HTTP/1.1
+Host: stsso2.edunet.net
+Cookie: KHANUSER=x19q8orqbslml7; UAKEY=d8e08a2e7415406d8d67a7044cab7a0a; EDUCAUTHTC=23^1; EDUCAUTH-NA=23^1102; AUTHCHK=F; build52=290; external=
+Content-Length: 140
+Cache-Control: max-age=0
+Sec-Ch-Ua: "Not-A.Brand";v="24", "Chromium";v="146"
+Sec-Ch-Ua-Mobile: ?0
+Sec-Ch-Ua-Platform: "Windows"
+Accept-Language: ko-KR,ko;q=0.9
+Origin: https://read365.edunet.net
+Content-Type: application/x-www-form-urlencoded
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: same-site
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Dest: document
+Referer: https://read365.edunet.net/
+Accept-Encoding: gzip, deflate, br
+Priority: u=0, i
+Connection: keep-alive
+
+userID=junpyokim&password=Kimjunpyo090106%40&ssosite=read365.edunet.net&credType=BASIC&returnURL=https%3A%2F%2Fread365.edunet.net%2FResLogin
+```
+
+```
+HTTP/2 200 OK
+Date: Tue, 14 Jul 2026 03:59:51 GMT
+Server: server
+Strict-Transport-Security: max-age=15768000; preload
+Vary: X-Forwarded-For,Origin
+Cache-Control: no-cache, no-store, must-revalidate
+Set-Cookie: SEDP=; Path=/; Domain=.edunet.net; Expires=Wed, 30-Jul-1997 15:00:00 GMT;
+Set-Cookie: EDUCAUTH=63765f671906ed6b97a856b5db0054c0f7fc18a24971282f8e5ec92b68880663832b7360607f355b9a431de33b6e62fbc8a9d27b9c52397b161008514b85aa581ce25deff3c5c71ae8349bd4a72ed437bb9a8bee4817d3c750674ff020aac24cf07bdf0f4c887842dee95b281249f3a7c5ddc777b94e421d7ae377773c73d29dcdf9d6fd70dbdbae50586ffc7ff378cd09c4143afacd468820c79e01d2e95d89fef651a9261b6ca568fcd6ed3bbc4fcf0ca743f8ae29942ac7f6110b81; Path=/; Domain=stsso2.edunet.net;
+Set-Cookie: blockWa=; Path=/; Domain=stsso2.edunet.net; Expires=Wed, 30-Jul-1997 15:00:00 GMT;
+Set-Cookie: EDUCAUTHTC=; Path=/; Domain=stsso2.edunet.net; Expires=Wed, 30-Jul-1997 15:00:00 GMT;
+Set-Cookie: EDUCAUTHRS=; Path=/; Domain=stsso2.edunet.net; Expires=Wed, 30-Jul-1997 15:00:00 GMT;
+Set-Cookie: EDUCAUTH-NA=; Path=/; Domain=stsso2.edunet.net; Expires=Wed, 30-Jul-1997 15:00:00 GMT;
+Set-Cookie: EDUCAUTH-NA=; Path=/; Domain=stsso2.edunet.net; Expires=Wed, 30-Jul-1997 15:00:00 GMT;
+Set-Cookie: EDUCAUTH-AU=1083^1102; Path=/; Domain=stsso2.edunet.net;
+Set-Cookie: JSESSIONID=4CFRlhOwAxtdCoz0eJmj4HVaolrr19D_Mx95gju2.RSSO11; path=/nsso-authweb
+Access-Control-Allow-Origin: https://read365.edunet.net
+Khan.tid: 19f5ec7f736-26dd63910d413b5f106
+Accept-Ch-Lifetime: 86400
+Access-Control-Allow-Credentials: true
+Accept-Ch: UA, UA-Platform, UA-Arch, UA-Model, UA-Mobile, UA-Full-Version
+Content-Length: 2040
+Content-Type: text/html;charset=UTF-8
+
+<!DOCTYPE html><html><head><meta http-equiv='Content-Type' 
+```
+
+
+```
+POST /nsso-authweb/loginDomain.do HTTP/2
+Host: stsso2.edunet.net
+Cookie: JSESSIONID=4CFRlhOwAxtdCoz0eJmj4HVaolrr19D_Mx95gju2.RSSO11; KHANUSER=x19q8orqbslml7; UAKEY=d8e08a2e7415406d8d67a7044cab7a0a; AUTHCHK=F; build52=290; external=; EDUCAUTH=63765f671906ed6b97a856b5db0054c0f7fc18a24971282f8e5ec92b68880663832b7360607f355b9a431de33b6e62fbc8a9d27b9c52397b161008514b85aa581ce25deff3c5c71ae8349bd4a72ed437bb9a8bee4817d3c750674ff020aac24cf07bdf0f4c887842dee95b281249f3a7c5ddc777b94e421d7ae377773c73d29dcdf9d6fd70dbdbae50586ffc7ff378cd09c4143afacd468820c79e01d2e95d89fef651a9261b6ca568fcd6ed3bbc4fcf0ca743f8ae29942ac7f6110b81; EDUCAUTH-AU=1083^1102
+Content-Length: 784
+Cache-Control: max-age=0
+Sec-Ch-Ua: "Not-A.Brand";v="24", "Chromium";v="146"
+Sec-Ch-Ua-Mobile: ?0
+Sec-Ch-Ua-Platform: "Windows"
+Accept-Language: ko-KR,ko;q=0.9
+Origin: https://stsso2.edunet.net
+Content-Type: application/x-www-form-urlencoded
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Dest: document
+Referer: https://stsso2.edunet.net/nsso-authweb/loginService.do
+Accept-Encoding: gzip, deflate, br
+Priority: u=0, i
+
+returnURL=https%3A%2F%2Fread365.edunet.net%2FResLogin&callsrc=logon&ssosite=read365.edunet.net%3A%3ASSO_WEB&build52=290&Urls=68747470733a2f2f737473736f322e6564756e65742e6e65742f6e73736f2d617574687765622f6e61436c6561722e646f7c737473736f322e6564756e65742e6e65743a3a53534f5f5745427c31&domainCred=22f8178cc6c1826e87c41143ac6fd21c3840ab998c3600d56c6116d3040982d79985d45e8f55f255011b636b7b0736999d47077c215ea4c831acfbc9a47d246bbfa7bc9088662a3db4228a08e3cfcf287d5e1640bb69ac66d12e61229dcc85c6fcec837afc2090ba4439a380aa9eef8c73c5d7de7aff8feef4d4f973297a30f6e35bb4314ecf4d501a161571526427120673c3e790c8631757d5a9fcf29f6df5019646aa8a04bbf52714c3b02348662d60874ad14f852744046e81b6583525c21085a27d3b5f64cab34a7444ddcac2aead3b60207cadf93d0fe878bb299d7bc31894ea2b981b68520c50a10e9c849966&mode=clear
+```
+
+```
+HTTP/2 200 OK
+Date: Tue, 14 Jul 2026 04:00:56 GMT
+Server: server
+Strict-Transport-Security: max-age=15768000; preload
+Vary: X-Forwarded-For,Origin
+Cache-Control: no-cache, no-store, must-revalidate
+Set-Cookie: EDUAUTHTOKEN=7c7d6a7d08d4ded165e294b027f3503eb018fb8fdc3321c977ccd98832bd91ddfa92c4453087be2212c7b7c778a6d1d48dbf3e40a102782002c3bfa3429c6d82ceb3bf0b623f81b9bd0b422622a367d00ca743f8ae29942ac7f6110b; Path=/; Domain=edunet.net;
+Set-Cookie: at=aae3d8e911bc1d18522fb32042ca8d7dd7ac4eb0878b82d5e8a0ce346fed816512406655e5d94fba1ed6161a10d98b0b77d359f20751875ef76d655b4b470c4dc88cab8bd7da616f12b3f0ecc72a97b37c4af849e092abd39d479bc0991fc54a0f543df903ccb385e485bb82b6994655dc64e0ebb3f6970ea856c3f36e963bc59d61b783729efd1d2f4f1e9f58c7575f93335457cb455bf41affdb12379508de8986f5cd8967a9ab6b6460c955d1a7390ca743f8ae29942ac7f6110b81; Path=/; Domain=edunet.net; HttpOnly;
+Set-Cookie: EDUDOCOOKIE=69dbee2335e796eac53389d45c11d7f91cc689ac15c0f29bc799edff2ee6295bf5dfa09f45d82987770702827cf29c8e453b8f7a3c59a430f85c3493a8d4d7a0a2195c2cbb3a0e8c95c6bc4f2f9b9ce215893fd4f4923ab0e2b0e9b276cf6b7258729ac0c20244e1ab0399f9a7c8b01a436a8c826a2fcf5bfe27b84ac6938e4649a4a51b949a1d3e50a04a0c0cfc4fa6ac141977daa89841ed1378f21740352d3d140ea75ed7b9ccf4c7124c263c4090632323332e395c23bd9259fabea51fa3788484b39bbfe85aadcadbafa4ee095a84d2746697792af037c584692d1607157775b34d615d4f1a8a6388a870a2124d7eb2b0a3c207888460bfa5eccfda71703eeb3be3afd3cc33c517cbdf786c2f3c1f95a004ac9d4398350c913d52ead2c901b321b8ca468f72845f6ab9cd7fdc52463b6c1b5103cd277012e63612fdd6a2b47e4fa9b2c8e71c7da1ef792b7a97a152cd9e8e38f18c77d1a2329ba11108a3758ed32aa0c619fa0b4f280e67b101a2eac198a96eb853cf7756d6eff92f5161551359e97b278ff913b9a64331faa097c778401ab645e04e1008bdcf01b438bf; Path=/; Domain=edunet.net;
+Set-Cookie: ua=108fd450965f7efcd5d4dd5b0550dc144e8401f0a9d04cc57fbd0cd5bd24d407cba25d35b3ef8b76b5e0b2ed45445ee586345965a0e6b0ef0f562f395cf2845b7605a9a9fc3e78ea32bf5d8942727bc6753465a5be8d45d71ee22244f536f4aa1c5368628d3f2cd63041a2ea502a3ff53bc76eb438361ff9f5a03e3e43643d5bd9e46bacf0ab38d6e05022f8d3f07dfae7e0b4b8860f47d6954f824ef1a216243b68387d416af19af48927a6fa821a21adbd69299234febebf07608585454ef725d40c7f2568b8f519f0f8810f49e32206fb75a74f26427fcd37d576c3bf6d57df1412c533d35635807e59c3fbb042687b4919e42f7bf7740983c18e9854b6925f20efb5bf4ea06bee9bbdfd06f7db41ba1e98cd7f31b2e9153eea042f9d35c499abfa78564d249371c8f5b839c2783ea4f405d44703d8cf7dd727bdc464d05dfacbe19224c72a96844d6325e9cf4e35af01a8530a9320ebffd13e76d2318c6d40b2e74e646d9c289be14cbb31a5bd1267c35f116ad1239242e413a9cd367e73e767bc330cc2cd17c981c339406c9844ebc42abd0511b8b8b2ea35ba8e2ea4e3572acb014220ee0d54473176ed563361e8938f6b4f1f162b0d8d8616cb48eeb850cd39501fcd65be89f7bd5ef1d9413c4efb0cbcdadfc1cd2131dd297aac665100dc6f88efea460053524c0db121318ee1f75d155c5916551f14b25ca3e944955d48ffe341736061c3502b681dbabeb2673ab936462c44d16bcf6945ace27523773eedab38cacc1a26af3d29b0a3c066; Path=/; Domain=edunet.net; HttpOnly;
+Set-Cookie: build52=290; Path=/; Domain=edunet.net; HttpOnly;
+Access-Control-Allow-Origin: https://stsso2.edunet.net
+Khan.tid: 19f5ec8f502-2f9d8ef60bb117fbdae6
+Accept-Ch-Lifetime: 86400
+Access-Control-Allow-Credentials: true
+Accept-Ch: UA, UA-Platform, UA-Arch, UA-Model, UA-Mobile, UA-Full-Version
+Content-Length: 1651
+Content-Type: text/html;charset=UTF-8
+```
+
+
+```
+POST /nsso-authweb/naClear.do HTTP/2
+Host: stsso2.edunet.net
+Cookie: JSESSIONID=4CFRlhOwAxtdCoz0eJmj4HVaolrr19D_Mx95gju2.RSSO11; KHANUSER=x19q8orqbslml7; UAKEY=d8e08a2e7415406d8d67a7044cab7a0a; AUTHCHK=F; build52=290; external=; EDUCAUTH=63765f671906ed6b97a856b5db0054c0f7fc18a24971282f8e5ec92b68880663832b7360607f355b9a431de33b6e62fbc8a9d27b9c52397b161008514b85aa581ce25deff3c5c71ae8349bd4a72ed437bb9a8bee4817d3c750674ff020aac24cf07bdf0f4c887842dee95b281249f3a7c5ddc777b94e421d7ae377773c73d29dcdf9d6fd70dbdbae50586ffc7ff378cd09c4143afacd468820c79e01d2e95d89fef651a9261b6ca568fcd6ed3bbc4fcf0ca743f8ae29942ac7f6110b81; EDUCAUTH-AU=1083^1102; EDUAUTHTOKEN=7c7d6a7d08d4ded165e294b027f3503eb018fb8fdc3321c977ccd98832bd91ddfa92c4453087be2212c7b7c778a6d1d48dbf3e40a102782002c3bfa3429c6d82ceb3bf0b623f81b9bd0b422622a367d00ca743f8ae29942ac7f6110b; at=aae3d8e911bc1d18522fb32042ca8d7dd7ac4eb0878b82d5e8a0ce346fed816512406655e5d94fba1ed6161a10d98b0b77d359f20751875ef76d655b4b470c4dc88cab8bd7da616f12b3f0ecc72a97b37c4af849e092abd39d479bc0991fc54a0f543df903ccb385e485bb82b6994655dc64e0ebb3f6970ea856c3f36e963bc59d61b783729efd1d2f4f1e9f58c7575f93335457cb455bf41affdb12379508de8986f5cd8967a9ab6b6460c955d1a7390ca743f8ae29942ac7f6110b81; EDUDOCOOKIE=69dbee2335e796eac53389d45c11d7f91cc689ac15c0f29bc799edff2ee6295bf5dfa09f45d82987770702827cf29c8e453b8f7a3c59a430f85c3493a8d4d7a0a2195c2cbb3a0e8c95c6bc4f2f9b9ce215893fd4f4923ab0e2b0e9b276cf6b7258729ac0c20244e1ab0399f9a7c8b01a436a8c826a2fcf5bfe27b84ac6938e4649a4a51b949a1d3e50a04a0c0cfc4fa6ac141977daa89841ed1378f21740352d3d140ea75ed7b9ccf4c7124c263c4090632323332e395c23bd9259fabea51fa3788484b39bbfe85aadcadbafa4ee095a84d2746697792af037c584692d1607157775b34d615d4f1a8a6388a870a2124d7eb2b0a3c207888460bfa5eccfda71703eeb3be3afd3cc33c517cbdf786c2f3c1f95a004ac9d4398350c913d52ead2c901b321b8ca468f72845f6ab9cd7fdc52463b6c1b5103cd277012e63612fdd6a2b47e4fa9b2c8e71c7da1ef792b7a97a152cd9e8e38f18c77d1a2329ba11108a3758ed32aa0c619fa0b4f280e67b101a2eac198a96eb853cf7756d6eff92f5161551359e97b278ff913b9a64331faa097c778401ab645e04e1008bdcf01b438bf; ua=108fd450965f7efcd5d4dd5b0550dc144e8401f0a9d04cc57fbd0cd5bd24d407cba25d35b3ef8b76b5e0b2ed45445ee586345965a0e6b0ef0f562f395cf2845b7605a9a9fc3e78ea32bf5d8942727bc6753465a5be8d45d71ee22244f536f4aa1c5368628d3f2cd63041a2ea502a3ff53bc76eb438361ff9f5a03e3e43643d5bd9e46bacf0ab38d6e05022f8d3f07dfae7e0b4b8860f47d6954f824ef1a216243b68387d416af19af48927a6fa821a21adbd69299234febebf07608585454ef725d40c7f2568b8f519f0f8810f49e32206fb75a74f26427fcd37d576c3bf6d57df1412c533d35635807e59c3fbb042687b4919e42f7bf7740983c18e9854b6925f20efb5bf4ea06bee9bbdfd06f7db41ba1e98cd7f31b2e9153eea042f9d35c499abfa78564d249371c8f5b839c2783ea4f405d44703d8cf7dd727bdc464d05dfacbe19224c72a96844d6325e9cf4e35af01a8530a9320ebffd13e76d2318c6d40b2e74e646d9c289be14cbb31a5bd1267c35f116ad1239242e413a9cd367e73e767bc330cc2cd17c981c339406c9844ebc42abd0511b8b8b2ea35ba8e2ea4e3572acb014220ee0d54473176ed563361e8938f6b4f1f162b0d8d8616cb48eeb850cd39501fcd65be89f7bd5ef1d9413c4efb0cbcdadfc1cd2131dd297aac665100dc6f88efea460053524c0db121318ee1f75d155c5916551f14b25ca3e944955d48ffe341736061c3502b681dbabeb2673ab936462c44d16bcf6945ace27523773eedab38cacc1a26af3d29b0a3c066
+Content-Length: 627
+Cache-Control: max-age=0
+Sec-Ch-Ua: "Not-A.Brand";v="24", "Chromium";v="146"
+Sec-Ch-Ua-Mobile: ?0
+Sec-Ch-Ua-Platform: "Windows"
+Accept-Language: ko-KR,ko;q=0.9
+Origin: https://stsso2.edunet.net
+Content-Type: application/x-www-form-urlencoded
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Dest: document
+Referer: https://stsso2.edunet.net/nsso-authweb/loginDomain.do
+Accept-Encoding: gzip, deflate, br
+Priority: u=0, i
+
+returnURL=https%3A%2F%2Fread365.edunet.net%2FResLogin&callsrc=logon&ssosite=stsso2.edunet.net%3A%3ASSO_WEB&build52=290&Urls=&domainCred=22f8178cc6c1826e87c41143ac6fd21c3840ab998c3600d56c6116d3040982d79985d45e8f55f255011b636b7b0736999d47077c215ea4c831acfbc9a47d246bbfa7bc9088662a3db4228a08e3cfcf287d5e1640bb69ac66d12e61229dcc85c6fcec837afc2090ba4439a380aa9eef8c73c5d7de7aff8feef4d4f973297a30f6e35bb4314ecf4d501a161571526427120673c3e790c8631757d5a9fcf29f6df5019646aa8a04bbf52714c3b02348662d60874ad14f852744046e81b6583525c21085a27d3b5f64cab34a7444ddcac2aead3b60207cadf93d0fe878bb299d7bc31894ea2b981b68520c50a10e9c849966&mode=clear
+```
+
+```
+HTTP/2 200 OK
+Date: Tue, 14 Jul 2026 04<:01:1502375448963710996>35 GMT
+Server: server
+Strict-Transport-Security: max-age=15768000; preload
+Vary: X-Forwarded-For,Origin
+Cache-Control: no-cache, no-store, must-revalidate
+Set-Cookie: AUTHCHK=; Path=/; Domain=edunet.net; Expires=Wed, 30-Jul-1997 15:00:00 GMT;
+Set-Cookie: AUTHERR=; Path=/; Domain=edunet.net; Expires=Wed, 30-Jul-1997 15:00:00 GMT;
+Set-Cookie: dupinfo=; Path=/; Domain=edunet.net; Expires=Wed, 30-Jul-1997 15:00:00 GMT;
+Set-Cookie: build52=290; Path=/; Domain=edunet.net; HttpOnly;
+Access-Control-Allow-Origin: https://stsso2.edunet.net
+Khan.tid: 19f5ec98e32-c0d1c5a2dec19af983
+Accept-Ch-Lifetime: 86400
+Access-Control-Allow-Credentials: true
+Accept-Ch: UA, UA-Platform, UA-Arch, UA-Model, UA-Mobile, UA-Full-Version
+Content-Length: 762
+Content-Type: text/html;charset=UTF-8
+
+<!DOCTYPE html><html><head><meta http-equiv='Content-Type' content='text/html;charset=utf-8' /><meta http-equiv='X-UA-Compatible' content='IE=edge,chrome=1' /><script type='text/javascript'>var supportESSO=false; var supportLive=false; var synced=false; </script><script type='text/javascript'>function OnLoad() {document.forms.frmData.submit();} </script></head><body onload="OnLoad()"><noscript><p><strong>Note:</strong> Since your browser does not support Javascript, you must press the Continue button once to proceed.</p></noscript><form id="frmData" action="https://read365.edunet.net/ResLogin" method="post"><div></div><noscript><div><input type="submit" value="Continue"/></div></noscript></form><form id='frmArtifact' method='post'></form></body></html>
+```
+
+
+```
+POST /ResLogin HTTP/1.1
+Host: read365.edunet.net
+Cookie: build52=290; external=; LAST_COUNT_DATE=2026-07-14; JSESSIONID=4E159567D0427A3F843EC3E96557FCCA.read365.edunet.net; EDUAUTHTOKEN=7c7d6a7d08d4ded165e294b027f3503eb018fb8fdc3321c977ccd98832bd91ddfa92c4453087be2212c7b7c778a6d1d48dbf3e40a102782002c3bfa3429c6d82ceb3bf0b623f81b9bd0b422622a367d00ca743f8ae29942ac7f6110b; at=aae3d8e911bc1d18522fb32042ca8d7dd7ac4eb0878b82d5e8a0ce346fed816512406655e5d94fba1ed6161a10d98b0b77d359f20751875ef76d655b4b470c4dc88cab8bd7da616f12b3f0ecc72a97b37c4af849e092abd39d479bc0991fc54a0f543df903ccb385e485bb82b6994655dc64e0ebb3f6970ea856c3f36e963bc59d61b783729efd1d2f4f1e9f58c7575f93335457cb455bf41affdb12379508de8986f5cd8967a9ab6b6460c955d1a7390ca743f8ae29942ac7f6110b81; EDUDOCOOKIE=69dbee2335e796eac53389d45c11d7f91cc689ac15c0f29bc799edff2ee6295bf5dfa09f45d82987770702827cf29c8e453b8f7a3c59a430f85c3493a8d4d7a0a2195c2cbb3a0e8c95c6bc4f2f9b9ce215893fd4f4923ab0e2b0e9b276cf6b7258729ac0c20244e1ab0399f9a7c8b01a436a8c826a2fcf5bfe27b84ac6938e4649a4a51b949a1d3e50a04a0c0cfc4fa6ac141977daa89841ed1378f21740352d3d140ea75ed7b9ccf4c7124c263c4090632323332e395c23bd9259fabea51fa3788484b39bbfe85aadcadbafa4ee095a84d2746697792af037c584692d1607157775b34d615d4f1a8a6388a870a2124d7eb2b0a3c207888460bfa5eccfda71703eeb3be3afd3cc33c517cbdf786c2f3c1f95a004ac9d4398350c913d52ead2c901b321b8ca468f72845f6ab9cd7fdc52463b6c1b5103cd277012e63612fdd6a2b47e4fa9b2c8e71c7da1ef792b7a97a152cd9e8e38f18c77d1a2329ba11108a3758ed32aa0c619fa0b4f280e67b101a2eac198a96eb853cf7756d6eff92f5161551359e97b278ff913b9a64331faa097c778401ab645e04e1008bdcf01b438bf; ua=108fd450965f7efcd5d4dd5b0550dc144e8401f0a9d04cc57fbd0cd5bd24d407cba25d35b3ef8b76b5e0b2ed45445ee586345965a0e6b0ef0f562f395cf2845b7605a9a9fc3e78ea32bf5d8942727bc6753465a5be8d45d71ee22244f536f4aa1c5368628d3f2cd63041a2ea502a3ff53bc76eb438361ff9f5a03e3e43643d5bd9e46bacf0ab38d6e05022f8d3f07dfae7e0b4b8860f47d6954f824ef1a216243b68387d416af19af48927a6fa821a21adbd69299234febebf07608585454ef725d40c7f2568b8f519f0f8810f49e32206fb75a74f26427fcd37d576c3bf6d57df1412c533d35635807e59c3fbb042687b4919e42f7bf7740983c18e9854b6925f20efb5bf4ea06bee9bbdfd06f7db41ba1e98cd7f31b2e9153eea042f9d35c499abfa78564d249371c8f5b839c2783ea4f405d44703d8cf7dd727bdc464d05dfacbe19224c72a96844d6325e9cf4e35af01a8530a9320ebffd13e76d2318c6d40b2e74e646d9c289be14cbb31a5bd1267c35f116ad1239242e413a9cd367e73e767bc330cc2cd17c981c339406c9844ebc42abd0511b8b8b2ea35ba8e2ea4e3572acb014220ee0d54473176ed563361e8938f6b4f1f162b0d8d8616cb48eeb850cd39501fcd65be89f7bd5ef1d9413c4efb0cbcdadfc1cd2131dd297aac665100dc6f88efea460053524c0db121318ee1f75d155c5916551f14b25ca3e944955d48ffe341736061c3502b681dbabeb2673ab936462c44d16bcf6945ace27523773eedab38cacc1a26af3d29b0a3c066
+Content-Length: 0
+Cache-Control: max-age=0
+Sec-Ch-Ua: "Not-A.Brand";v="24", "Chromium";v="146"
+Sec-Ch-Ua-Mobile: ?0
+Sec-Ch-Ua-Platform: "Windows"
+Accept-Language: ko-KR,ko;q=0.9
+Origin: https://stsso2.edunet.net
+Content-Type: application/x-www-form-urlencoded
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Sec-Fetch-Site: same-site
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Dest: document
+Referer: https://stsso2.edunet.net/
+Accept-Encoding: gzip, deflate, br
+Priority: u=0, i
+Connection: keep-alive
+```
+
+```
+HTTP/1.1 200 OK
+Date: Tue, 14 Jul 2026 04:02:22 GMT
+Server: Apache
+Last-Modified: Mon, 13 Jul 2026 07:39:16 GMT
+Accept-Ranges: bytes
+Content-Length: 1227
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+Cache-Control: max-age=0, no-cache, no-store, must-revalidate
+Pragma: no-cache
+Expires: Wed, 21 Oct 2015 01:00:00 GMT
+Access-Control-Allow-Credentials: true
+Access-Control-Allow-Methods: POST, GET
+Content-Type: text/html
+
+<!doctype html><html lang="ko" xml:lang="ko" xmlns="http://www.w3.org/1999/xhtml"><head><meta charset="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="robots" content="index,follow"/><meta name="description" content="학교도서관 이용 현황 및 독서 활동을 관리하고 맞춤형 독서 정보를 제공하는 플랫폼입니다."/><link rel="shortcut icon" id="main-icon" href="/favicon.ico"/><title>독서로</title><script src="/namo/js/namo_scripteditor.js?ver=20260708"></script><script src="/namo/lib/jquery-1.7.2.min.js"></script><link rel="prefetch" href="../src/assets/img/reading_world_main.png"/><script defer="defer" src="/js/chunk-vendors.575acb5e.js"></script><script defer="defer" src="/js/app.a9c9d861.js"></script><link href="/css/chunk-vendors.330eaa46.css" rel="stylesheet"><link href="/css/app.d7dc9b82.css" rel="stylesheet"></head><body><noscript><strong>We're sorry but keris doesn't work properly without JavaScript enabled. Please enable it to continue.</strong></noscript><div id="app"></div><script src="/js/vue.global.js"></script><script src="/js/vue-datepicker.life.js"></script></body></html>
+```
+
+ -- member info
+
+```
+GET /schome/auth/member/refresh HTTP/1.1
+Host: read365.edunet.net
+Cookie: build52=290; external=; LAST_COUNT_DATE=2026-07-14; EDUDOCOOKIE=69dbee2335e796eac53389d45c11d7f91cc689ac15c0f29bc799edff2ee6295bf5dfa09f45d82987770702827cf29c8e453b8f7a3c59a430f85c3493a8d4d7a0a2195c2cbb3a0e8c95c6bc4f2f9b9ce215893fd4f4923ab0e2b0e9b276cf6b7258729ac0c20244e1ab0399f9a7c8b01a436a8c826a2fcf5bfe27b84ac6938e4649a4a51b949a1d3e50a04a0c0cfc4fa6ac141977daa89841ed1378f21740352d3d140ea75ed7b9ccf4c7124c263c4090632323332e395c23bd9259fabea51fa3788484b39bbfe85aadcadbafa4ee095a84d2746697792af037c584692d1607157775b34d615d4f1a8a6388a870a2124d7eb2b0a3c207888460bfa5eccfda71703eeb3be3afd3cc33c517cbdf786c2f3c1f95a004ac9d4398350c913d52ead2c901b321b8ca468f72845f6ab9cd7fdc52463b6c1b5103cd277012e63612fdd6a2b47e4fa9b2c8e71c7da1ef792b7a97a152cd9e8e38f18c77d1a2329ba11108a3758ed32aa0c619fa0b4f280e67b101a2eac198a96eb853cf7756d6eff92f5161551359e97b278ff913b9a64331faa097c778401ab645e04e1008bdcf01b438bf; ua=108fd450965f7efcd5d4dd5b0550dc144e8401f0a9d04cc57fbd0cd5bd24d407cba25d35b3ef8b76b5e0b2ed45445ee586345965a0e6b0ef0f562f395cf2845b7605a9a9fc3e78ea32bf5d8942727bc6753465a5be8d45d71ee22244f536f4aa1c5368628d3f2cd63041a2ea502a3ff53bc76eb438361ff9f5a03e3e43643d5bd9e46bacf0ab38d6e05022f8d3f07dfae7e0b4b8860f47d6954f824ef1a216243b68387d416af19af48927a6fa821a21adbd69299234febebf07608585454ef725d40c7f2568b8f519f0f8810f49e32206fb75a74f26427fcd37d576c3bf6d57df1412c533d35635807e59c3fbb042687b4919e42f7bf7740983c18e9854b6925f20efb5bf4ea06bee9bbdfd06f7db41ba1e98cd7f31b2e9153eea042f9d35c499abfa78564d249371c8f5b839c2783ea4f405d44703d8cf7dd727bdc464d05dfacbe19224c72a96844d6325e9cf4e35af01a8530a9320ebffd13e76d2318c6d40b2e74e646d9c289be14cbb31a5bd1267c35f116ad1239242e413a9cd367e73e767bc330cc2cd17c981c339406c9844ebc42abd0511b8b8b2ea35ba8e2ea4e3572acb014220ee0d54473176ed563361e8938f6b4f1f162b0d8d8616cb48eeb850cd39501fcd65be89f7bd5ef1d9413c4efb0cbcdadfc1cd2131dd297aac665100dc6f88efea460053524c0db121318ee1f75d155c5916551f14b25ca3e944955d48ffe341736061c3502b681dbabeb2673ab936462c44d16bcf6945ace27523773eedab38cacc1a26af3d29b0a3c066; ACSLOG=d1e447b20ca743f8ae29942ac7f6110b; refreshToken=JbmkBd91vPxRtdDfKgRYgsrKqfJUNvbUevCXl6XsHEb2QAMDbmTZ8BKd1EHLnciDVGBVZhxmJHNDpSuEaetp+ueENIubCNUib89dj/JUTao=; at=aae3d8e911bc1d18522fb32042ca8d7dc1bce154c5406bf4a47c8c3f57057d80a24b97ee2fbfb2db8b4b7cb0158a7b618aeecd3797ac877fd4b2c41b54e099bc4d6790b9bccdda00bff790d527c0222aa89304c43c311d2cdd69d0345d7f24759851d4061ddbd8e29b87bd6316090f5942982c921d2bf117090fc6e47ee4730a742c7a8dafe62b508345522e6b990f5aed36a3cb35760bc71a3dbab48ecae5412641ca3e6837f1f8b7a11eee8c826e6a0ca743f8ae29942ac7f6110b81; EDUAUTHTOKEN=7c7d6a7d08d4ded165e294b027f3503eb018fb8fdc3321c977ccd98832bd91ddfa92c4453087be2212c7b7c778a6d1d48dbf3e40a102782002c3bfa3429c6d82ceb3bf0b623f81b9bd0b422622a367d00ca743f8ae29942ac7f6110b; JSESSIONID=82995787EB0D8EA9D21EE89AE248B3D6.read365.edunet.net
+Sec-Ch-Ua-Platform: "Windows"
+Accept-Language: ko-KR,ko;q=0.9
+Accept: application/json, text/plain, */*
+Sec-Ch-Ua: "Not-A.Brand";v="24", "Chromium";v="146"
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+Sec-Ch-Ua-Mobile: ?0
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Referer: https://read365.edunet.net/Elementary
+Accept-Encoding: gzip, deflate, br
+Priority: u=1, i
+Connection: keep-alive
+```
+
+```
+HTTP/1.1 200 
+Date: Tue, 14 Jul 2026 04:03:07 GMT
+Server: Apache
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: max-age=0, no-cache, no-store, must-revalidate
+Pragma: no-cache
+Expires: Wed, 21 Oct 2015 01:00:00 GMT
+X-Frame-Options: SAMEORIGIN
+Content-Type: application/json;charset=UTF-8
+Referrer-Policy: strict-origin-when-cross-origin
+Access-Control-Allow-Credentials: true
+Content-Length: 3784
+
+{"status":"OK","message":"새로고침되었습니다.","data":{"rnum":0,"pageSize":10,"pageIndex":1,"tiberoForPageTotalCount":0,"tiberoForPageLimitS":0,"memberKey":"809652233","schKey":"1000002227","provCode":"F10","id":"junpyokim","password":null,"name":"김준표","memGrade":"2","memClass":"3","memNo":"2","memberTypeCode":"01","dlsLoanCardNo":null,"authCertificateValue":null,"delYn":"N","lastLoginDate":"2026-07-14","regDate":"2025-07-15","schName":"광주소프트웨어마이스터고등학교","prov":null,"eduOffice":null,"schoolSpecies":"고등학교","schoolGroupCode":"03","neisCode":"F100000120","ud":null,"encId":null,"mode":null,"dlsToken":{"accessToken":"IfkzytEpPbl4UkZAbxpWDXfLh/9jaZQYwEpBo+HmL19y99K20ez2lubRQlNQujQ8fc9ogFJUwzUA0dOUEdlXaUz/y8Mk6xO8AWgGN65zZ9E=","tokenType":"Bearer"},"dlsUserKey":"34146370553","searchWord":null,"kerisAuthToken":null,"refreshToken":null,"neisLinked":null,"neisLinkedAt":null,"klUserNo":null,"changeKlUserNo":null,"klMemberHistoryKey":null,"klLinkedYn":"N","profileId":"103213040","profileIcon":"iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAeDSURBVHgB5Vs7bxNZFD4JAQIEMCAgCCRmeUhLAfFCQVCEMEICgoQE5VZkf0GMgCgdpougwOl2K7LlVkAHSGhNAaIA8ijSJFK8Uoo0SSZv573fN5lrTZyxM+O5Yzu7nzTy2J7X+e53zj333jNVEjIePXp0ctu2bTHsRrEZq6urRlVVVaS2ttZoampyHprGZuL/NP7vwWfP9u3be27cuPGPhIgqCQFPnjy5BiPuYfcePg0QINwIfuI3OX36tJw7dy57zsrKiiwvLwsMl6Wlpew2Pz+frqmpSVVXV3fdvHnzk2iGNgLi8XgED9qKB43DyAgNxfes4bm4fPmyHDp0aNPrkoTFxUWZm5sjQVRHgoToUkZgApyGQ7LctwwvhF27dsn169fFL0gGiZienjZBRlddXV0yKBGBCIDUW9kiNHznzp2WtL3g+PHj0tDQIMWCrjI7OyuZTMZSxK1bt/6UIlEUAWh1A0a/QkvHEMwEre/r/EuXLsnRo0clKEgE1CALCwtpPE+sGDX4e3JZa/UdO3Z0w/DY7t27fRtPePF9L2B82b9/v8AVDATRnnfv3rWKT/h6+ra2tpe4aXLPnj0RkCDFgC2/WYzwC8YUEMHAm3z//v1TP+d6JgAt/wo3iBfb6go6pO8GquHAgQMCV0hACa+8nufJEhjfjQu30HivgS4fDh48KGGBz0aXgHu2QAndXs7ZlAC2PIyPUmZBQeNJYtjYu3evoFeKelFCQQIeP378FP7aosN4or6+XkoFkoA4RSW8LHRcXgIY7WF8QpfxRJjyd8O+ffsYr+KFegdXAtjPM8Gg8UF9XoHX4gOVEiomIEAmPn78eNLtGFcCIJ2/4UORINE+F6WUvxPsHUB+BOOJLrf/N1iIvv4BTjKK7efz4ciRI1IuUH2wJ+bmCuv0Temz9ZHoGDpb3+vghwOdvr4+GR0dtdyFKbOuGMS0eXx83MQY4qf79++b6vd1VsL4VnR5Wo0nvAa/b9++WcYTk5OT0tvbK7qgXAHd8DoVZC1l6+OjRbf0Ca/+PzU1te772NiY6ISdxcZfv34dUb9lCYDh1zis1d36hNfBT65SdPca7BVoo1MFTms5rhfdoFFeBz8XLlywEhh13sWLF0U3OHxHjxBX360gyDk8+EgKwU90g0adOHFCKgkTExOcXYpxjlEpoCWM1idKnf15AW3F/AEnbddcAL4Ryzd5GQSlGvz4hT19t0YAoz8CnxEGAeXK/jaDPTVvMD2uBhsNYUR+ohLlr8DunnGgGgsR0TAIKMfgxw/YM1m2Yz8alv9XMuxRrkECDAkBldb15YI9AeMACYjoVgAvrmvqO2RELAXomvRQKOfQ1yvsRjdCCf+V2v25IRQCtoj8LWgnwM/gpxJAAtIsStCFSo/+CpwhAtIkwGR1hi5Uev+vYNtsWgrQRQAzv0oc/LiBqmc9Ep1VmwvQ9wcGBjwff/bsWSkXWG3CYqwaGN9r+0NgcA7PzzxeOQmgzRgD9VRzJkgXAVsJVIBFQEdHB10g/X8igbay/I4lNSoPeENGKhlcL/jx40d23SAIFhYWmAqnuG8RAAW8qWQFcJHk+/fvMjIyIul0WoIik8nQZquyzCLgxYsXn0CAWYkqGBoakq9fv4p6tqCJFhuaBZfNzc0pfnfmrEncJFHKNJZGud2Pa4SqtbmvcP78+cA1Rvb1Eup79u7wi058xLksrnt4nA8fPnywCHAux9E/c5XI6TWuLwQdZDHhw/Kbieul1G/ZmRDILNPU1FQL34iVUgV8KNYCq82ZlfI5Tp06ZVWV1tXVSVDMzMxQAb9D/n9l7+E8QKkALRIJa6bYCVaLU5I0XIGzSWxxjilY3aELJJaltawvdv6+Qet2bVCyFDn9nTt3pFTgchiIbsmtK97QzOgROuGDKfrifwW2ytJuRdWuOkeS8BsyJa3D5HKBNoAAk4Xdbv+7EmCnxwkyp3OypNTgs1P66PcT+SrJ80Y6ugLYSzr74a0GZpA0/vbt2535jikY6p8/f/4Q8aCLqWMYCDPzZLkN4lgX/P5ZoeM2XRH58uXL2ytXrtyDnOp15wf0z8OHD3s+nmrkxuXtQqDxiGE9aPlm2QSeloQ+f/78R2NjowE5RUmCrkzRNNeq1djl5ivQ4ATL8PCwDA4OSn9/v2V8voyQPk/Zw/guL8YTvixpa2t7igTJKqHVnSjRKGdNIA3he0G5bsJZJLeZJKrJLn1JwviH4hG+FgWhhE9wBxN9aiNUUKtzTZHSptFqQyuKWzdMonIV4HiTrB3GPxMf8N2M7B3Q+r9wRoUtVM5cQbU6noMvVkYLRft8COTMrCuWtfI6q7a4FOMHyv/MmTPqtTkma4liDFcIpGG4RO/Vq1ffcpIBbvEzglAtSQhrOM37ME4gENINO0DCr3fv3g30Oq22J21vb+era9ewm2DRFaM6e4ygqlDDZXsmxzx27FjSMIxOZ8FzEITSVCAjBjU84NwCySAJ3NSL024qsVdqsi9Q2wbzL6blb3DOW6ToKdGM0Kd+bGXw1Xm+K2u9Qs/X5/kavfM4/EZD2appbjCYpeIpjkskRPwL8fdbiQXShdwAAAAASUVORK5CYII=","continuousLoginDays":2}}
+```
+ -- marathon
+
+```
+GET /schome/service/readingActivitesJoin/readingMarathon/schoolList?schKey=1000002227&privacyBoundsCode=02&progressStatusCode=&statusCode=02&contestName=&contestSummary=&myMakeYN=N&myJoinYN=N&memberKey=809652233&pageIndex=1&pageSize=4 HTTP/1.1
+Host: read365.edunet.net
+Cookie: build52=290; external=; LAST_COUNT_DATE=2026-07-14; EDUDOCOOKIE=69dbee2335e796eac53389d45c11d7f91cc689ac15c0f29bc799edff2ee6295bf5dfa09f45d82987770702827cf29c8e453b8f7a3c59a430f85c3493a8d4d7a0a2195c2cbb3a0e8c95c6bc4f2f9b9ce215893fd4f4923ab0e2b0e9b276cf6b7258729ac0c20244e1ab0399f9a7c8b01a436a8c826a2fcf5bfe27b84ac6938e4649a4a51b949a1d3e50a04a0c0cfc4fa6ac141977daa89841ed1378f21740352d3d140ea75ed7b9ccf4c7124c263c4090632323332e395c23bd9259fabea51fa3788484b39bbfe85aadcadbafa4ee095a84d2746697792af037c584692d1607157775b34d615d4f1a8a6388a870a2124d7eb2b0a3c207888460bfa5eccfda71703eeb3be3afd3cc33c517cbdf786c2f3c1f95a004ac9d4398350c913d52ead2c901b321b8ca468f72845f6ab9cd7fdc52463b6c1b5103cd277012e63612fdd6a2b47e4fa9b2c8e71c7da1ef792b7a97a152cd9e8e38f18c77d1a2329ba11108a3758ed32aa0c619fa0b4f280e67b101a2eac198a96eb853cf7756d6eff92f5161551359e97b278ff913b9a64331faa097c778401ab645e04e1008bdcf01b438bf; ua=108fd450965f7efcd5d4dd5b0550dc144e8401f0a9d04cc57fbd0cd5bd24d407cba25d35b3ef8b76b5e0b2ed45445ee586345965a0e6b0ef0f562f395cf2845b7605a9a9fc3e78ea32bf5d8942727bc6753465a5be8d45d71ee22244f536f4aa1c5368628d3f2cd63041a2ea502a3ff53bc76eb438361ff9f5a03e3e43643d5bd9e46bacf0ab38d6e05022f8d3f07dfae7e0b4b8860f47d6954f824ef1a216243b68387d416af19af48927a6fa821a21adbd69299234febebf07608585454ef725d40c7f2568b8f519f0f8810f49e32206fb75a74f26427fcd37d576c3bf6d57df1412c533d35635807e59c3fbb042687b4919e42f7bf7740983c18e9854b6925f20efb5bf4ea06bee9bbdfd06f7db41ba1e98cd7f31b2e9153eea042f9d35c499abfa78564d249371c8f5b839c2783ea4f405d44703d8cf7dd727bdc464d05dfacbe19224c72a96844d6325e9cf4e35af01a8530a9320ebffd13e76d2318c6d40b2e74e646d9c289be14cbb31a5bd1267c35f116ad1239242e413a9cd367e73e767bc330cc2cd17c981c339406c9844ebc42abd0511b8b8b2ea35ba8e2ea4e3572acb014220ee0d54473176ed563361e8938f6b4f1f162b0d8d8616cb48eeb850cd39501fcd65be89f7bd5ef1d9413c4efb0cbcdadfc1cd2131dd297aac665100dc6f88efea460053524c0db121318ee1f75d155c5916551f14b25ca3e944955d48ffe341736061c3502b681dbabeb2673ab936462c44d16bcf6945ace27523773eedab38cacc1a26af3d29b0a3c066; ACSLOG=d1e447b20ca743f8ae29942ac7f6110b; refreshToken=JbmkBd91vPxRtdDfKgRYgsrKqfJUNvbUevCXl6XsHEb2QAMDbmTZ8BKd1EHLnciDVGBVZhxmJHNDpSuEaetp+ueENIubCNUib89dj/JUTao=; at=aae3d8e911bc1d18522fb32042ca8d7dc1bce154c5406bf4a47c8c3f57057d80a24b97ee2fbfb2db8b4b7cb0158a7b618aeecd3797ac877fd4b2c41b54e099bc4d6790b9bccdda00bff790d527c0222aa89304c43c311d2cdd69d0345d7f24759851d4061ddbd8e29b87bd6316090f5942982c921d2bf117090fc6e47ee4730a742c7a8dafe62b508345522e6b990f5aed36a3cb35760bc71a3dbab48ecae5412641ca3e6837f1f8b7a11eee8c826e6a0ca743f8ae29942ac7f6110b81; EDUAUTHTOKEN=7c7d6a7d08d4ded165e294b027f3503eb018fb8fdc3321c977ccd98832bd91ddfa92c4453087be2212c7b7c778a6d1d48dbf3e40a102782002c3bfa3429c6d82ceb3bf0b623f81b9bd0b422622a367d00ca743f8ae29942ac7f6110b; JSESSIONID=C8539410F78AF4A0670DC700C3F43A42.read365.edunet.net
+Sec-Ch-Ua-Platform: "Windows"
+Accept-Language: ko-KR,ko;q=0.9
+Sec-Ch-Ua: "Not-A.Brand";v="24", "Chromium";v="146"
+Sec-Ch-Ua-Mobile: ?0
+Schkey: 1000002227
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+Accept: application/json, text/plain, */*
+Userid: junpyokim
+Token: IfkzytEpPbl4UkZAbxpWDXfLh/9jaZQYwEpBo+HmL19y99K20ez2lubRQlNQujQ8fc9ogFJUwzUA0dOUEdlXaUz/y8Mk6xO8AWgGN65zZ9E=
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Referer: https://read365.edunet.net/High/contestMarathon?myJoinYN=N&myMakeYN=N&statusCode=02&progressStatusCode=&privacyBoundsCode=02&readingMarathonTypeCode&targetGrade&contestName=&contestSummary=&searchType=ALL&page=1&scroll=no
+Accept-Encoding: gzip, deflate, br
+Priority: u=1, i
+Connection: keep-alive
+```
+
+```
+HTTP/1.1 200 
+Date: Tue, 14 Jul 2026 04:04:36 GMT
+Server: Apache
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: max-age=0, no-cache, no-store, must-revalidate
+Pragma: no-cache
+Expires: Wed, 21 Oct 2015 01:00:00 GMT
+X-Frame-Options: SAMEORIGIN
+Content-Type: application/json;charset=UTF-8
+Referrer-Policy: strict-origin-when-cross-origin
+Access-Control-Allow-Credentials: true
+Content-Length: 20894
+
+{"status":"OK","message":"목록 정보를 조회하였습니다.","data":{"AVGPAGE":0,"TOTALJOINCOUNT":364,"MYTOTALPAGE":0,"list":{"totalCount":3,"totalPage":1,"pageIndex":1,"pageSize":4,"data":[{"rnum":1,"pageSize":10,"pageIndex":1,"tiberoForPageTotalCount":0,"tiberoForPageLimitS":0,"readingMarathonKey":"1493783412","provCode":"F10","provName":"광주","schKey":"0","schName":null,"memberKey":"410789134","readingMarathonTypeCode":"02","readingMarathonTypeName":"목표 거리 설정 마라톤","courseType":null,"contestKeyword":null,"contestName":"[광주광역시교육청] 제21회 빛고을독서마라톤(고등학교)","contestSummary":"[광주광역시교육청] 제21회 빛고을독서마라톤(고등학교)","contestImgUrl":"/service/readingActivitesJoin/readingMarathon/imageUrl?readingMarathonKey=1493783412","regGropCode":"04","regGropName":null,"targetSchGropCode":"03","targetSchGropName":"고등학교","targetGrade":null,"contestStartDate":"2026.03.23","contestEndDate":"2026.11.06","keyword":"독서마라톤","privacyBoundsCode":"03","statusCode":"02","statusName":"승인","progressStatusCode":"02","progressStatusName":"진행중","regMember":"독ㅇㅇ..","memberGrade":null,"memberClass":null,"memberNo":null,"memberName":null,"rejectReason":null,"rejectMember":null,"rejectDate":null,"regDate":"2026.03.19","updateDate":null,"updateMember":null,"maskingYN":null,"imgType":null,"imgKey":null,"userCourseList":null,"readingMarathonJoinKey":null,"marathonCourseList":[{"readingMarathonCourseKey":"1493783731","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"01","courseName":"거북이","completeDistance":"1500","targetPointsInterval":"2499","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"517","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493783732","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"02","courseName":"악어","completeDistance":"2500","targetPointsInterval":"4999","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"204","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493783733","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"03","courseName":"토끼","completeDistance":"5000","targetPointsInterval":"6499","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"212","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786161","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"04","courseName":"타조","completeDistance":"7500","targetPointsInterval":"10548","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"219","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786162","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"05","courseName":"사자","completeDistance":"10549","targetPointsInterval":"15822","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"143","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786163","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"06","courseName":"호랑이","completeDistance":"15823","targetPointsInterval":"21097","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"71","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786164","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"07","courseName":"월계관","completeDistance":"21098","targetPointsInterval":"50000","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"364","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"Y","dailyLogFinishYN":null,"neisCode":null}],"bookList":null,"fileInfo":null,"readingMarathonCourseKeyList":null,"myJoinMemberKey":null,"teacherMemberKey":null,"orderByField":null,"totalJoinCount":"1624","finishYJoinCount":"0","finishNJoinCount":"1624","deadLineDays":"116","totalPage":"63970","avgPage":"171679.226961","myTotalPage":"430","myJoinYN":"Y","mySchoolYN":"N","myMakeYN":"N","myFinishYN":"N","myJoinDate":"20260613","myJoinStatusCode":"01","myJoinRejectReason":null,"finishApplyDate":null,"finishApplyContent":null,"teacherFinishCheckDate":null,"name":null,"titleInfo":null,"author":null,"bookKey":null,"speciesKey":null,"regYear":null,"regMonth":null,"searchDate":null,"searchText":null,"searchOption":null,"uploadFileDeleteYN":null,"imgKeyNullYN":null,"targetGradeNullYN":null,"readingGroupKey":null,"textLength":"100","includeSpaceYn":"Y","ignoreTotalPageYn":"Y","ignoreTargetDistance":"Y","contestWarning":"아래의 인정 불가 도서 및 일지 기준을 확인해주시기 바랍니다.\r\n\r\n1. 페이지부풀리기\r\n·코스를 달성하기 위해 허위 페이지 입력(예: 200쪽의 도서를 300쪽으로 입력한 경우, 0쪽으로 처리)\r\n·동일 페이지를 계속적으로 허위 입력한 경우\r\n2. 불성실 감상평\r\n·해시태그, 무규칙 한글 자‧모음, 영어 알파벳, 일본어 등의 나열\r\n·해당 도서와 관련 없는 내용 기록(일상, 노래 가사 등), 동일한 감상평 반복 입력, 책제목만 나열하고 그치는 짧은 감상평\r\n․본인의 감상평없이 책의 일부 구절만 작성한 경우\r\n‧글자수 미달(초등·특수학생은 30자이상, 중·고등학생은 100자 이상)\r\n3. 동일도서 반복\r\n동일도서를 반복해서 올리며 특별한 감상평의 변화없이3회 이상, 고의적인 반복 입력은 미인정\r\n4. 금지도서 작성\r\n‧ 정기간행물(과학동아 등), 학습지(참고서), 사전, 학습만화 이외의 만화(웹툰),\r\n 관광안내서, 선정도서, 애니메이션 등 만화원작의 도서, 유튜브 파생도서(흔한남매, 웃소 등) 등의 금지도서 활용\r\n5. 타인의 글 복사,붙여넣기\r\n·인터넷 감상평, 책소개 등의 글을 복사하여 기재한 경우·형제, 자매, 친구 등이 동일한 감상평을 올린 경우 모두 미인정\r\n6. 타인이 작성\r\n․부모, 형제, 친구 등 타인이 대신 참가하였을 경우 미완주 처리"},{"rnum":2,"pageSize":10,"pageIndex":1,"tiberoForPageTotalCount":0,"tiberoForPageLimitS":0,"readingMarathonKey":"421833119","provCode":"F10","provName":"광주","schKey":"0","schName":null,"memberKey":"410789134","readingMarathonTypeCode":"02","readingMarathonTypeName":"목표 거리 설정 마라톤","courseType":null,"contestKeyword":null,"contestName":"[광주광역시교육청] 제20회 빛고을독서마라톤(특수학교)","contestSummary":"주최/주관: 광주광역시교육청","contestImgUrl":"/service/readingActivitesJoin/readingMarathon/imageUrl?readingMarathonKey=421833119","regGropCode":"04","regGropName":null,"targetSchGropCode":"01,02,03,93","targetSchGropName":"초등학교,중학교,고등학교,특수학교","targetGrade":null,"contestStartDate":"2025.03.17","contestEndDate":"2025.11.07","keyword":"독서마라톤","privacyBoundsCode":"03","statusCode":"02","statusName":"승인","progressStatusCode":"03","progressStatusName":"종료","regMember":"독ㅇㅇ..","memberGrade":null,"memberClass":null,"memberNo":null,"memberName":null,"rejectReason":null,"rejectMember":null,"rejectDate":null,"regDate":"2025.03.19","updateDate":null,"updateMember":null,"maskingYN":null,"imgType":null,"imgKey":null,"userCourseList":null,"readingMarathonJoinKey":null,"marathonCourseList":[{"readingMarathonCourseKey":"1493783731","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"01","courseName":"거북이","completeDistance":"1500","targetPointsInterval":"2499","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"517","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493783732","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"02","courseName":"악어","completeDistance":"2500","targetPointsInterval":"4999","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"204","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493783733","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"03","courseName":"토끼","completeDistance":"5000","targetPointsInterval":"6499","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"212","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786161","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"04","courseName":"타조","completeDistance":"7500","targetPointsInterval":"10548","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"219","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786162","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"05","courseName":"사자","completeDistance":"10549","targetPointsInterval":"15822","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"143","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786163","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"06","courseName":"호랑이","completeDistance":"15823","targetPointsInterval":"21097","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"71","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786164","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"07","courseName":"월계관","completeDistance":"21098","targetPointsInterval":"50000","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"364","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"Y","dailyLogFinishYN":null,"neisCode":null}],"bookList":null,"fileInfo":null,"readingMarathonCourseKeyList":null,"myJoinMemberKey":null,"teacherMemberKey":null,"orderByField":null,"totalJoinCount":"1581","finishYJoinCount":"0","finishNJoinCount":"1581","deadLineDays":"-247","totalPage":"63970","avgPage":"65263.914735","myTotalPage":"0","myJoinYN":"N","mySchoolYN":"N","myMakeYN":"N","myFinishYN":null,"myJoinDate":null,"myJoinStatusCode":null,"myJoinRejectReason":null,"finishApplyDate":null,"finishApplyContent":null,"teacherFinishCheckDate":null,"name":null,"titleInfo":null,"author":null,"bookKey":null,"speciesKey":null,"regYear":null,"regMonth":null,"searchDate":null,"searchText":null,"searchOption":null,"uploadFileDeleteYN":null,"imgKeyNullYN":null,"targetGradeNullYN":null,"readingGroupKey":null,"textLength":"30","includeSpaceYn":"Y","ignoreTotalPageYn":"Y","ignoreTargetDistance":"Y","contestWarning":null},{"rnum":3,"pageSize":10,"pageIndex":1,"tiberoForPageTotalCount":0,"tiberoForPageLimitS":0,"readingMarathonKey":"410802807","provCode":"F10","provName":"광주","schKey":"0","schName":null,"memberKey":"410789134","readingMarathonTypeCode":"02","readingMarathonTypeName":"목표 거리 설정 마라톤","courseType":null,"contestKeyword":null,"contestName":"[광주광역시교육청] 제20회 빛고을독서마라톤(고등)","contestSummary":"주최/주관: 광주광역시교육청","contestImgUrl":"/service/readingActivitesJoin/readingMarathon/imageUrl?readingMarathonKey=410802807","regGropCode":"04","regGropName":null,"targetSchGropCode":"03","targetSchGropName":"고등학교","targetGrade":null,"contestStartDate":"2025.03.17","contestEndDate":"2025.11.07","keyword":"독서마라톤","privacyBoundsCode":"03","statusCode":"02","statusName":"승인","progressStatusCode":"03","progressStatusName":"종료","regMember":"독ㅇㅇ..","memberGrade":null,"memberClass":null,"memberNo":null,"memberName":null,"rejectReason":null,"rejectMember":null,"rejectDate":null,"regDate":"2025.03.07","updateDate":null,"updateMember":null,"maskingYN":null,"imgType":null,"imgKey":null,"userCourseList":null,"readingMarathonJoinKey":null,"marathonCourseList":[{"readingMarathonCourseKey":"1493783731","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"01","courseName":"거북이","completeDistance":"1500","targetPointsInterval":"2499","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"517","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493783732","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"02","courseName":"악어","completeDistance":"2500","targetPointsInterval":"4999","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"204","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493783733","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"03","courseName":"토끼","completeDistance":"5000","targetPointsInterval":"6499","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"212","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786161","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"04","courseName":"타조","completeDistance":"7500","targetPointsInterval":"10548","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"219","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786162","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"05","courseName":"사자","completeDistance":"10549","targetPointsInterval":"15822","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"143","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786163","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"06","courseName":"호랑이","completeDistance":"15823","targetPointsInterval":"21097","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"71","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"N","dailyLogFinishYN":null,"neisCode":null},{"readingMarathonCourseKey":"1493786164","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"07","courseName":"월계관","completeDistance":"21098","targetPointsInterval":"50000","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"364","finishYJoinCount":"0","avgPage":"0","myTotalPage":"0","myOneDayRead":null,"myCourseYN":"Y","dailyLogFinishYN":null,"neisCode":null}],"bookList":null,"fileInfo":null,"readingMarathonCourseKeyList":null,"myJoinMemberKey":null,"teacherMemberKey":null,"orderByField":null,"totalJoinCount":"2373","finishYJoinCount":"0","finishNJoinCount":"2373","deadLineDays":"-247","totalPage":"63970","avgPage":"2839.908259","myTotalPage":"0","myJoinYN":"Y","mySchoolYN":"N","myMakeYN":"N","myFinishYN":"N","myJoinDate":"20250715","myJoinStatusCode":"01","myJoinRejectReason":null,"finishApplyDate":null,"finishApplyContent":null,"teacherFinishCheckDate":null,"name":null,"titleInfo":null,"author":null,"bookKey":null,"speciesKey":null,"regYear":null,"regMonth":null,"searchDate":null,"searchText":null,"searchOption":null,"uploadFileDeleteYN":null,"imgKeyNullYN":null,"targetGradeNullYN":null,"readingGroupKey":null,"textLength":"100","includeSpaceYn":"Y","ignoreTotalPageYn":"Y","ignoreTargetDistance":"Y","contestWarning":null}]},"FINISHYJOINCOUNT":0}}
+```
+
+
+```
+GET /schome/service/readingActivitesJoin/readingMarathon/detail?readingMarathonKey=1493783412&memberKey=809652233 HTTP/1.1
+Host: read365.edunet.net
+Cookie: build52=290; external=; LAST_COUNT_DATE=2026-07-14; EDUDOCOOKIE=69dbee2335e796eac53389d45c11d7f91cc689ac15c0f29bc799edff2ee6295bf5dfa09f45d82987770702827cf29c8e453b8f7a3c59a430f85c3493a8d4d7a0a2195c2cbb3a0e8c95c6bc4f2f9b9ce215893fd4f4923ab0e2b0e9b276cf6b7258729ac0c20244e1ab0399f9a7c8b01a436a8c826a2fcf5bfe27b84ac6938e4649a4a51b949a1d3e50a04a0c0cfc4fa6ac141977daa89841ed1378f21740352d3d140ea75ed7b9ccf4c7124c263c4090632323332e395c23bd9259fabea51fa3788484b39bbfe85aadcadbafa4ee095a84d2746697792af037c584692d1607157775b34d615d4f1a8a6388a870a2124d7eb2b0a3c207888460bfa5eccfda71703eeb3be3afd3cc33c517cbdf786c2f3c1f95a004ac9d4398350c913d52ead2c901b321b8ca468f72845f6ab9cd7fdc52463b6c1b5103cd277012e63612fdd6a2b47e4fa9b2c8e71c7da1ef792b7a97a152cd9e8e38f18c77d1a2329ba11108a3758ed32aa0c619fa0b4f280e67b101a2eac198a96eb853cf7756d6eff92f5161551359e97b278ff913b9a64331faa097c778401ab645e04e1008bdcf01b438bf; ua=108fd450965f7efcd5d4dd5b0550dc144e8401f0a9d04cc57fbd0cd5bd24d407cba25d35b3ef8b76b5e0b2ed45445ee586345965a0e6b0ef0f562f395cf2845b7605a9a9fc3e78ea32bf5d8942727bc6753465a5be8d45d71ee22244f536f4aa1c5368628d3f2cd63041a2ea502a3ff53bc76eb438361ff9f5a03e3e43643d5bd9e46bacf0ab38d6e05022f8d3f07dfae7e0b4b8860f47d6954f824ef1a216243b68387d416af19af48927a6fa821a21adbd69299234febebf07608585454ef725d40c7f2568b8f519f0f8810f49e32206fb75a74f26427fcd37d576c3bf6d57df1412c533d35635807e59c3fbb042687b4919e42f7bf7740983c18e9854b6925f20efb5bf4ea06bee9bbdfd06f7db41ba1e98cd7f31b2e9153eea042f9d35c499abfa78564d249371c8f5b839c2783ea4f405d44703d8cf7dd727bdc464d05dfacbe19224c72a96844d6325e9cf4e35af01a8530a9320ebffd13e76d2318c6d40b2e74e646d9c289be14cbb31a5bd1267c35f116ad1239242e413a9cd367e73e767bc330cc2cd17c981c339406c9844ebc42abd0511b8b8b2ea35ba8e2ea4e3572acb014220ee0d54473176ed563361e8938f6b4f1f162b0d8d8616cb48eeb850cd39501fcd65be89f7bd5ef1d9413c4efb0cbcdadfc1cd2131dd297aac665100dc6f88efea460053524c0db121318ee1f75d155c5916551f14b25ca3e944955d48ffe341736061c3502b681dbabeb2673ab936462c44d16bcf6945ace27523773eedab38cacc1a26af3d29b0a3c066; ACSLOG=d1e447b20ca743f8ae29942ac7f6110b; refreshToken=JbmkBd91vPxRtdDfKgRYgsrKqfJUNvbUevCXl6XsHEb2QAMDbmTZ8BKd1EHLnciDVGBVZhxmJHNDpSuEaetp+ueENIubCNUib89dj/JUTao=; at=aae3d8e911bc1d18522fb32042ca8d7dc1bce154c5406bf4a47c8c3f57057d80a24b97ee2fbfb2db8b4b7cb0158a7b618aeecd3797ac877fd4b2c41b54e099bc4d6790b9bccdda00bff790d527c0222aa89304c43c311d2cdd69d0345d7f24759851d4061ddbd8e29b87bd6316090f5942982c921d2bf117090fc6e47ee4730a742c7a8dafe62b508345522e6b990f5aed36a3cb35760bc71a3dbab48ecae5412641ca3e6837f1f8b7a11eee8c826e6a0ca743f8ae29942ac7f6110b81; EDUAUTHTOKEN=7c7d6a7d08d4ded165e294b027f3503eb018fb8fdc3321c977ccd98832bd91ddfa92c4453087be2212c7b7c778a6d1d48dbf3e40a102782002c3bfa3429c6d82ceb3bf0b623f81b9bd0b422622a367d00ca743f8ae29942ac7f6110b; JSESSIONID=F6134898322ED4DBB072100D51605702.read365.edunet.net
+Sec-Ch-Ua-Platform: "Windows"
+Accept-Language: ko-KR,ko;q=0.9
+Sec-Ch-Ua: "Not-A.Brand";v="24", "Chromium";v="146"
+Sec-Ch-Ua-Mobile: ?0
+Schkey: 1000002227
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+Accept: application/json, text/plain, */*
+Userid: junpyokim
+Token: IfkzytEpPbl4UkZAbxpWDXfLh/9jaZQYwEpBo+HmL19y99K20ez2lubRQlNQujQ8fc9ogFJUwzUA0dOUEdlXaUz/y8Mk6xO8AWgGN65zZ9E=
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Referer: https://read365.edunet.net/High/contestMarathonDetail?index=1493783412
+Accept-Encoding: gzip, deflate, br
+Priority: u=1, i
+Connection: keep-alive
+```
+
+```
+HTTP/1.1 200 
+Date: Tue, 14 Jul 2026 04:09:06 GMT
+Server: Apache
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: max-age=0, no-cache, no-store, must-revalidate
+Pragma: no-cache
+Expires: Wed, 21 Oct 2015 01:00:00 GMT
+X-Frame-Options: SAMEORIGIN
+Content-Type: application/json;charset=UTF-8
+Referrer-Policy: strict-origin-when-cross-origin
+Access-Control-Allow-Credentials: true
+Content-Length: 8228
+
+{"status":"OK","message":"조회하였습니다.","data":{"rnum":0,"pageSize":10,"pageIndex":1,"tiberoForPageTotalCount":0,"tiberoForPageLimitS":0,"readingMarathonKey":"1493783412","provCode":"F10","provName":"광주","schKey":"0","schName":null,"memberKey":"410789134","readingMarathonTypeCode":"02","readingMarathonTypeName":"목표 거리 설정 마라톤","courseType":null,"contestKeyword":null,"contestName":"[광주광역시교육청] 제21회 빛고을독서마라톤(고등학교)","contestSummary":"[광주광역시교육청] 제21회 빛고을독서마라톤(고등학교)","contestImgUrl":"/service/readingActivitesJoin/readingMarathon/imageUrl?readingMarathonKey=1493783412","regGropCode":"04","regGropName":null,"targetSchGropCode":"03","targetSchGropName":"고등학교","targetGrade":null,"contestStartDate":"2026.03.23","contestEndDate":"2026.11.06","keyword":"독서마라톤","privacyBoundsCode":"03","statusCode":"02","statusName":"승인","progressStatusCode":"02","progressStatusName":"진행중","regMember":"독ㅇㅇ..","memberGrade":null,"memberClass":null,"memberNo":null,"memberName":null,"rejectReason":null,"rejectMember":null,"rejectDate":null,"regDate":"2026.03.19","updateDate":null,"updateMember":null,"maskingYN":null,"imgType":null,"imgKey":null,"userCourseList":null,"readingMarathonJoinKey":null,"marathonCourseList":[{"readingMarathonCourseKey":"1493783731","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"01","courseName":"거북이","completeDistance":"1500","targetPointsInterval":"2499","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"1623","finishYJoinCount":"293","avgPage":"0","myTotalPage":"0","myOneDayRead":"12.93","myCourseYN":"N","dailyLogFinishYN":"N","neisCode":null},{"readingMarathonCourseKey":"1493783732","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"02","courseName":"악어","completeDistance":"2500","targetPointsInterval":"4999","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"1623","finishYJoinCount":"213","avgPage":"0","myTotalPage":"0","myOneDayRead":"21.55","myCourseYN":"N","dailyLogFinishYN":"N","neisCode":null},{"readingMarathonCourseKey":"1493783733","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"03","courseName":"토끼","completeDistance":"5000","targetPointsInterval":"6499","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"1623","finishYJoinCount":"121","avgPage":"0","myTotalPage":"0","myOneDayRead":"43.10","myCourseYN":"N","dailyLogFinishYN":"N","neisCode":null},{"readingMarathonCourseKey":"1493786161","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"04","courseName":"타조","completeDistance":"7500","targetPointsInterval":"10548","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"1623","finishYJoinCount":"75","avgPage":"0","myTotalPage":"0","myOneDayRead":"64.66","myCourseYN":"N","dailyLogFinishYN":"N","neisCode":null},{"readingMarathonCourseKey":"1493786162","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"05","courseName":"사자","completeDistance":"10549","targetPointsInterval":"15822","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"1623","finishYJoinCount":"53","avgPage":"0","myTotalPage":"0","myOneDayRead":"90.94","myCourseYN":"N","dailyLogFinishYN":"N","neisCode":null},{"readingMarathonCourseKey":"1493786163","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"06","courseName":"호랑이","completeDistance":"15823","targetPointsInterval":"21097","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"1623","finishYJoinCount":"29","avgPage":"0","myTotalPage":"0","myOneDayRead":"136.41","myCourseYN":"N","dailyLogFinishYN":"N","neisCode":null},{"readingMarathonCourseKey":"1493786164","readingMarathonKey":"1493783412","courseTypeCode":"COS000","courseTypeName":null,"courseCode":"07","courseName":"월계관","completeDistance":"21098","targetPointsInterval":"50000","memberKey":null,"regMember":null,"regDate":null,"bookKey":null,"provCode":null,"speciesKey":null,"titleInfo":null,"coverUrl":null,"author":null,"publisher":null,"publishYear":null,"isbn":null,"kdcClassCode":null,"page":null,"totalJoinCount":"1623","finishYJoinCount":"16","avgPage":"0","myTotalPage":"0","myOneDayRead":"181.88","myCourseYN":"Y","dailyLogFinishYN":"N","neisCode":null}],"bookList":null,"fileInfo":{"readingMarathonUploadImgKey":"1493783414","readingMarathonKey":"1493783412","filePath":"","originalFileName":"고.png","saveFileName":"43d2a434-b6aa-4e89-986c-66e3248020fb.png","regDate":"2026-03-19 13:56:40"},"readingMarathonCourseKeyList":null,"myJoinMemberKey":null,"teacherMemberKey":null,"orderByField":null,"totalJoinCount":"1624","finishYJoinCount":"0","finishNJoinCount":"1624","deadLineDays":"116","totalPage":"63970","avgPage":"171679.226961","myTotalPage":"430","myJoinYN":"Y","mySchoolYN":"N","myMakeYN":"N","myFinishYN":"N","myJoinDate":"20260613","myJoinStatusCode":"01","myJoinRejectReason":null,"finishApplyDate":null,"finishApplyContent":null,"teacherFinishCheckDate":null,"name":null,"titleInfo":null,"author":null,"bookKey":null,"speciesKey":null,"regYear":null,"regMonth":null,"searchDate":null,"searchText":null,"searchOption":null,"uploadFileDeleteYN":null,"imgKeyNullYN":null,"targetGradeNullYN":null,"readingGroupKey":null,"textLength":"100","includeSpaceYn":"Y","ignoreTotalPageYn":"Y","ignoreTargetDistance":"Y","contestWarning":"아래의 인정 불가 도서 및 일지 기준을 확인해주시기 바랍니다.\r\n\r\n1. 페이지부풀리기\r\n·코스를 달성하기 위해 허위 페이지 입력(예: 200쪽의 도서를 300쪽으로 입력한 경우, 0쪽으로 처리)\r\n·동일 페이지를 계속적으로 허위 입력한 경우\r\n2. 불성실 감상평\r\n·해시태그, 무규칙 한글 자‧모음, 영어 알파벳, 일본어 등의 나열\r\n·해당 도서와 관련 없는 내용 기록(일상, 노래 가사 등), 동일한 감상평 반복 입력, 책제목만 나열하고 그치는 짧은 감상평\r\n․본인의 감상평없이 책의 일부 구절만 작성한 경우\r\n‧글자수 미달(초등·특수학생은 30자이상, 중·고등학생은 100자 이상)\r\n3. 동일도서 반복\r\n동일도서를 반복해서 올리며 특별한 감상평의 변화없이3회 이상, 고의적인 반복 입력은 미인정\r\n4. 금지도서 작성\r\n‧ 정기간행물(과학동아 등), 학습지(참고서), 사전, 학습만화 이외의 만화(웹툰),\r\n 관광안내서, 선정도서, 애니메이션 등 만화원작의 도서, 유튜브 파생도서(흔한남매, 웃소 등) 등의 금지도서 활용\r\n5. 타인의 글 복사,붙여넣기\r\n·인터넷 감상평, 책소개 등의 글을 복사하여 기재한 경우·형제, 자매, 친구 등이 동일한 감상평을 올린 경우 모두 미인정\r\n6. 타인이 작성\r\n․부모, 형제, 친구 등 타인이 대신 참가하였을 경우 미완주 처리"}}
+```
+
+
+```
+GET /schome/service/readingActivitesJoin/readingMarathon/dailyLog/list?readingMarathonKey=1493783412&memberKey=809652233&pageSize=10&pageIndex=1&statusCode=&titleInfo=&memberGrade=&memberClass=&name=&author= HTTP/1.1
+Host: read365.edunet.net
+Cookie: build52=290; external=; LAST_COUNT_DATE=2026-07-14; EDUDOCOOKIE=69dbee2335e796eac53389d45c11d7f91cc689ac15c0f29bc799edff2ee6295bf5dfa09f45d82987770702827cf29c8e453b8f7a3c59a430f85c3493a8d4d7a0a2195c2cbb3a0e8c95c6bc4f2f9b9ce215893fd4f4923ab0e2b0e9b276cf6b7258729ac0c20244e1ab0399f9a7c8b01a436a8c826a2fcf5bfe27b84ac6938e4649a4a51b949a1d3e50a04a0c0cfc4fa6ac141977daa89841ed1378f21740352d3d140ea75ed7b9ccf4c7124c263c4090632323332e395c23bd9259fabea51fa3788484b39bbfe85aadcadbafa4ee095a84d2746697792af037c584692d1607157775b34d615d4f1a8a6388a870a2124d7eb2b0a3c207888460bfa5eccfda71703eeb3be3afd3cc33c517cbdf786c2f3c1f95a004ac9d4398350c913d52ead2c901b321b8ca468f72845f6ab9cd7fdc52463b6c1b5103cd277012e63612fdd6a2b47e4fa9b2c8e71c7da1ef792b7a97a152cd9e8e38f18c77d1a2329ba11108a3758ed32aa0c619fa0b4f280e67b101a2eac198a96eb853cf7756d6eff92f5161551359e97b278ff913b9a64331faa097c778401ab645e04e1008bdcf01b438bf; ua=108fd450965f7efcd5d4dd5b0550dc144e8401f0a9d04cc57fbd0cd5bd24d407cba25d35b3ef8b76b5e0b2ed45445ee586345965a0e6b0ef0f562f395cf2845b7605a9a9fc3e78ea32bf5d8942727bc6753465a5be8d45d71ee22244f536f4aa1c5368628d3f2cd63041a2ea502a3ff53bc76eb438361ff9f5a03e3e43643d5bd9e46bacf0ab38d6e05022f8d3f07dfae7e0b4b8860f47d6954f824ef1a216243b68387d416af19af48927a6fa821a21adbd69299234febebf07608585454ef725d40c7f2568b8f519f0f8810f49e32206fb75a74f26427fcd37d576c3bf6d57df1412c533d35635807e59c3fbb042687b4919e42f7bf7740983c18e9854b6925f20efb5bf4ea06bee9bbdfd06f7db41ba1e98cd7f31b2e9153eea042f9d35c499abfa78564d249371c8f5b839c2783ea4f405d44703d8cf7dd727bdc464d05dfacbe19224c72a96844d6325e9cf4e35af01a8530a9320ebffd13e76d2318c6d40b2e74e646d9c289be14cbb31a5bd1267c35f116ad1239242e413a9cd367e73e767bc330cc2cd17c981c339406c9844ebc42abd0511b8b8b2ea35ba8e2ea4e3572acb014220ee0d54473176ed563361e8938f6b4f1f162b0d8d8616cb48eeb850cd39501fcd65be89f7bd5ef1d9413c4efb0cbcdadfc1cd2131dd297aac665100dc6f88efea460053524c0db121318ee1f75d155c5916551f14b25ca3e944955d48ffe341736061c3502b681dbabeb2673ab936462c44d16bcf6945ace27523773eedab38cacc1a26af3d29b0a3c066; ACSLOG=d1e447b20ca743f8ae29942ac7f6110b; refreshToken=JbmkBd91vPxRtdDfKgRYgsrKqfJUNvbUevCXl6XsHEb2QAMDbmTZ8BKd1EHLnciDVGBVZhxmJHNDpSuEaetp+ueENIubCNUib89dj/JUTao=; at=aae3d8e911bc1d18522fb32042ca8d7dc1bce154c5406bf4a47c8c3f57057d80a24b97ee2fbfb2db8b4b7cb0158a7b618aeecd3797ac877fd4b2c41b54e099bc4d6790b9bccdda00bff790d527c0222aa89304c43c311d2cdd69d0345d7f24759851d4061ddbd8e29b87bd6316090f5942982c921d2bf117090fc6e47ee4730a742c7a8dafe62b508345522e6b990f5aed36a3cb35760bc71a3dbab48ecae5412641ca3e6837f1f8b7a11eee8c826e6a0ca743f8ae29942ac7f6110b81; EDUAUTHTOKEN=7c7d6a7d08d4ded165e294b027f3503eb018fb8fdc3321c977ccd98832bd91ddfa92c4453087be2212c7b7c778a6d1d48dbf3e40a102782002c3bfa3429c6d82ceb3bf0b623f81b9bd0b422622a367d00ca743f8ae29942ac7f6110b; JSESSIONID=F6134898322ED4DBB072100D51605702.read365.edunet.net
+Sec-Ch-Ua-Platform: "Windows"
+Accept-Language: ko-KR,ko;q=0.9
+Sec-Ch-Ua: "Not-A.Brand";v="24", "Chromium";v="146"
+Sec-Ch-Ua-Mobile: ?0
+Schkey: 1000002227
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+Accept: application/json, text/plain, */*
+Userid: junpyokim
+Token: IfkzytEpPbl4UkZAbxpWDXfLh/9jaZQYwEpBo+HmL19y99K20ez2lubRQlNQujQ8fc9ogFJUwzUA0dOUEdlXaUz/y8Mk6xO8AWgGN65zZ9E=
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Referer: https://read365.edunet.net/High/contestMarathonDetail?index=1493783412
+Accept-Encoding: gzip, deflate, br
+Priority: u=1, i
+Connection: keep-alive
+```
+
+```
+HTTP/1.1 200 
+Date: Tue, 14 Jul 2026 04:09:06 GMT
+Server: Apache
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: max-age=0, no-cache, no-store, must-revalidate
+Pragma: no-cache
+Expires: Wed, 21 Oct 2015 01:00:00 GMT
+X-Frame-Options: SAMEORIGIN
+Content-Type: application/json;charset=UTF-8
+Set-Cookie: JSESSIONID=8DB15D2723D261AA8CCB3C7B21CB739D.read365.edunet.net; Path=/; HttpOnly
+Referrer-Policy: strict-origin-when-cross-origin
+Access-Control-Allow-Credentials: true
+Content-Length: 19604
+
+{"status":"OK","message":"목록 정보를 조회하였습니다.","data":{"list":{"totalCount":2,"totalPage":1,"pageIndex":1,"pageSize":10,"data":[{"rnum":1,"pageSize":10,"pageIndex":1,"tiberoForPageTotalCount":0,"tiberoForPageLimitS":0,"certainBookKey":"1674195557","speciesKey":"8004248123","bookKey":"8004425610","bookProvCode":null,"provCode":null,"memberKey":"809652233","readingMarathonKey":"1493783412","pubFormCode":null,"pubFormName":null,"titleInfo":"총, 균, 쇠:무기, 병균, 금속은 인류의 운명을 어떻게 바꿨는가","coverYN":null,"coverUrl":"https://image.aladin.co.kr/product/30192/3/cover500/k142839095_1.jpg","author":"재레드 다이아몬드 지음;김진준 옮김","publisher":"(주)문학사상사","publishYear":"2012","isbn":"9788970127248","classNo":"389","callNo":null,"page":"751","targetPointsInterval":null,"regMember":"김준표","regDate":"2026.06.22","totalJoinCount":null,"finishYJoinCount":null,"avgPage":null,"myTotalPage":"122","statusCodeList":"02","statusNameList":"승인","readingMarathonTitle":null,"dailyLogList":[{"readingMarathonDailyLogKey":"1674195558","readingMarathonJoinKey":"1651421815","readingMarathonKey":"1493783412","schKey":null,"memberKey":"809652233","bookKey":"8004425610","startPage":"0","endPage":"122","readingPage":"122","logTitle":"총, 균, 쇠를 통해 바라본 문명의 발전 원인","logContent":"<p> </p>\n<p class=\"p1\">총, 균, 쇠를 읽으며 인류 문명의 발전 과정을 새로운 시각으로 바라볼 수 있었다. 책은 뉴기니의 정치인 얄리가 던진 질문인 &ldquo;왜 어떤 사회는 발전하고 어떤 사회는 발전하지 못했는가?&ldquo;라는 의문에서 시작한다. 저자는 이러한 차이가 인종의 우열 때문이 아니라 환경과 지리적 조건의 차이에서 비롯되었다고 설명한다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">특히 스페인 정복자들이 잉카 제국을 무너뜨린 사례가 인상 깊었다. 단순히 군사력 때문이 아니라 무기, 문자, 조직력 등 오랜 기간 축적된 여러 요소들이 복합적으로 작용했다는 점을 알 수 있었다. 이를 통해 역사적 사건은 단순한 우연이 아니라 다양한 조건이 함께 작용한 결과라는 사실을 이해하게 되었다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">또한 수렵채집 사회와 농경 사회를 비교하는 내용도 흥미로웠다. 수렵채집인은 필요한 식량을 직접 구하며 생활했지만 농업이 시작되면서 식량 생산량이 증가하였고, 더 많은 사람들을 부양할 수 있게 되었다. 그 결과 인구가 늘어나고 정착 생활이 가능해졌으며, 다양한 직업과 사회 조직이 등장하게 되었다. 이러한 변화가 문명의 발전으로 이어졌다는 점이 인상 깊었다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">하지만 농업이 반드시 모든 면에서 좋은 것만은 아니라는 내용도 기억에 남는다. 농경 사회에서는 식량을 안정적으로 확보할 수 있었지만 노동 시간이 늘어나고 질병이나 영양 문제도 발생할 수 있었다. 그럼에도 더 많은 인구를 유지할 수 있었기 때문에 농업 사회가 점차 확대되었다는 설명이 설득력 있게 느껴졌다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">이번 독서를 통해 문명의 발전은 특정 민족의 능력 차이가 아니라 자연환경과 식량 생산 방식의 차이에서 비롯되었다는 점을 알게 되었다. 앞으로 역사와 사회를 바라볼 때도 단순히 결과만 보는 것이 아니라 그 배경이 되는 환경과 조건을 함께 생각해 보아야겠다고 느꼈다.</p><br>\n\n<p><br></p>","logContentLength":"877","statusCode":"02","statusName":null,"teacherName":"","teacherSchName":null,"teacherMemberKey":null,"teacherCheckDate":null,"teacherCheckContent":null,"regDate":"2026-06-22 08:26:32","updateDate":null,"regMember":"김준표","memberGrade":"2","memberClass":"3","memberNo":"2","certainBookKey":"1674195557","speciesKey":null,"provCode":null,"pubFormCode":null,"pubFormName":null,"titleInfo":null,"author":null,"publisher":null,"publishYear":null,"page":null,"isbn":null,"classNo":null,"callNo":null,"coverYN":null,"coverUrl":null,"totalDailyLogCount":null,"totalCompleteDistance":null,"totalReadingPage":null,"neisCode":"F100000120"}],"teacherMemberKey":null,"readingBookKey":null,"readingKey":null,"readingActivitesTypeCode":null,"neisCode":null},{"rnum":2,"pageSize":10,"pageIndex":1,"tiberoForPageTotalCount":0,"tiberoForPageLimitS":0,"certainBookKey":"1651438085","speciesKey":"8011299044","bookKey":"8011414056","bookProvCode":null,"provCode":null,"memberKey":"809652233","readingMarathonKey":"1493783412","pubFormCode":null,"pubFormName":null,"titleInfo":"Justice","coverYN":null,"coverUrl":"https://image.aladin.co.kr/product/664/77/cover500/0374532508_1.jpg","author":"by Michael J. Sandel","publisher":"Farrar Straus Giroux","publishYear":"2010","isbn":"9780374532505","classNo":"747","callNo":null,"page":"308","targetPointsInterval":null,"regMember":"김준표","regDate":"2026.06.13","totalJoinCount":null,"finishYJoinCount":null,"avgPage":null,"myTotalPage":"308","statusCodeList":"02","statusNameList":"승인","readingMarathonTitle":null,"dailyLogList":[{"readingMarathonDailyLogKey":"1651438086","readingMarathonJoinKey":"1651421815","readingMarathonKey":"1493783412","schKey":null,"memberKey":"809652233","bookKey":"8011414056","startPage":"0","endPage":"150","readingPage":"150","logTitle":"정의란 무엇인가를 통해 생각해 본 정의와 시장의 한계","logContent":"<p> </p>\n<p class=\"p1\">마이클 샌델의 『정의란 무엇인가』를 150페이지까지 읽으며 정의에 대해 다양한 관점에서 생각해 볼 수 있었다. 평소에는 정의가 옳고 그름을 판단하는 단순한 기준이라고 생각했지만, 책에서는 정의를 바라보는 여러 철학적 관점을 소개하며 같은 문제도 사람마다 다르게 판단할 수 있다는 점을 보여주었다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">초반에는 허리케인 이후 생필품 가격을 크게 올린 상인의 사례와 전차 문제를 통해 정의가 무엇인지 질문한다. 많은 사람을 살리기 위해 한 사람을 희생시키는 것이 옳은지에 대한 논쟁을 보며 정의를 단순히 결과만으로 판단하기 어렵다는 사실을 알게 되었다. 또한 사회 전체의 행복을 중요하게 생각하는 공리주의에서는 다수의 행복을 위해 소수의 희생을 정당화할 수 있지만, 이러한 방식이 항상 정의롭다고 볼 수 있는지 의문이 들었다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">이후 자유지상주의에 대한 내용을 읽으며 개인의 자유와 권리를 최대한 보장해야 한다는 주장에 대해 생각해 보았다. 개인이 노력하여 얻은 재산과 능력을 국가가 강제로 재분배하는 것이 정당한지에 대한 논쟁은 현재 사회의 복지 정책과 세금 제도에도 연결된다고 느꼈다. 모든 사람이 자유롭게 선택할 수 있어야 한다는 주장에는 공감했지만, 현실에서는 경제적 환경이나 출발선의 차이가 존재하기 때문에 완전한 자유만으로는 사회 문제를 해결하기 어렵다고 생각했다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">특히 인상 깊었던 부분은 시장 논리와 도덕성에 대한 내용이었다. 대리인을 고용해 군 복무를 대신하게 하거나, 돈을 주고 대리모를 고용하는 사례를 통해 돈으로 거래할 수 있다고 해서 반드시 거래해야 하는 것은 아니라는 점을 강조한다. 그중에서도 대리모 계약에 대한 논쟁이 기억에 남았다. 계약에 동의한 성인들 사이의 자유로운 거래라고 볼 수도 있지만, 다른 한편으로는 인간의 출산 능력과 생명의 탄생을 단순한 상품처럼 취급하는 것이 과연 옳은지 고민하게 되었다. 특히 여성의 출산 능력은 일반적인 노동과 달리 인간의 존엄성과 깊게 연결되어 있기 때문에 시장에서 사고파는 대상이 되어서는 안 된다는 주장에 대해 생각해 볼 수 있었다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">이번 독서를 통해 정의는 단순히 법을 지키거나 다수의 이익을 추구하는 것이 아니라 자유, 행복, 인간의 존엄성, 공동체의 가치 등을 함께 고려해야 한다는 사실을 알게 되었다. 또한 사회의 다양한 문제를 바라볼 때 정답을 찾기보다 여러 관점에서 비판적으로 생각하는 태도가 중요하다는 점을 느꼈다. 앞으로도 사회 문제나 정책을 접할 때 결과만 보는 것이 아니라 그 과정과 도덕적 가치까지 함께 고민해 보아야겠다고 생각했다.</p><br>\n\n<p><br></p>","logContentLength":"1257","statusCode":"02","statusName":null,"teacherName":"","teacherSchName":null,"teacherMemberKey":null,"teacherCheckDate":null,"teacherCheckContent":null,"regDate":"2026-06-13 16:08:56","updateDate":null,"regMember":"김준표","memberGrade":"2","memberClass":"3","memberNo":"2","certainBookKey":"1651438085","speciesKey":null,"provCode":null,"pubFormCode":null,"pubFormName":null,"titleInfo":null,"author":null,"publisher":null,"publishYear":null,"page":null,"isbn":null,"classNo":null,"callNo":null,"coverYN":null,"coverUrl":null,"totalDailyLogCount":null,"totalCompleteDistance":null,"totalReadingPage":null,"neisCode":"F100000120"},{"readingMarathonDailyLogKey":"1653637002","readingMarathonJoinKey":"1651421815","readingMarathonKey":"1493783412","schKey":null,"memberKey":"809652233","bookKey":"8011414056","startPage":"150","endPage":"186","readingPage":"36","logTitle":"칸트의 도덕 철학을 통해 생각해 본 올바른 행동의 기준","logContent":"<p data-start=\"224\" data-end=\"390\">정의란 무엇인가 150페이지부터 186페이지까지를 읽으며 칸트의 도덕 철학에 대해 배울 수 있었다. 칸트는 어떤 행동의 결과보다 행동의 동기와 의도가 더 중요하다고 주장하였다. 같은 행동이라도 자신의 이익을 위해 한 행동과 도덕적 의무를 다하기 위해 한 행동은 다르게 평가되어야 한다고 보았다.</p>\n<p data-start=\"392\" data-end=\"548\">특히 의무와 경향의 차이가 인상 깊었다. 경향에 따른 행동은 자신의 감정이나 욕구, 이익에 의해 이루어지는 행동이며, 의무에 따른 행동은 개인적인 이익과 관계없이 옳다고 생각하기 때문에 실천하는 행동이다. 칸트는 진정한 도덕적 가치는 의무에 따라 행동할 때 나타난다고 설명하였다.</p>\n<p data-start=\"550\" data-end=\"700\">또한 자율과 타율의 개념도 흥미로웠다. 자율은 자신의 이성에 따라 스스로 도덕 법칙을 세우고 실천하는 것이고, 타율은 외부의 보상이나 처벌, 욕망에 의해 행동하는 것이다. 칸트는 인간이 자유로운 존재가 되기 위해서는 타율이 아닌 자율에 따라 행동해야 한다고 주장하였다.</p>\n<p data-start=\"702\" data-end=\"891\">이번 독서를 통해 단순히 좋은 결과를 만드는 것이 아니라 왜 그런 행동을 했는지에 대해서도 생각해 보게 되었다. 평소에는 결과만 중요하다고 생각한 적이 많았지만, 칸트의 관점을 접하면서 올바른 동기와 의무 의식 역시 중요한 가치라는 점을 깨달았다. 앞으로도 행동의 결과뿐 아니라 행동의 이유와 목적에 대해서도 깊이 고민해야겠다고 생각했다.</p>","logContentLength":"665","statusCode":"02","statusName":null,"teacherName":"","teacherSchName":null,"teacherMemberKey":null,"teacherCheckDate":null,"teacherCheckContent":null,"regDate":"2026-06-14 15:41:33","updateDate":null,"regMember":"김준표","memberGrade":"2","memberClass":"3","memberNo":"2","certainBookKey":"1651438085","speciesKey":null,"provCode":null,"pubFormCode":null,"pubFormName":null,"titleInfo":null,"author":null,"publisher":null,"publishYear":null,"page":null,"isbn":null,"classNo":null,"callNo":null,"coverYN":null,"coverUrl":null,"totalDailyLogCount":null,"totalCompleteDistance":null,"totalReadingPage":null,"neisCode":"F100000120"},{"readingMarathonDailyLogKey":"1659162261","readingMarathonJoinKey":"1651421815","readingMarathonKey":"1493783412","schKey":null,"memberKey":"809652233","bookKey":"8011414056","startPage":"186","endPage":"210","readingPage":"24","logTitle":"칸트의 도덕 철학과 인간의 존엄성에 대한 고찰","logContent":"<p> </p>\n<p class=\"p1\">정의란 무엇인가&nbsp;186페이지부터 210페이지까지를 읽으며 칸트의 도덕 철학에 대해 더욱 깊이 이해할 수 있었다. 이번 부분에서는 인간의 행동을 판단할 때 결과보다 동기와 의무가 중요하다는 칸트의 주장이 다양한 사례를 통해 설명되었다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">특히 거짓말에 대한 칸트의 관점이 인상 깊었다. 칸트는 거짓말이 좋은 결과를 가져오더라도 도덕적으로 옳지 않다고 보았다. 이는 결과에 따라 행동을 판단하는 공리주의와 큰 차이가 있었다. 처음에는 다소 극단적이라고 생각했지만, 만약 모든 사람이 자신의 이익을 위해 거짓말을 한다면 사회의 신뢰가 무너질 수 있다는 점에서 일리가 있다고 느꼈다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">또한 인간을 단순한 수단이 아닌 목적 그 자체로 존중해야 한다는 주장도 기억에 남았다. 책에서는 성관계와 관련된 사례를 통해 상대방을 자신의 욕망을 충족시키기 위한 수단으로만 대하는 것이 왜 문제가 되는지 설명하였다. 이를 통해 인간의 존엄성과 자유의 중요성을 다시 생각해 볼 수 있었다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">이번 범위에서는 과학이 도덕의 기준을 결정할 수 없다는 내용도 다루었다. 과학은 세상이 어떻게 움직이는지를 설명할 수는 있지만, 인간이 어떻게 살아야 하는지에 대한 답을 주지는 못한다는 점이 흥미로웠다. 또한 인간은 욕망에 따라 행동하는 존재이면서도 이성을 통해 스스로 선택할 수 있는 자유로운 존재라는 칸트의 주장도 인상 깊었다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">이번 독서를 통해 도덕은 단순히 결과만으로 판단할 수 있는 문제가 아니라 인간의 자유와 존엄성, 그리고 의무와 책임에 대한 깊은 고민이 필요하다는 사실을 알게 되었다. 앞으로도 어떤 행동이 옳은지 판단할 때 결과뿐만 아니라 그 행동의 동기와 원칙도 함께 고려해야겠다고 생각했다.</p><br>\n\n<p><br></p>","logContentLength":"841","statusCode":"02","statusName":null,"teacherName":"","teacherSchName":null,"teacherMemberKey":null,"teacherCheckDate":null,"teacherCheckContent":null,"regDate":"2026-06-15 23:07:59","updateDate":null,"regMember":"김준표","memberGrade":"2","memberClass":"3","memberNo":"2","certainBookKey":"1651438085","speciesKey":null,"provCode":null,"pubFormCode":null,"pubFormName":null,"titleInfo":null,"author":null,"publisher":null,"publishYear":null,"page":null,"isbn":null,"classNo":null,"callNo":null,"coverYN":null,"coverUrl":null,"totalDailyLogCount":null,"totalCompleteDistance":null,"totalReadingPage":null,"neisCode":"F100000120"},{"readingMarathonDailyLogKey":"1661457331","readingMarathonJoinKey":"1651421815","readingMarathonKey":"1493783412","schKey":null,"memberKey":"809652233","bookKey":"8011414056","startPage":"210","endPage":"308","readingPage":"98","logTitle":"존 롤스의 정의론과 공정한 사회에 대한 고민","logContent":"<p> </p>\n<p class=\"p1\">정의란 무엇인가&nbsp;210페이지부터 308페이지까지를 읽으며 존 롤스의 정의론에 대해 배울 수 있었다. 롤스는 정의로운 사회를 만들기 위해서는 개인의 능력이나 사회적 지위에 따라 결정되는 것이 아니라 모든 사람이 공정한 조건에서 사회 제도를 선택해야 한다고 주장하였다. 이를 설명하기 위해 &lsquo;무지의 베일&rsquo;이라는 개념을 제시하였는데, 이는 자신이 어떤 가정에서 태어날지, 어떤 재능을 가질지 모르는 상태에서 사회의 규칙을 정한다면 더 공정한 선택을 하게 된다는 내용이었다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">특히 롤스가 제시한 정의의 두 원칙이 인상 깊었다. 첫 번째 원칙은 모든 사람이 동등한 기본적 자유를 누려야 한다는 것이고, 두 번째 원칙은 사회적&middot;경제적 불평등이 존재하더라도 그것이 가장 불리한 사람들에게도 도움이 될 때 정당화될 수 있다는 것이다. 이를 통해 단순히 모두를 똑같이 대하는 것이 아니라 사회적 약자에게도 기회를 보장하는 것이 중요하다는 점을 알게 되었다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">또한 소수집단 우대정책에 대한 논쟁도 흥미로웠다. 대학 입학이나 취업 과정에서 역사적으로 차별받아 온 집단에게 일정한 혜택을 주는 것이 공정한지에 대해 다양한 의견이 제시되었다. 찬성 측은 사회적 불평등을 완화할 수 있다고 주장하였고, 반대 측은 개인의 능력보다 집단의 특성을 기준으로 평가하는 것은 또 다른 차별이 될 수 있다고 주장하였다.</p>\n<p class=\"p1\"><br></p>\n<p class=\"p1\">책에서 소개된 골프장 회원권과 케이시 마틴 사례 역시 기억에 남았다. 케이시 마틴은 장애로 인해 걷기 어려웠지만 골프 경기에서 카트를 사용할 수 있게 해 달라고 요구하였다. 이에 대해 경기의 본질이 무엇인지, 그리고 공정성이 무엇인지에 대한 논쟁이 이어졌다. 이 사례를 통해 단순히 모든 사람에게 같은 규칙을 적용하는 것이 항상 공정한 것은 아니라는 점을 생각하게 되었다.</p>\n<p class=\"p2\"><br></p>\n<p class=\"p2\">이번 독서를 통해 정의는 단순한 평등이 아니라 공정한 기회와 사회적 약자에 대한 배려까지 포함하는 개념이라는 것을 알게 되었다. 또한 사회 문제를 바라볼 때 개인의 노력만이 아니라 출발선의 차이와 사회 구조 역시 함께 고려해야 한다는 점을 깨달았다. 앞으로도 정의로운 사회가 무엇인지 다양한 관점에서 생각해 보고 싶다.</p><br>\n\n<p><br></p>","logContentLength":"1066","statusCode":"02","statusName":null,"teacherName":"","teacherSchName":null,"teacherMemberKey":null,"teacherCheckDate":null,"teacherCheckContent":null,"regDate":"2026-06-16 23:27:47","updateDate":null,"regMember":"김준표","memberGrade":"2","memberClass":"3","memberNo":"2","certainBookKey":"1651438085","speciesKey":null,"provCode":null,"pubFormCode":null,"pubFormName":null,"titleInfo":null,"author":null,"publisher":null,"publishYear":null,"page":null,"isbn":null,"classNo":null,"callNo":null,"coverYN":null,"coverUrl":null,"totalDailyLogCount":null,"totalCompleteDistance":null,"totalReadingPage":null,"neisCode":"F100000120"}],"teacherMemberKey":null,"readingBookKey":null,"readingKey":null,"readingActivitesTypeCode":null,"neisCode":null}]}}}
+```
+
+ -- check status
+
+```
+GET /schome/auth/member/checkToken?id=junpyokim HTTP/1.1
+Host: read365.edunet.net
+Cookie: build52=290; external=; LAST_COUNT_DATE=2026-07-14; EDUDOCOOKIE=69dbee2335e796eac53389d45c11d7f91cc689ac15c0f29bc799edff2ee6295bf5dfa09f45d82987770702827cf29c8e453b8f7a3c59a430f85c3493a8d4d7a0a2195c2cbb3a0e8c95c6bc4f2f9b9ce215893fd4f4923ab0e2b0e9b276cf6b7258729ac0c20244e1ab0399f9a7c8b01a436a8c826a2fcf5bfe27b84ac6938e4649a4a51b949a1d3e50a04a0c0cfc4fa6ac141977daa89841ed1378f21740352d3d140ea75ed7b9ccf4c7124c263c4090632323332e395c23bd9259fabea51fa3788484b39bbfe85aadcadbafa4ee095a84d2746697792af037c584692d1607157775b34d615d4f1a8a6388a870a2124d7eb2b0a3c207888460bfa5eccfda71703eeb3be3afd3cc33c517cbdf786c2f3c1f95a004ac9d4398350c913d52ead2c901b321b8ca468f72845f6ab9cd7fdc52463b6c1b5103cd277012e63612fdd6a2b47e4fa9b2c8e71c7da1ef792b7a97a152cd9e8e38f18c77d1a2329ba11108a3758ed32aa0c619fa0b4f280e67b101a2eac198a96eb853cf7756d6eff92f5161551359e97b278ff913b9a64331faa097c778401ab645e04e1008bdcf01b438bf; ua=108fd450965f7efcd5d4dd5b0550dc144e8401f0a9d04cc57fbd0cd5bd24d407cba25d35b3ef8b76b5e0b2ed45445ee586345965a0e6b0ef0f562f395cf2845b7605a9a9fc3e78ea32bf5d8942727bc6753465a5be8d45d71ee22244f536f4aa1c5368628d3f2cd63041a2ea502a3ff53bc76eb438361ff9f5a03e3e43643d5bd9e46bacf0ab38d6e05022f8d3f07dfae7e0b4b8860f47d6954f824ef1a216243b68387d416af19af48927a6fa821a21adbd69299234febebf07608585454ef725d40c7f2568b8f519f0f8810f49e32206fb75a74f26427fcd37d576c3bf6d57df1412c533d35635807e59c3fbb042687b4919e42f7bf7740983c18e9854b6925f20efb5bf4ea06bee9bbdfd06f7db41ba1e98cd7f31b2e9153eea042f9d35c499abfa78564d249371c8f5b839c2783ea4f405d44703d8cf7dd727bdc464d05dfacbe19224c72a96844d6325e9cf4e35af01a8530a9320ebffd13e76d2318c6d40b2e74e646d9c289be14cbb31a5bd1267c35f116ad1239242e413a9cd367e73e767bc330cc2cd17c981c339406c9844ebc42abd0511b8b8b2ea35ba8e2ea4e3572acb014220ee0d54473176ed563361e8938f6b4f1f162b0d8d8616cb48eeb850cd39501fcd65be89f7bd5ef1d9413c4efb0cbcdadfc1cd2131dd297aac665100dc6f88efea460053524c0db121318ee1f75d155c5916551f14b25ca3e944955d48ffe341736061c3502b681dbabeb2673ab936462c44d16bcf6945ace27523773eedab38cacc1a26af3d29b0a3c066; ACSLOG=d1e447b20ca743f8ae29942ac7f6110b; refreshToken=JbmkBd91vPxRtdDfKgRYgsrKqfJUNvbUevCXl6XsHEb2QAMDbmTZ8BKd1EHLnciDVGBVZhxmJHNDpSuEaetp+ueENIubCNUib89dj/JUTao=; at=aae3d8e911bc1d18522fb32042ca8d7dc1bce154c5406bf4a47c8c3f57057d80a24b97ee2fbfb2db8b4b7cb0158a7b618aeecd3797ac877fd4b2c41b54e099bc4d6790b9bccdda00bff790d527c0222aa89304c43c311d2cdd69d0345d7f24759851d4061ddbd8e29b87bd6316090f5942982c921d2bf117090fc6e47ee4730a742c7a8dafe62b508345522e6b990f5aed36a3cb35760bc71a3dbab48ecae5412641ca3e6837f1f8b7a11eee8c826e6a0ca743f8ae29942ac7f6110b81; EDUAUTHTOKEN=7c7d6a7d08d4ded165e294b027f3503eb018fb8fdc3321c977ccd98832bd91ddfa92c4453087be2212c7b7c778a6d1d48dbf3e40a102782002c3bfa3429c6d82ceb3bf0b623f81b9bd0b422622a367d00ca743f8ae29942ac7f6110b; JSESSIONID=CA2CCA280D2F357555989182DCFDECF7.read365.edunet.net
+Sec-Ch-Ua-Platform: "Windows"
+Accept-Language: ko-KR,ko;q=0.9
+Sec-Ch-Ua: "Not-A.Brand";v="24", "Chromium";v="146"
+Sec-Ch-Ua-Mobile: ?0
+Schkey: 1000002227
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36
+Accept: application/json, text/plain, */*
+Userid: junpyokim
+Token: IfkzytEpPbl4UkZAbxpWDXfLh/9jaZQYwEpBo+HmL19y99K20ez2lubRQlNQujQ8fc9ogFJUwzUA0dOUEdlXaUz/y8Mk6xO8AWgGN65zZ9E=
+Sec-Fetch-Site: same-origin
+Sec-Fetch-Mode: cors
+Sec-Fetch-Dest: empty
+Referer: https://read365.edunet.net/High/contestMarathonDetail?index=1493783412
+Accept-Encoding: gzip, deflate, br
+Priority: u=1, i
+Connection: keep-alive
+```
+
+```
+HTTP/1.1 200 
+Date: Tue, 14 Jul 2026 04:11:19 GMT
+Server: Apache
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Cache-Control: max-age=0, no-cache, no-store, must-revalidate
+Pragma: no-cache
+Expires: Wed, 21 Oct 2015 01:00:00 GMT
+X-Frame-Options: SAMEORIGIN
+Content-Type: application/json;charset=UTF-8
+Set-Cookie: JSESSIONID=4D3C92443A760474DAA6E02F3630FB97.read365.edunet.net; Path=/; HttpOnly
+Referrer-Policy: strict-origin-when-cross-origin
+Access-Control-Allow-Credentials: true
+Content-Length: 70
+
+{"status":"OK","message":"사용자 로그온 존재 체크","data":1}
+```

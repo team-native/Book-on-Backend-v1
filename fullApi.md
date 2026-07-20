@@ -43,8 +43,18 @@
 | 인증 | 불필요 |
 | params | 없음 |
 | request body | 없음 |
-| request headers | 없음 |
-| status | 200 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| 없음 | 없음 |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
 
 Example response:
 
@@ -64,10 +74,35 @@ Example response:
 |---|---|
 | 인증 | 불필요 |
 | params | 없음 |
-| request headers | `Content-Type: application/json` |
-| status | 201, 422, 409 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Content-Type | application/json |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 201 | 생성 성공 |
+| 422 | 요청 본문 검증 실패 |
+| 409 | 요청 충돌 |
 
 Request body:
+
+```json
+{
+  "email": "string",
+  "name": "string",
+  "department": "string",
+  "gender": "string",
+  "password": "string",
+  "passwordConfirm": "string"
+}
+```
+
+Example request body:
 
 ```json
 {
@@ -114,10 +149,31 @@ Example response:
 |---|---|
 | 인증 | 불필요 |
 | params | 없음 |
-| request headers | `Content-Type: application/json` |
-| status | 200, 422, 401 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Content-Type | application/json |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 422 | 요청 본문 검증 실패 |
+| 401 | 인증 실패 |
 
 Request body:
+
+```json
+{
+  "loginId": "string",
+  "password": "string"
+}
+```
+
+Example request body:
 
 ```json
 {
@@ -159,10 +215,33 @@ read365 개인 계정 로그인 후 세션 저장.
 |---|---|
 | 인증 | 필요 |
 | params | 없음 |
-| request headers | `Authorization: Bearer <accessToken>`, `Content-Type: application/json` |
-| status | 200, 401, 422, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+| Content-Type | application/json |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 401 | 인증 실패 |
+| 422 | 요청 본문 검증 실패 |
+| 502 | 외부 서비스 연동 오류 |
 
 Request body:
+
+```json
+{
+  "id": "string",
+  "password": "string"
+}
+```
+
+Example request body:
 
 ```json
 {
@@ -207,10 +286,30 @@ Example response:
 |---|---|
 | 인증 | 불필요 |
 | params | 없음 |
-| request headers | `Content-Type: application/json` |
-| status | 200, 422, 404 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Content-Type | application/json |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 422 | 요청 본문 검증 실패 |
+| 404 | 리소스 없음 |
 
 Request body:
+
+```json
+{
+  "email": "string"
+}
+```
+
+Example request body:
 
 ```json
 {
@@ -246,10 +345,33 @@ Example response:
 |---|---|
 | 인증 | 불필요 |
 | params | 없음 |
-| request headers | `Content-Type: application/json` |
-| status | 200, 422, 401 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Content-Type | application/json |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 422 | 요청 본문 검증 실패 |
+| 401 | 인증 실패 |
 
 Request body:
+
+```json
+{
+  "email": "string",
+  "verificationCode": "string",
+  "newPassword": "string",
+  "newPasswordConfirm": "string"
+}
+```
+
+Example request body:
 
 ```json
 {
@@ -290,8 +412,20 @@ Example response:
 | 인증 | 불필요 |
 | query params | `page` 기본 1, `size` 기본 20 최대 100, `sort` 기본 `POPULAR` 허용 `POPULAR`, `NEW`, `category` 선택 |
 | request body | 없음 |
-| request headers | 없음 |
-| status | 200, 400, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| 없음 | 없음 |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example request:
 
@@ -352,8 +486,21 @@ Example response:
 | 인증 | 불필요 |
 | query params | `keyword` 선택, `libraryNumber` 선택, `page` 기본 1, `size` 기본 20 최대 100 |
 | request body | 없음 |
-| request headers | 없음 |
-| status | 200, 422, 400, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| 없음 | 없음 |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 422 | 요청 본문 검증 실패 |
+| 400 | 잘못된 요청 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example request:
 
@@ -413,8 +560,18 @@ Example response:
 | 인증 | 불필요 |
 | params | 없음 |
 | request body | 없음 |
-| request headers | 없음 |
-| status | 200 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| 없음 | 없음 |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
 
 Example response:
 
@@ -446,8 +603,20 @@ Example response:
 | 인증 | 불필요 |
 | query params | `page` 기본 1, `size` 기본 20 최대 100 |
 | request body | 없음 |
-| request headers | 없음 |
-| status | 200, 400, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| 없음 | 없음 |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example response:
 
@@ -484,8 +653,19 @@ Example response:
 | 인증 | 불필요 |
 | params | 없음 |
 | request body | 없음 |
-| request headers | 없음 |
-| status | 200, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| 없음 | 없음 |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example response:
 
@@ -528,8 +708,22 @@ Example response:
 | 인증 | 선택 |
 | path params | `bookId`: 양의 정수 |
 | request body | 없음 |
-| request headers | 선택: `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401, 404, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> (선택) |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
+| 404 | 리소스 없음 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example response:
 
@@ -577,8 +771,22 @@ Example response:
 | 인증 | 필요 |
 | path params | `bookId`: 양의 정수 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 201, 400, 401, 404, 409 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 201 | 생성 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
+| 404 | 리소스 없음 |
+| 409 | 요청 충돌 |
 
 Example response:
 
@@ -611,8 +819,20 @@ Example response:
 | 인증 | 필요 |
 | path params | `bookId`: 양의 정수 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
 
 Example response:
 
@@ -642,10 +862,34 @@ Example response:
 |---|---|
 | 인증 | 필요 |
 | params | 없음 |
-| request headers | `Authorization: Bearer <accessToken>`, `Content-Type: application/json` |
-| status | 200, 400, 401, 404, 409, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+| Content-Type | application/json |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
+| 404 | 리소스 없음 |
+| 409 | 요청 충돌 |
+| 502 | 외부 서비스 연동 오류 |
 
 Request body:
+
+```json
+{
+  "bookId": "int"
+}
+```
+
+Example request body:
 
 ```json
 {
@@ -690,8 +934,22 @@ Example response:
 | 인증 | 필요 |
 | path params | `loanId`: 양의 정수 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401, 404, 409 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
+| 404 | 리소스 없음 |
+| 409 | 요청 충돌 |
 
 Example response:
 
@@ -728,8 +986,19 @@ Example response:
 | 인증 | 필요 |
 | params | 없음 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 401 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 401 | 인증 실패 |
 
 Example response:
 
@@ -780,8 +1049,19 @@ Example response:
 | 인증 | 필요 |
 | params | 없음 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 401 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 401 | 인증 실패 |
 
 Example response:
 
@@ -818,8 +1098,20 @@ Example response:
 | 인증 | 필요 |
 | query params | `page` 기본 1, `size` 기본 20 최대 100, `status` 기본 `ALL` 허용 `ALL`, `RETURNED`, `OVERDUE`, `BORROWED` |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
 
 Example response:
 
@@ -867,8 +1159,20 @@ Example response:
 | 인증 | 필요 |
 | query params | `page` 기본 1, `size` 기본 20 최대 100 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
 
 Example response:
 
@@ -914,10 +1218,32 @@ Example response:
 |---|---|
 | 인증 | 필요 |
 | params | 없음 |
-| request headers | `Authorization: Bearer <accessToken>`, `Content-Type: application/json` |
-| status | 200, 400, 401 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+| Content-Type | application/json |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
 
 Request body:
+
+```json
+{
+  "dueDateReminder": "boolean",
+  "newBookReminder": "boolean"
+}
+```
+
+Example request body:
 
 ```json
 {
@@ -956,8 +1282,20 @@ read365 독서마라톤 진행 정보 조회.
 | 인증 | 필요 |
 | params | 없음 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 401, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 401 | 인증 실패 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example response:
 
@@ -1026,8 +1364,20 @@ read365 내 정보 조회.
 | 인증 | 필요 |
 | params | 없음 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 401, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 401 | 인증 실패 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example response:
 
@@ -1058,8 +1408,19 @@ Example response:
 | 인증 | 불필요 |
 | query params | `page` 기본 1, `size` 기본 10 최대 100 |
 | request body | 없음 |
-| request headers | 없음 |
-| status | 200, 400 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| 없음 | 없음 |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
 
 Example response:
 
@@ -1098,8 +1459,19 @@ Example response:
 | 인증 | 불필요 |
 | query params | `year` 필수, `limit` 필수 최대 100 |
 | request body | 없음 |
-| request headers | 없음 |
-| status | 200, 400 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| 없음 | 없음 |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
 
 Example request:
 
@@ -1146,8 +1518,20 @@ Example response:
 | 인증 | 불필요 |
 | query params | `limit` 기본 5 최대 20 |
 | request body | 없음 |
-| request headers | 없음 |
-| status | 200, 400, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| 없음 | 없음 |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example response:
 
@@ -1208,8 +1592,20 @@ DLS 반납 예정일 정보 조회. `Book-on-DLS-v1`의 `GET /returnDate`를 호
 | 인증 | 필요 |
 | params | 없음 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 401, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 401 | 인증 실패 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example response:
 
@@ -1240,8 +1636,21 @@ DLS 학생 검색.
 | 인증 | 필요 |
 | query params | `name` 필수 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example request:
 
@@ -1285,8 +1694,21 @@ DLS 현재 대출 목록 조회.
 | 인증 | 필요 |
 | query params | `user_key` 필수, `user_no` 필수 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example request:
 
@@ -1333,8 +1755,21 @@ DLS 등록번호 기반 도서 정보 조회.
 | 인증 | 필요 |
 | query params | `reg_nos` 필수. 여러 값은 DLS 프록시가 받는 문자열 그대로 전달 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example request:
 
@@ -1386,8 +1821,21 @@ DLS 대출 이력 조회.
 | 인증 | 필요 |
 | query params | `user_key` 필수, `start_date` 선택, `end_date` 선택. 날짜 형식은 DLSClient 기준 `YYYY-MM-DD` |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example request:
 
@@ -1431,8 +1879,21 @@ DLS 대출/반납 실행 요청. `Book-on-DLS-v1`은 `reg_no`, `user_key`로 `re
 | 인증 | 필요 |
 | query params | `reg_no` 필수, `user_key` 필수 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example request:
 
@@ -1470,8 +1931,21 @@ DLS 원본 도서 검색.
 | 인증 | 필요 |
 | query params | `query` 필수 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example request:
 
@@ -1519,8 +1993,21 @@ DLS 대출 연장.
 | 인증 | 필요 |
 | query params | `user_key` 필수, `loan_key` 필수 |
 | request body | 없음 |
-| request headers | `Authorization: Bearer <accessToken>` |
-| status | 200, 400, 401, 502 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | desc |
+|---:|---|
+| 200 | 성공 |
+| 400 | 잘못된 요청 |
+| 401 | 인증 실패 |
+| 502 | 외부 서비스 연동 오류 |
 
 Example request:
 

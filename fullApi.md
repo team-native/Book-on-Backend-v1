@@ -5,6 +5,7 @@
 - Base URL: 서버 실행 환경 기준. 기본 포트는 `PORT` 미설정 시 `3000`.
 - Content-Type: JSON body가 있는 요청은 `Content-Type: application/json`.
 - 인증 헤더: 인증 필요 API는 `Authorization: Bearer <accessToken>`.
+- Status codes 테이블의 `message`는 실제 응답 JSON의 `message`에 담기는 값이다.
 - 성공 응답 envelope:
 
 ```json
@@ -52,9 +53,9 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
+| 200 | no message (`{ "status": "ok" }`) |
 
 Example response:
 
@@ -83,11 +84,11 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 201 | 생성 성공 |
-| 422 | 요청 본문 검증 실패 |
-| 409 | 요청 충돌 |
+| 201 | 회원가입 성공 |
+| 409 | 이미 사용 중인 이메일입니다. |
+| 422 | 필수 입력값을 모두 입력해 주세요. / 올바른 이메일을 입력해 주세요. / 학교 이메일(@gsm.hs.kr)만 사용할 수 있습니다. / 비밀번호는 영문과 특수문자(!@#$%^&?~)만 사용하여 6~15자로 입력해야 합니다. / 비밀번호 확인이 일치하지 않습니다. / 성별 값이 올바르지 않습니다. |
 
 Request body:
 
@@ -158,11 +159,11 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 422 | 요청 본문 검증 실패 |
-| 401 | 인증 실패 |
+| 200 | 로그인 성공 |
+| 401 | 아이디 또는 비밀번호가 올바르지 않습니다. |
+| 422 | 아이디와 비밀번호를 모두 입력해 주세요. |
 
 Request body:
 
@@ -225,12 +226,12 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 401 | 인증 실패 |
-| 422 | 요청 본문 검증 실패 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | read365 개인 계정 로그인에 성공했습니다. |
+| 401 | 로그인이 필요합니다. / read365 아이디 또는 비밀번호가 올바르지 않습니다. |
+| 422 | read365 아이디와 비밀번호를 모두 입력해 주세요. |
+| 502 | read365 응답을 해석하지 못했습니다. / read365 로그인 서버에 연결하지 못했습니다. / read365 초기 페이지를 불러오지 못했습니다. / read365 세션 쿠키를 받지 못했습니다. |
 
 Request body:
 
@@ -255,7 +256,7 @@ Example response:
 ```json
 {
   "errorCode": 0,
-  "message": "read365 개인 계정 로그인 성공",
+  "message": "read365 개인 계정 로그인에 성공했습니다.",
   "data": {
     "read365Id": "read365-id",
     "cookie": "JSESSIONID=...",
@@ -295,11 +296,11 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 422 | 요청 본문 검증 실패 |
-| 404 | 리소스 없음 |
+| 200 | 비밀번호 재설정 인증 메일을 발송했습니다. |
+| 404 | 가입된 이메일을 찾을 수 없습니다. |
+| 422 | 올바른 이메일을 입력해 주세요. |
 
 Request body:
 
@@ -322,7 +323,7 @@ Example response:
 ```json
 {
   "errorCode": 0,
-  "message": "비밀번호 재설정 인증 메일 발송",
+  "message": "비밀번호 재설정 인증 메일을 발송했습니다.",
   "data": {
     "email": "student@gsm.hs.kr",
     "expiresIn": 300
@@ -354,11 +355,11 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 422 | 요청 본문 검증 실패 |
-| 401 | 인증 실패 |
+| 200 | 비밀번호가 변경되었습니다. |
+| 401 | 인증 코드가 올바르지 않거나 만료되었습니다. |
+| 422 | 필수 입력값을 모두 입력해 주세요. / 비밀번호는 영문과 특수문자(!@#$%^&?~)만 사용하여 6~15자로 입력해야 합니다. / 비밀번호 확인이 일치하지 않습니다. |
 
 Request body:
 
@@ -387,7 +388,7 @@ Example response:
 ```json
 {
   "errorCode": 0,
-  "message": "비밀번호 변경 성공",
+  "message": "비밀번호가 변경되었습니다.",
   "data": {
     "email": "student@gsm.hs.kr"
   }
@@ -421,11 +422,11 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | 도서 목록 조회 성공 |
+| 400 | 정렬 값이 올바르지 않습니다. / 도서 카테고리가 올바르지 않습니다. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example request:
 
@@ -495,12 +496,12 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 422 | 요청 본문 검증 실패 |
-| 400 | 잘못된 요청 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | 도서 검색 성공 |
+| 400 | undefined |
+| 422 | 책 제목 또는 도서관 번호 중 하나 이상을 입력해 주세요. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example request:
 
@@ -569,9 +570,9 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
+| 200 | 도서 카테고리 목록 조회 성공 |
 
 Example response:
 
@@ -612,11 +613,11 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | 신간 도서 목록 조회 성공 |
+| 400 | undefined |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example response:
 
@@ -662,10 +663,10 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | 오늘의 책 추천 조회 성공 |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example response:
 
@@ -717,13 +718,13 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
-| 404 | 리소스 없음 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | 도서 상세 조회 성공 |
+| 400 | 도서 ID가 올바르지 않습니다. |
+| 401 | 인증이 필요합니다. |
+| 404 | 도서를 찾을 수 없습니다. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example response:
 
@@ -780,20 +781,20 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 201 | 생성 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
-| 404 | 리소스 없음 |
-| 409 | 요청 충돌 |
+| 201 | 관심 도서로 등록되었습니다. |
+| 400 | 도서 ID가 올바르지 않습니다. |
+| 401 | 인증이 필요합니다. |
+| 404 | 도서를 찾을 수 없습니다. |
+| 409 | 이미 관심 도서로 등록된 책입니다. |
 
 Example response:
 
 ```json
 {
   "errorCode": 0,
-  "message": "관심 도서 등록 성공",
+  "message": "관심 도서로 등록되었습니다.",
   "data": {
     "bookId": 123,
     "favorite": true
@@ -828,18 +829,18 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
+| 200 | 관심 도서 등록이 해제되었습니다. |
+| 400 | 도서 ID가 올바르지 않습니다. |
+| 401 | 인증이 필요합니다. |
 
 Example response:
 
 ```json
 {
   "errorCode": 0,
-  "message": "관심 도서 등록 해제 성공",
+  "message": "관심 도서 등록이 해제되었습니다.",
   "data": {
     "bookId": 123,
     "favorite": false
@@ -872,14 +873,14 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
-| 404 | 리소스 없음 |
-| 409 | 요청 충돌 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | 대출 신청이 완료되었습니다. |
+| 400 | 도서 ID가 올바르지 않습니다. |
+| 401 | 인증이 필요합니다. |
+| 404 | 도서를 찾을 수 없습니다. |
+| 409 | 현재 대출 가능한 재고가 없습니다. / 이미 대출 중인 도서입니다. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Request body:
 
@@ -902,7 +903,7 @@ Example response:
 ```json
 {
   "errorCode": 0,
-  "message": "대출 신청 완료",
+  "message": "대출 신청이 완료되었습니다.",
   "data": {
     "loanId": 10,
     "bookId": 123,
@@ -943,20 +944,20 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
-| 404 | 리소스 없음 |
-| 409 | 요청 충돌 |
+| 200 | 대출 기간이 연장되었습니다. |
+| 400 | 대출 ID가 올바르지 않습니다. |
+| 401 | 인증이 필요합니다. |
+| 404 | 대출 정보를 찾을 수 없습니다. |
+| 409 | 이미 연장한 대출입니다. / 연체 중인 도서는 연장할 수 없습니다. / 현재 대출 중인 도서만 연장할 수 있습니다. |
 
 Example response:
 
 ```json
 {
   "errorCode": 0,
-  "message": "대출 기간 연장 성공",
+  "message": "대출 기간이 연장되었습니다.",
   "data": {
     "loanId": 10,
     "previousDueDate": "2026-08-03",
@@ -995,10 +996,10 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 401 | 인증 실패 |
+| 200 | 마이페이지 조회 성공 |
+| 401 | 인증이 필요합니다. |
 
 Example response:
 
@@ -1058,10 +1059,10 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 401 | 인증 실패 |
+| 200 | 현재 대출 목록 조회 성공 |
+| 401 | 인증이 필요합니다. |
 
 Example response:
 
@@ -1107,11 +1108,11 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
+| 200 | 대출 히스토리 조회 성공 |
+| 400 | 대출 상태 값이 올바르지 않습니다. |
+| 401 | 인증이 필요합니다. |
 
 Example response:
 
@@ -1168,11 +1169,11 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
+| 200 | 관심 도서 목록 조회 성공 |
+| 400 | undefined |
+| 401 | 인증이 필요합니다. |
 
 Example response:
 
@@ -1228,11 +1229,11 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
+| 200 | 알림 설정이 변경되었습니다. |
+| 400 | 변경할 알림 설정을 입력해 주세요. / 알림 설정 값이 올바르지 않습니다. |
+| 401 | 인증이 필요합니다. |
 
 Request body:
 
@@ -1257,7 +1258,7 @@ Example response:
 ```json
 {
   "errorCode": 0,
-  "message": "알림 설정 변경 성공",
+  "message": "알림 설정이 변경되었습니다.",
   "data": {
     "dueDateReminder": true,
     "newBookReminder": false
@@ -1291,18 +1292,18 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 401 | 인증 실패 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | read365 마라톤 정보를 조회했습니다. |
+| 401 | 로그인이 필요합니다. / read365 세션이 없습니다. 다시 로그인해 주세요. / read365 세션이 만료되었습니다. 다시 로그인해 주세요. / read365 세션 정보가 불완전합니다. 다시 로그인해 주세요. / read365 세션이 유효하지 않습니다. 다시 로그인해 주세요. |
+| 502 | read365 마라톤 서버에 연결하지 못했습니다. / read365 마라톤 응답을 해석하지 못했습니다. |
 
 Example response:
 
 ```json
 {
   "errorCode": 0,
-  "message": "read365 마라톤 정보 조회 성공",
+  "message": "read365 마라톤 정보를 조회했습니다.",
   "data": {
     "read365Id": "read365-id",
     "memberKey": "123",
@@ -1373,18 +1374,18 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 401 | 인증 실패 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | read365 내 정보를 조회했습니다. |
+| 401 | 로그인이 필요합니다. / read365 세션이 없습니다. 다시 로그인해 주세요. / read365 세션이 만료되었습니다. 다시 로그인해 주세요. / read365 세션 정보가 불완전합니다. 다시 로그인해 주세요. / read365 세션이 유효하지 않습니다. 다시 로그인해 주세요. |
+| 502 | read365 마라톤 서버에 연결하지 못했습니다. / read365 마라톤 응답을 해석하지 못했습니다. |
 
 Example response:
 
 ```json
 {
   "errorCode": 0,
-  "message": "read365 내 정보 조회 성공",
+  "message": "read365 내 정보를 조회했습니다.",
   "data": {
     "read365Id": "read365-id",
     "memberKey": "123",
@@ -1417,10 +1418,10 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
+| 200 | 공지사항 목록 조회 성공 |
+| 400 | undefined |
 
 Example response:
 
@@ -1468,10 +1469,10 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
+| 200 | 다독 학생 랭킹 조회 성공 |
+| 400 | 연도와 조회 개수를 입력해 주세요. / 연도 값이 올바르지 않습니다. |
 
 Example request:
 
@@ -1527,11 +1528,11 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | 메인 화면 조회 성공 |
+| 400 | undefined |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example response:
 
@@ -1601,11 +1602,11 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 401 | 인증 실패 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | DLS 반납 예정일 조회 성공 |
+| 401 | 인증이 필요합니다. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example response:
 
@@ -1645,12 +1646,12 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | DLS 학생 검색 성공 |
+| 400 | {key} query parameter is required |
+| 401 | 인증이 필요합니다. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example request:
 
@@ -1703,12 +1704,12 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | DLS 현재 대출 목록 조회 성공 |
+| 400 | {key} query parameter is required |
+| 401 | 인증이 필요합니다. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example request:
 
@@ -1764,12 +1765,12 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | DLS 도서 정보 조회 성공 |
+| 400 | {key} query parameter is required |
+| 401 | 인증이 필요합니다. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example request:
 
@@ -1830,12 +1831,12 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | DLS 대출 이력 조회 성공 |
+| 400 | {key} query parameter is required |
+| 401 | 인증이 필요합니다. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example request:
 
@@ -1888,12 +1889,12 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | DLS 대출/반납 실행 성공 |
+| 400 | {key} query parameter is required |
+| 401 | 인증이 필요합니다. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example request:
 
@@ -1940,12 +1941,12 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | DLS 도서 검색 성공 |
+| 400 | {key} query parameter is required |
+| 401 | 인증이 필요합니다. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example request:
 
@@ -2002,12 +2003,12 @@ Request headers:
 
 Status codes:
 
-| code | desc |
+| code | message |
 |---:|---|
-| 200 | 성공 |
-| 400 | 잘못된 요청 |
-| 401 | 인증 실패 |
-| 502 | 외부 서비스 연동 오류 |
+| 200 | DLS 대출 연장 성공 |
+| 400 | {key} query parameter is required |
+| 401 | 인증이 필요합니다. |
+| 502 | 학교 도서관 서버에 연결할 수 없습니다. / 학교 도서관 서버 응답이 올바르지 않습니다. / 학교 도서관 조회에 실패했습니다. / 학교 도서 식별자가 올바르지 않습니다. |
 
 Example request:
 

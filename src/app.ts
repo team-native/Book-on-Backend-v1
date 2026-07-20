@@ -4,6 +4,7 @@ import helmet from "helmet";
 import { ApiError } from "./lib/api";
 import { authRouter } from "./routes/auth.routes";
 import { booksRouter } from "./routes/books.routes";
+import { dlsRouter } from "./routes/dls.routes";
 import { loansRouter } from "./routes/loans.routes";
 import { marathonRouter } from "./routes/marathon.routes";
 import { meRouter } from "./routes/me.routes";
@@ -22,6 +23,7 @@ app.get("/life", (_req: Request, res: Response) => {
 
 app.use("/auth", authRouter);
 app.use("/books", booksRouter);
+app.use("/dls", dlsRouter);
 app.use("/marathon", marathonRouter);
 app.use("/loans", loansRouter);
 app.use("/me", meRouter);

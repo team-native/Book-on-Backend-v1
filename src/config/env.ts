@@ -30,8 +30,12 @@ export const env = {
     password: process.env.SMTP_PASSWORD,
     from: process.env.SMTP_FROM
   },
+  read365: {
+    baseUrl: process.env.READ365_BASE_URL ?? "https://read365.edunet.net",
+    timeoutMs: Number(process.env.READ365_TIMEOUT_MS ?? 15000)
+  },
   dls: {
-    baseUrl: process.env.DLS_BASE_URL ?? "https://read365.edunet.net",
+    baseUrl: process.env.DLS_PROXY_BASE_URL ?? process.env.DLS_BASE_URL ?? "http://localhost:3001",
     provCode: process.env.DLS_PROV_CODE ?? "F10",
     neisCode: process.env.DLS_NEIS_CODE ?? "F100000120",
     schoolName: process.env.DLS_SCHOOL_NAME ?? "",

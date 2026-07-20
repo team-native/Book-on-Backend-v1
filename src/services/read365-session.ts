@@ -1,3 +1,4 @@
+import { env } from "../config/env";
 import { pool } from "../db/pool";
 import { authQueries } from "../db/queries";
 import { ApiError } from "../lib/api";
@@ -25,7 +26,7 @@ type RefreshResponse = {
   [key: string]: unknown;
 };
 
-const READ365_BASE_URL = "https://read365.edunet.net";
+const READ365_BASE_URL = env.read365.baseUrl;
 const STSSO_BASE_URL = "https://stsso2.edunet.net";
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36";

@@ -1,9 +1,10 @@
+import { env } from "../config/env";
 import { authQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { ApiError } from "../lib/api";
 import { Read365SessionRow } from "../types/read365.types";
 
-const READ365_BASE_URL = "https://read365.edunet.net";
+const READ365_BASE_URL = env.read365.baseUrl;
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36";
 
@@ -84,7 +85,7 @@ const requestRead365 = async <T>(
       userid: session.read365Id,
       "user-agent": USER_AGENT
     },
-    signal: AbortSignal.timeout(15000)
+    signal: AbortSignal.timeout(env.read365.timeoutMs)
   }).catch(() => {
     throw new ApiError(502, 5024, "read365 마라톤 서버에 연결하지 못했습니다.");
   });

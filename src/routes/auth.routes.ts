@@ -5,7 +5,8 @@ import {
   refresh,
   register,
   resetPassword,
-  sendResetEmail
+  sendResetEmail,
+  verifyRegister
 } from "../controllers/auth.controller";
 import { asyncHandler } from "../lib/api";
 import { requireAuth } from "../middleware/auth";
@@ -13,6 +14,7 @@ import { requireAuth } from "../middleware/auth";
 export const authRouter = Router();
 
 authRouter.post("/register", asyncHandler(register));
+authRouter.post("/register/verify", asyncHandler(verifyRegister));
 authRouter.post("/login", asyncHandler(login));
 authRouter.post("/refresh", asyncHandler(refresh));
 authRouter.post("/read365/login", requireAuth, asyncHandler(loginRead365));

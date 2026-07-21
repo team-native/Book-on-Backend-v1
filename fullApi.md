@@ -69,7 +69,7 @@ Example response:
 
 ## POST /auth/register
 
-회원가입.
+회원가입 인증 메일 발송.
 
 | 항목 | 값 |
 |---|---|
@@ -86,7 +86,7 @@ Status codes:
 
 | code | message |
 |---:|---|
-| 201 | 회원가입 성공 |
+| 202 | 회원가입 인증 메일을 발송했습니다. |
 | 409 | 이미 사용 중인 이메일입니다. |
 | 422 | 필수 입력값을 모두 입력해 주세요. / 올바른 이메일을 입력해 주세요. / 학교 이메일(@gsm.hs.kr)만 사용할 수 있습니다. / 비밀번호는 영문과 특수문자(`!@#$%^&?~`)만 사용하여 `6~15`자로 입력해야 합니다. / 비밀번호 확인이 일치하지 않습니다. / 성별 값이 올바르지 않습니다. |
 
@@ -121,11 +121,11 @@ Example response:
 ```json
 {
   "errorCode": 0,
-  "message": "회원가입 성공",
+  "message": "회원가입 인증 메일을 발송했습니다.",
   "data": {
-    "userId": 1,
-    "email": "student@gsm.hs.kr",
-    "name": "홍길동"
+    "sessionId": "u6xqXW8QXG4VY9fK2v9sLCW0tZ9x2D7N0w0R6A8xQ1c",
+    "expiresAt": "2026-07-22T12:00:00.000Z",
+    "email": "student@gsm.hs.kr"
   }
 }
 ```
@@ -141,6 +141,71 @@ Example response:
 | 422 | 4221 | 비밀번호 규칙 오류 | `{ "password": "abcdef" }` |
 | 422 | 4221 | 비밀번호 확인 불일치 | `{ "password": "abc!123", "passwordConfirm": "abc!124" }` |
 | 409 | 4091 | 이미 사용 중인 이메일 | 동일 이메일 재가입 |
+
+## POST /auth/register/verify
+
+회원가입 인증 코드 확인 후 회원가입 완료.
+
+| 항목 | 값 |
+|---|---|
+| 인증 | 불필요 |
+| params | 없음 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Content-Type | application/json |
+
+Status codes:
+
+| code | message |
+|---:|---|
+| 201 | 회원가입 성공 |
+| 401 | 인증 세션이 올바르지 않거나 만료되었습니다. |
+| 409 | 이미 사용 중인 이메일입니다. |
+| 422 | 세션 아이디를 입력해 주세요. / 인증 코드는 6자리 숫자여야 합니다. |
+
+Request body:
+
+```json
+{
+  "sessionId": "string",
+  "passcode": "string"
+}
+```
+
+Example request body:
+
+```json
+{
+  "sessionId": "u6xqXW8QXG4VY9fK2v9sLCW0tZ9x2D7N0w0R6A8xQ1c",
+  "passcode": "123456"
+}
+```
+
+Example response:
+
+```json
+{
+  "errorCode": 0,
+  "message": "회원가입 성공",
+  "data": {
+    "userId": 1,
+    "email": "student@gsm.hs.kr",
+    "name": "홍길동"
+  }
+}
+```
+
+오류 반례:
+
+| HTTP status | errorCode | 조건 | 예시 |
+|---:|---:|---|---|
+| 422 | 4220 | 필수값 누락 | `{ "sessionId": "" }` |
+| 422 | 4220 | 인증 코드 형식 오류 | `{ "passcode": "12345" }` |
+| 401 | 4012 | 세션 없음/코드 불일치/만료 | `{ "passcode": "000000" }` |
+| 409 | 4091 | 인증 중 다른 요청에서 이미 가입된 이메일 | 동일 이메일 동시 가입 |
 
 ## POST /auth/login
 

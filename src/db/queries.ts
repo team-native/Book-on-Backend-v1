@@ -43,6 +43,59 @@ export const authQueries = {
       })
     ),
 
+  deletePendingRegisterVerificationSessionsByEmail: (email: string): Q => ({
+    sql: "DELETE FROM register_verification_sessions WHERE email = ? AND used_at IS NULL",
+    values: [email],
+  }),
+
+  insertRegisterVerificationSession: (
+    sessionId: string,
+    email: string,
+    name: string,
+    department: string,
+    gender: string,
+    passwordHash: string,
+    codeHash: string
+  ): Q => ({
+    sql: `
+      INSERT INTO register_verification_sessions (
+        session_id, email, name, department, gender, password_hash, code_hash, expires_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now', '+5 minutes'))
+    `,
+    values: [sessionId, email, name, department, gender, passwordHash, codeHash],
+  }),
+
+  deleteRegisterVerificationSession: (sessionId: string): Q => ({
+    sql: "DELETE FROM register_verification_sessions WHERE session_id = ? AND used_at IS NULL",
+    values: [sessionId],
+  }),
+
+  findValidRegisterVerificationSession: (sessionId: string, codeHash: string): Q => ({
+    sql: `
+      SELECT
+        id,
+        session_id AS sessionId,
+        email,
+        name,
+        department,
+        gender,
+        password_hash AS passwordHash,
+        expires_at AS expiresAt
+      FROM register_verification_sessions
+      WHERE session_id = ?
+        AND code_hash = ?
+        AND used_at IS NULL
+        AND expires_at >= datetime('now')
+      LIMIT 1
+    `,
+    values: [sessionId, codeHash],
+  }),
+
+  markRegisterVerificationSessionUsed: (id: number): Q => ({
+    sql: "UPDATE register_verification_sessions SET used_at = CURRENT_TIMESTAMP WHERE id = ?",
+    values: [id],
+  }),
+
   findRefreshToken: (tokenHash: string): Q => ({
     sql: `
       SELECT

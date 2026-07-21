@@ -43,6 +43,24 @@ export const authQueries = {
       })
     ),
 
+  findRefreshToken: (tokenHash: string): Q => ({
+    sql: `
+      SELECT
+        id,
+        user_id AS userId,
+        expires_at AS expiresAt
+      FROM refresh_tokens
+      WHERE token_hash = ? AND revoked_at IS NULL
+      LIMIT 1
+    `,
+    values: [tokenHash],
+  }),
+
+  revokeRefreshToken: (id: number): Q => ({
+    sql: "UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE id = ?",
+    values: [id],
+  }),
+
   findUserByEmailForReset: (email: string): Q =>
     toQ(sb.select("id, email").from("users").where({ email })),
 

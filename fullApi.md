@@ -208,6 +208,67 @@ Example response:
 | 422 | 4222 | 아이디/비밀번호 누락 | `{ "loginId": "" }` |
 | 401 | 4011 | 계정 없음 또는 비밀번호 불일치 | `{ "loginId": "none@gsm.hs.kr", "password": "wrong!1" }` |
 
+## POST /auth/refresh
+
+Access token 재발급 API. 유효한 refresh token을 전달하면 기존 refresh token을 폐기하고 새 access token과 refresh token을 발급한다.
+
+| 항목 | 값 |
+|---|---|
+| 인증 | 불필요 |
+| params | 없음 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Content-Type | application/json |
+
+Status codes:
+
+| code | message |
+|---:|---|
+| 200 | Token refreshed successfully. |
+| 401 | Invalid or expired refresh token. |
+| 422 | refreshToken is required. |
+
+Request body:
+
+```json
+{
+  "refreshToken": "string"
+}
+```
+
+Example request body:
+
+```json
+{
+  "refreshToken": "refresh-token"
+}
+```
+
+Example response:
+
+```json
+{
+  "errorCode": 0,
+  "message": "Token refreshed successfully.",
+  "data": {
+    "accessToken": "jwt.access.token",
+    "refreshToken": "new-refresh-token",
+    "tokenType": "Bearer",
+    "expiresIn": 3600
+  }
+}
+```
+
+오류 반례:
+
+| HTTP status | errorCode | 조건 | 예시 |
+|---:|---:|---|---|
+| 422 | 4222 | refreshToken 누락 | `{ "refreshToken": "" }` |
+| 401 | 4010 | refreshToken 없음/만료/폐기됨 | `{ "refreshToken": "invalid" }` |
+
 ## POST /auth/read365/login
 
 read365 개인 계정 로그인 후 세션 저장.

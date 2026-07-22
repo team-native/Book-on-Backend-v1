@@ -273,6 +273,43 @@ Example response:
 | 422 | 4222 | 아이디/비밀번호 누락 | `{ "loginId": "" }` |
 | 401 | 4011 | 계정 없음 또는 비밀번호 불일치 | `{ "loginId": "none@gsm.hs.kr", "password": "wrong!1" }` |
 
+## POST /auth/logout
+
+Logs out the current service account session. Pass the refresh token issued by `/auth/login` or `/auth/refresh`.
+Because this API uses the refresh token directly, an access token is not required.
+
+Request headers:
+
+| key | value |
+|---|---|
+| Content-Type | application/json |
+
+Status codes:
+
+| code | message |
+|---:|---|
+| 200 | Logged out successfully. |
+| 401 | Invalid or expired refresh token. |
+| 422 | refreshToken is required. |
+
+Request body:
+
+```json
+{
+  "refreshToken": "string"
+}
+```
+
+Example response:
+
+```json
+{
+  "errorCode": 0,
+  "message": "Logged out successfully.",
+  "data": null
+}
+```
+
 ## POST /auth/refresh
 
 Access token 재발급 API. 유효한 refresh token을 전달하면 기존 refresh token을 폐기하고 새 access token과 refresh token을 발급한다.

@@ -109,6 +109,20 @@ export const authQueries = {
     values: [tokenHash],
   }),
 
+  findActiveSession: (userId: number, sessionId: number): Q => ({
+    sql: `
+      SELECT
+        id,
+        expires_at AS expiresAt
+      FROM refresh_tokens
+      WHERE id = ?
+        AND user_id = ?
+        AND revoked_at IS NULL
+      LIMIT 1
+    `,
+    values: [sessionId, userId],
+  }),
+
   revokeRefreshToken: (id: number): Q => ({
     sql: "UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE id = ?",
     values: [id],

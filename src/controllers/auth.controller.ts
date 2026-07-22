@@ -180,11 +180,28 @@ export const login = async (req: Request, res: Response) => {
     throw new ApiError(401, 4011, "아이디 또는 비밀번호가 올바르지 않습니다.");
   }
 
-  const accessToken = createAccessToken(user.id);
-  const refreshToken = createRefreshToken();
-  const refreshExpiresAt = new Date(Date.now() + env.refreshTokenExpiresIn * 1000);
-  const q2 = authQueries.insertRefreshToken(user.id, hashToken(refreshToken), refreshExpiresAt);
-  await pool.query(q2.sql, q2.values);
+  const connection = await pool.getConnection();
+  let accessToken: string;
+  let refreshToken: string;
+  try {
+    await connection.beginTransaction();
+
+    const q2 = authQueries.revokeRefreshTokens(user.id);
+    await connection.query(q2.sql, q2.values);
+
+    refreshToken = createRefreshToken();
+    const refreshExpiresAt = new Date(Date.now() + env.refreshTokenExpiresIn * 1000);
+    const q3 = authQueries.insertRefreshToken(user.id, hashToken(refreshToken), refreshExpiresAt);
+    const [result] = await connection.query<ResultSetHeader>(q3.sql, q3.values);
+    accessToken = createAccessToken(user.id, result.insertId);
+
+    await connection.commit();
+  } catch (error) {
+    await connection.rollback();
+    throw error;
+  } finally {
+    connection.release();
+  }
 
   sendSuccess(res, 200, "로그인 성공", {
     userId: user.id,
@@ -214,14 +231,14 @@ export const refresh = async (req: Request, res: Response) => {
       throw new ApiError(401, 4010, "Invalid or expired refresh token.");
     }
 
-    const q2 = authQueries.revokeRefreshToken(token.id);
+    const q2 = authQueries.revokeRefreshTokens(token.userId);
     await connection.query(q2.sql, q2.values);
 
-    const accessToken = createAccessToken(token.userId);
     const newRefreshToken = createRefreshToken();
     const refreshExpiresAt = new Date(Date.now() + env.refreshTokenExpiresIn * 1000);
     const q3 = authQueries.insertRefreshToken(token.userId, hashToken(newRefreshToken), refreshExpiresAt);
-    await connection.query(q3.sql, q3.values);
+    const [result] = await connection.query<ResultSetHeader>(q3.sql, q3.values);
+    const accessToken = createAccessToken(token.userId, result.insertId);
 
     await connection.commit();
 
@@ -237,6 +254,25 @@ export const refresh = async (req: Request, res: Response) => {
   } finally {
     connection.release();
   }
+};
+
+export const logout = async (req: Request, res: Response) => {
+  const { refreshToken } = req.body ?? {};
+  if (typeof refreshToken !== "string" || !refreshToken.trim()) {
+    throw new ApiError(422, 4222, "refreshToken is required.", { field: "refreshToken" });
+  }
+
+  const q1 = authQueries.findRefreshToken(hashToken(refreshToken));
+  const [tokens] = await pool.query<RowDataPacket[]>(q1.sql, q1.values);
+  const token = tokens[0];
+  if (!token || new Date(token.expiresAt).getTime() <= Date.now()) {
+    throw new ApiError(401, 4010, "Invalid or expired refresh token.");
+  }
+
+  const q2 = authQueries.revokeRefreshTokens(token.userId);
+  await pool.query(q2.sql, q2.values);
+
+  sendSuccess(res, 200, "Logged out successfully.", null);
 };
 
 export const sendResetEmail = async (req: Request, res: Response) => {

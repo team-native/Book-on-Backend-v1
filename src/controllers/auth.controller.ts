@@ -11,7 +11,7 @@ import { sendPasswordResetCode, sendRegisterVerificationCode } from "../services
 import { loginRead365Session } from "../services/read365-session";
 import { UserRow } from "../types/user.types";
 
-const passwordPattern = /^(?=.*[a-zA-Z])(?=.*[!@#$%^&?~])[a-zA-Z!@#$%^&?~]{6,15}$/;
+const passwordPattern = /^(?=.*[a-zA-Z])(?=.*[!@#$%^&?~])[a-zA-Z0-9!@#$%^&?~]{6,15}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const schoolEmailDomain = "@gsm.hs.kr";
 const verificationCodePattern = /^\d{6}$/;
@@ -49,7 +49,7 @@ export const register = async (req: Request, res: Response) => {
     throw new ApiError(
       422,
       4221,
-      "비밀번호는 영문과 특수문자(!@#$%^&?~)만 사용하여 6~15자로 입력해야 합니다.",
+      "비밀번호는 영문, 숫자, 특수문자(!@#$%^&?~)만 사용하여 6~15자로 입력해야 합니다.",
       { field: "password" }
     );
   }
@@ -334,7 +334,7 @@ export const resetPassword = async (req: Request, res: Response) => {
     throw new ApiError(
       422,
       4221,
-      "비밀번호는 영문과 특수문자(!@#$%^&?~)만 사용하여 6~15자로 입력해야 합니다.",
+      "비밀번호는 영문, 숫자, 특수문자(!@#$%^&?~)만 사용하여 6~15자로 입력해야 합니다.",
       { field: "newPassword" }
     );
   }

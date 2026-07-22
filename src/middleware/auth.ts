@@ -10,7 +10,7 @@ const assertActiveSession = async (userId: number, sessionId: number) => {
   const [sessions] = await pool.query<RowDataPacket[]>(q.sql, q.values);
   const session = sessions[0];
   if (!session || new Date(session.expiresAt).getTime() <= Date.now()) {
-    throw new ApiError(401, 4010, "?몄쬆???꾩슂?⑸땲??");
+    throw new ApiError(401, 4010, "인증이 필요합니다.");
   }
 };
 

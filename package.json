@@ -7,8 +7,7 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "db:migrate": "tsx src/db/migrate.ts",
-    "test:dls-admin": "node scripts/test-dls-admin.js"
+    "db:migrate": "tsx src/db/migrate.ts"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -11,20 +11,32 @@ const transporter = hasSmtpConfig
       secure: env.smtp.secure,
       auth: {
         user: env.smtp.user as string,
-        pass: env.smtp.password as string
-      }
+        pass: env.smtp.password as string,
+      },
     })
   : null;
 
-export const sendPasswordResetCode = async (email: string, code: string) => {
+const requireTransporter = () => {
   if (!transporter) {
     throw new ApiError(500, 5001, "메일 서버 설정이 필요합니다.");
   }
+  return transporter;
+};
 
-  await transporter.sendMail({
+export const sendPasswordResetCode = async (email: string, code: string) => {
+  await requireTransporter().sendMail({
     from: env.smtp.from as string,
     to: email,
     subject: "Book-on 비밀번호 재설정 인증 코드",
-    text: `인증 코드는 ${code}입니다. 5분 안에 입력해 주세요.`
+    text: `인증 코드는 ${code}입니다. 5분 안에 입력해 주세요.`,
+  });
+};
+
+export const sendRegisterVerificationCode = async (email: string, code: string) => {
+  await requireTransporter().sendMail({
+    from: env.smtp.from as string,
+    to: email,
+    subject: "Book-on 회원가입 인증 코드",
+    text: `회원가입 인증 코드는 ${code}입니다. 5분 안에 입력해 주세요.`,
   });
 };

@@ -43,6 +43,91 @@ export const authQueries = {
       })
     ),
 
+  deletePendingRegisterVerificationSessionsByEmail: (email: string): Q => ({
+    sql: "DELETE FROM register_verification_sessions WHERE email = ? AND used_at IS NULL",
+    values: [email],
+  }),
+
+  insertRegisterVerificationSession: (
+    sessionId: string,
+    email: string,
+    name: string,
+    department: string,
+    gender: string,
+    passwordHash: string,
+    codeHash: string
+  ): Q => ({
+    sql: `
+      INSERT INTO register_verification_sessions (
+        session_id, email, name, department, gender, password_hash, code_hash, expires_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now', '+5 minutes'))
+    `,
+    values: [sessionId, email, name, department, gender, passwordHash, codeHash],
+  }),
+
+  deleteRegisterVerificationSession: (sessionId: string): Q => ({
+    sql: "DELETE FROM register_verification_sessions WHERE session_id = ? AND used_at IS NULL",
+    values: [sessionId],
+  }),
+
+  findValidRegisterVerificationSession: (sessionId: string, codeHash: string): Q => ({
+    sql: `
+      SELECT
+        id,
+        session_id AS sessionId,
+        email,
+        name,
+        department,
+        gender,
+        password_hash AS passwordHash,
+        expires_at AS expiresAt
+      FROM register_verification_sessions
+      WHERE session_id = ?
+        AND code_hash = ?
+        AND used_at IS NULL
+        AND expires_at >= datetime('now')
+      LIMIT 1
+    `,
+    values: [sessionId, codeHash],
+  }),
+
+  markRegisterVerificationSessionUsed: (id: number): Q => ({
+    sql: "UPDATE register_verification_sessions SET used_at = CURRENT_TIMESTAMP WHERE id = ?",
+    values: [id],
+  }),
+
+  findRefreshToken: (tokenHash: string): Q => ({
+    sql: `
+      SELECT
+        id,
+        user_id AS userId,
+        expires_at AS expiresAt
+      FROM refresh_tokens
+      WHERE token_hash = ? AND revoked_at IS NULL
+      LIMIT 1
+    `,
+    values: [tokenHash],
+  }),
+
+  findActiveSession: (userId: number, sessionId: number): Q => ({
+    sql: `
+      SELECT
+        id,
+        expires_at AS expiresAt
+      FROM refresh_tokens
+      WHERE id = ?
+        AND user_id = ?
+        AND revoked_at IS NULL
+      LIMIT 1
+    `,
+    values: [sessionId, userId],
+  }),
+
+  revokeRefreshToken: (id: number): Q => ({
+    sql: "UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE id = ?",
+    values: [id],
+  }),
+
   findUserByEmailForReset: (email: string): Q =>
     toQ(sb.select("id, email").from("users").where({ email })),
 
@@ -74,6 +159,57 @@ export const authQueries = {
 
   revokeRefreshTokens: (userId: number): Q => ({
     sql: "UPDATE refresh_tokens SET revoked_at = CURRENT_TIMESTAMP WHERE user_id = ?",
+    values: [userId],
+  }),
+
+  upsertRead365Session: (
+    userId: number,
+    read365Id: string,
+    cookieHeader: string,
+    memberKey: string | null,
+    schoolKey: string | null,
+    accessToken: string | null,
+    refreshToken: string | null,
+    sessionExpiresAt: string
+  ): Q => ({
+    sql: `
+      INSERT INTO read365_sessions (
+        user_id, read365_id, cookie_header, member_key, school_key,
+        access_token, refresh_token, session_expires_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      ON CONFLICT(user_id) DO UPDATE SET
+        read365_id = excluded.read365_id,
+        cookie_header = excluded.cookie_header,
+        member_key = excluded.member_key,
+        school_key = excluded.school_key,
+        access_token = excluded.access_token,
+        refresh_token = excluded.refresh_token,
+        session_expires_at = excluded.session_expires_at,
+        updated_at = CURRENT_TIMESTAMP
+    `,
+    values: [userId, read365Id, cookieHeader, memberKey, schoolKey, accessToken, refreshToken, sessionExpiresAt],
+  }),
+
+  findRead365SessionByUserId: (userId: number): Q => ({
+    sql: `
+      SELECT
+        user_id AS userId,
+        read365_id AS read365Id,
+        cookie_header AS cookieHeader,
+        member_key AS memberKey,
+        school_key AS schoolKey,
+        access_token AS accessToken,
+        refresh_token AS refreshToken,
+        session_expires_at AS sessionExpiresAt
+      FROM read365_sessions
+      WHERE user_id = ?
+      LIMIT 1
+    `,
+    values: [userId],
+  }),
+
+  deleteRead365SessionByUserId: (userId: number): Q => ({
+    sql: "DELETE FROM read365_sessions WHERE user_id = ?",
     values: [userId],
   }),
 };

@@ -4,6 +4,7 @@ import { ApiError } from "./api";
 
 type AccessTokenPayload = {
   sub: number;
+  sid: number;
   type: "access";
   iat: number;
   exp: number;
@@ -14,11 +15,12 @@ const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString("b
 const signature = (value: string) =>
   createHmac("sha256", env.jwtSecret).update(value).digest("base64url");
 
-export const createAccessToken = (userId: number) => {
+export const createAccessToken = (userId: number, sessionId: number) => {
   const now = Math.floor(Date.now() / 1000);
   const header = encode({ alg: "HS256", typ: "JWT" });
   const payload = encode({
     sub: userId,
+    sid: sessionId,
     type: "access",
     iat: now,
     exp: now + env.accessTokenExpiresIn
@@ -50,7 +52,12 @@ export const verifyAccessToken = (token: string) => {
     throw new ApiError(401, 4010, "인증이 필요합니다.");
   }
 
-  if (decoded.type !== "access" || !Number.isInteger(decoded.sub) || decoded.exp <= Date.now() / 1000) {
+  if (
+    decoded.type !== "access" ||
+    !Number.isInteger(decoded.sub) ||
+    !Number.isInteger(decoded.sid) ||
+    decoded.exp <= Date.now() / 1000
+  ) {
     throw new ApiError(401, 4010, "인증이 필요합니다.");
   }
   return decoded;

@@ -275,8 +275,8 @@ Example response:
 
 ## POST /auth/logout
 
-Logs out the current service account session. Pass the refresh token issued by `/auth/login` or `/auth/refresh`.
-Because this API uses the refresh token directly, an access token is not required.
+서비스 계정 로그아웃 API. `/auth/login` 또는 `/auth/refresh`에서 발급받은 refresh token을 전달하면 해당 계정의 활성 로그인 세션을 폐기한다.
+refresh token을 직접 사용하므로 access token은 필요하지 않다.
 
 Request headers:
 

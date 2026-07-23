@@ -22,6 +22,9 @@ export const env = {
   sqlite: {
     path: process.env.SQLITE_PATH ?? path.join(process.cwd(), "data", "book-on.sqlite")
   },
+  imageSqlite: {
+    path: process.env.IMAGE_SQLITE_PATH ?? path.join(process.cwd(), "data", "book-on-images.sqlite")
+  },
   smtp: {
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT ?? 587),

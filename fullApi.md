@@ -1143,7 +1143,7 @@ Example response:
 
 ## GET /me
 
-내 프로필, 대출 요약, 현재 대출, 알림 설정 조회.
+내 프로필, 대출 요약, 현재 대출, 알림 설정 조회. 프로필 이미지가 없으면 `profileImageUrl`은 `null`이다.
 
 | 항목 | 값 |
 |---|---|
@@ -1176,7 +1176,8 @@ Example response:
       "email": "student@gsm.hs.kr",
       "name": "홍길동",
       "department": "소프트웨어개발과",
-      "gender": "MALE"
+      "gender": "MALE",
+      "profileImageUrl": "/image/1e2b3c4d5e6f7890abcdef1234567890abcdef12.jpg"
     },
     "loanSummary": {
       "currentLoanCount": 1,
@@ -1373,6 +1374,98 @@ Example response:
 |---:|---:|---|---|
 | 400 | 4001 | 페이지 값 오류 | `/me/favorite-books?size=101` |
 | 401 | 4010 | 인증 없음/오류 | 헤더 없음 |
+
+## POST /me/profile-image
+
+프로필 사진 변경. 이미지 바이너리를 그대로 전송한다. 저장 key는 `sha1(유저 이메일)`이며, 조회 URL은 `/image/${imageKey}.${extent}` 형식이다.
+
+| 항목 | 값 |
+|---|---|
+| 인증 | 필요 |
+| params | 없음 |
+| request body | 이미지 바이너리 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+| Content-Type | `image/jpeg`, `image/png`, `image/gif`, `image/webp` 또는 `application/octet-stream` |
+
+Status codes:
+
+| code | message |
+|---:|---|
+| 200 | 프로필 사진이 변경되었습니다. |
+| 400 | 이미지 데이터를 입력해 주세요. / 지원하지 않는 이미지 형식입니다. |
+| 401 | 인증이 필요합니다. |
+
+Example request:
+
+```http
+POST /me/profile-image
+Authorization: Bearer <accessToken>
+Content-Type: image/png
+
+<binary image data>
+```
+
+Example response:
+
+```json
+{
+  "errorCode": 0,
+  "message": "프로필 사진이 변경되었습니다.",
+  "data": {
+    "profileImageUrl": "/image/1e2b3c4d5e6f7890abcdef1234567890abcdef12.png"
+  }
+}
+```
+
+오류 반례:
+
+| HTTP status | errorCode | 조건 | 예시 |
+|---:|---:|---|---|
+| 400 | 4001 | body가 비어 있음 | body 없음 |
+| 400 | 4001 | 지원하지 않는 이미지 형식 | `Content-Type: text/plain` |
+| 401 | 4010 | 인증 없음/오류 | 헤더 없음 |
+
+## DELETE /me/profile-image
+
+프로필 사진을 기본 프로필 이미지로 초기화한다. 저장된 프로필 이미지 데이터를 삭제한다.
+
+| 항목 | 값 |
+|---|---|
+| 인증 | 필요 |
+| params | 없음 |
+| request body | 없음 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | message |
+|---:|---|
+| 200 | 프로필 사진이 기본 이미지로 초기화되었습니다. |
+| 401 | 인증이 필요합니다. |
+
+Example response:
+
+```json
+{
+  "errorCode": 0,
+  "message": "프로필 사진이 기본 이미지로 초기화되었습니다.",
+  "data": {
+    "profileImageUrl": null
+  }
+}
+```
+
+오류 반례: 인증 없음/만료/위조 토큰은 `401 / 4010`.
 
 ## PATCH /me/notification-settings
 
@@ -1614,9 +1707,54 @@ Example response:
 
 오류 반례: `/notices?page=0`, `/notices?size=101`은 `400 / 4001`.
 
+## GET /image/{imageKey}.{extent}
+
+프로필 이미지 데이터를 그대로 반환한다. `imageKey`는 `sha1(유저 이메일)`이고, `extent`는 저장된 이미지 확장자이다.
+
+| 항목 | 값 |
+|---|---|
+| 인증 | 불필요 |
+| path params | `imageKey` 필수, `extent` 필수 |
+| request body | 없음 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| 없음 | 없음 |
+
+Status codes:
+
+| code | message |
+|---:|---|
+| 200 | 이미지 바이너리 반환 |
+| 404 | 이미지를 찾을 수 없습니다. |
+
+Example request:
+
+```http
+GET /image/1e2b3c4d5e6f7890abcdef1234567890abcdef12.png
+```
+
+Example response:
+
+```http
+HTTP/1.1 200 OK
+Content-Type: image/png
+Cache-Control: public, max-age=31536000, immutable
+
+<binary image data>
+```
+
+오류 반례:
+
+| HTTP status | errorCode | 조건 | 예시 |
+|---:|---:|---|---|
+| 404 | 4040 | 파일명 형식 오류 또는 이미지 없음 | `/image/not-found.png` |
+
 ## GET /rankings/readers
 
-연도별 다독 학생 랭킹 조회.
+연도별 다독 학생 랭킹 조회. 프로필 이미지가 없으면 각 사용자 데이터의 `profileImageUrl`은 `null`이다.
 
 | 항목 | 값 |
 |---|---|
@@ -1658,6 +1796,7 @@ Example response:
         "userId": 1,
         "name": "홍길동",
         "department": "소프트웨어개발과",
+        "profileImageUrl": "/image/1e2b3c4d5e6f7890abcdef1234567890abcdef12.jpg",
         "loanCount": 12
       }
     ]

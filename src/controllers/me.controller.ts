@@ -3,6 +3,11 @@ import { loanQueries, meQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { RowDataPacket } from "../db/types";
 import { ApiError, sendSuccess } from "../lib/api";
+import {
+  deleteProfileImage,
+  findProfileImageMetaByEmail,
+  saveProfileImage
+} from "../services/profile-image";
 
 export const getMe = async (req: Request, res: Response) => {
   const q1 = loanQueries.markUserOverdueLoans(req.userId!);
@@ -22,8 +27,12 @@ export const getMe = async (req: Request, res: Response) => {
   const [currentLoans] = await pool.query<RowDataPacket[]>(q4.sql, q4.values);
 
   const { dueDateReminder, newBookReminder, ...profile } = user;
+  const profileImage = findProfileImageMetaByEmail(user.email);
   sendSuccess(res, 200, "마이페이지 조회 성공", {
-    user: profile,
+    user: {
+      ...profile,
+      profileImageUrl: profileImage?.profileImageUrl ?? null
+    },
     loanSummary: {
       currentLoanCount: Number(summaries[0].currentLoanCount),
       overdueCount: Number(summaries[0].overdueCount),
@@ -38,6 +47,42 @@ export const getMe = async (req: Request, res: Response) => {
       dueDateReminder: Boolean(dueDateReminder),
       newBookReminder: Boolean(newBookReminder)
     }
+  });
+};
+
+export const updateProfileImage = async (req: Request, res: Response) => {
+  if (!Buffer.isBuffer(req.body) || req.body.length === 0) {
+    throw new ApiError(400, 4001, "이미지 데이터를 입력해 주세요.");
+  }
+
+  const q = meQueries.findUserProfile(req.userId!);
+  const [users] = await pool.query<RowDataPacket[]>(q.sql, q.values);
+  const user = users[0];
+  if (!user) {
+    throw new ApiError(401, 4010, "?몄쬆???꾩슂?⑸땲??");
+  }
+
+  const saved = saveProfileImage(user.email, req.header("content-type") ?? "", req.body);
+  if (!saved) {
+    throw new ApiError(400, 4001, "지원하지 않는 이미지 형식입니다.");
+  }
+
+  sendSuccess(res, 200, "프로필 사진이 변경되었습니다.", {
+    profileImageUrl: saved.profileImageUrl
+  });
+};
+
+export const deleteMyProfileImage = async (req: Request, res: Response) => {
+  const q = meQueries.findUserProfile(req.userId!);
+  const [users] = await pool.query<RowDataPacket[]>(q.sql, q.values);
+  const user = users[0];
+  if (!user) {
+    throw new ApiError(401, 4010, "?몄쬆???꾩슂?⑸땲??");
+  }
+
+  deleteProfileImage(user.email);
+  sendSuccess(res, 200, "프로필 사진이 기본 이미지로 초기화되었습니다.", {
+    profileImageUrl: null
   });
 };
 

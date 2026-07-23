@@ -4,6 +4,7 @@ import { pool } from "../db/pool";
 import { RowDataPacket } from "../db/types";
 import { ApiError, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
 import { enrichDlsBooks, getDlsPopularBooks, serializeDlsBook } from "../services/dls";
+import { findProfileImageByFile, findProfileImageMetaByEmail } from "../services/profile-image";
 
 export const listNotices = async (req: Request, res: Response) => {
   const page = parsePositiveInteger(req.query.page, 1);
@@ -40,10 +41,30 @@ export const getReaderRankings = async (req: Request, res: Response) => {
     resetPolicy: "매년 1월 1일 00:00에 연간 랭킹이 초기화됩니다.",
     items: rows.map((row, index) => ({
       rank: index + 1,
-      ...row,
+      userId: row.userId,
+      name: row.name,
+      department: row.department,
+      profileImageUrl: findProfileImageMetaByEmail(row.email)?.profileImageUrl ?? null,
       loanCount: Number(row.loanCount)
     }))
   });
+};
+
+export const getImage = async (req: Request, res: Response) => {
+  const file = Array.isArray(req.params.file) ? req.params.file[0] : req.params.file;
+  const match = /^([a-f0-9]{40})\.(jpg|png|gif|webp)$/i.exec(file ?? "");
+  if (!match) {
+    throw new ApiError(404, 4040, "이미지를 찾을 수 없습니다.");
+  }
+
+  const image = findProfileImageByFile(match[1].toLowerCase(), match[2].toLowerCase());
+  if (!image) {
+    throw new ApiError(404, 4040, "이미지를 찾을 수 없습니다.");
+  }
+
+  res.setHeader("Content-Type", image.content_type);
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+  res.status(200).send(image.data);
 };
 
 export const getHome = async (req: Request, res: Response) => {

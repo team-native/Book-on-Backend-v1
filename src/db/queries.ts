@@ -486,13 +486,14 @@ export const publicQueries = {
     sql: `
       SELECT
         u.id AS userId,
+        u.email,
         u.name,
         u.department,
         COUNT(l.id) AS loanCount
       FROM users u
       JOIN loans l ON l.user_id = u.id
       WHERE strftime('%Y', l.borrowed_at) = ?
-      GROUP BY u.id
+      GROUP BY u.id, u.email
       ORDER BY loanCount DESC, u.id ASC
       LIMIT ?
     `,

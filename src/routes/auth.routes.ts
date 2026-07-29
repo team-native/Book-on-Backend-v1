@@ -5,6 +5,7 @@ import {
   logout,
   refresh,
   register,
+  registerRead365ExternalSession,
   resetPassword,
   sendResetEmail,
   verifyRegister
@@ -20,5 +21,6 @@ authRouter.post("/login", asyncHandler(login));
 authRouter.post("/logout", asyncHandler(logout));
 authRouter.post("/refresh", asyncHandler(refresh));
 authRouter.post("/read365/login", requireAuth, asyncHandler(loginRead365));
+authRouter.post("/read365/session", requireAuth, asyncHandler(registerRead365ExternalSession));
 authRouter.post("/password-reset/email", asyncHandler(sendResetEmail));
 authRouter.patch("/password-reset", asyncHandler(resetPassword));

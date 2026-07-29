@@ -26,6 +26,7 @@ npm run dev
 ## read365 기능
 
 - `POST /auth/read365/login`
+- `POST /auth/read365/session`
 - `GET /marathon`
 - `GET /marathon/read365/myinfo`
 

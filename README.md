@@ -27,6 +27,7 @@ npm run dev
 
 - `POST /auth/read365/login`
 - `POST /auth/read365/session`
+- `POST /auth/read365/session/extend`
 - `GET /marathon`
 - `GET /marathon/read365/myinfo`
 

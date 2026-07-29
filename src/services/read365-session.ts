@@ -2,6 +2,7 @@ import { env } from "../config/env";
 import { pool } from "../db/pool";
 import { authQueries } from "../db/queries";
 import { ApiError } from "../lib/api";
+import { Read365SessionRow } from "../types/read365.types";
 
 type Cookie = {
   value: string;
@@ -43,7 +44,7 @@ const READ365_BASE_URL = env.read365.baseUrl;
 const STSSO_BASE_URL = "https://stsso2.edunet.net";
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36";
-const DEFAULT_SESSION_TTL_MS = 1000 * 60 * 60 * 12;
+const DEFAULT_SESSION_TTL_MS = 1000 * 60 * 120;
 
 const splitSetCookie = (value: string) => value.split(/,(?=\s*[^;,\s]+=)/);
 
@@ -119,12 +120,11 @@ class CookieJar {
     return this.cookies.get(name)?.value;
   }
 
-  getLatestExpiry() {
-    const expiries = [...this.cookies.values()]
-      .map((cookie) => cookie.expiresAt)
-      .filter((value): value is number => typeof value === "number" && value > Date.now());
-
-    return expiries.length > 0 ? Math.max(...expiries) : Date.now() + DEFAULT_SESSION_TTL_MS;
+  getSessionExpiry() {
+    const expiresAt = this.cookies.get("JSESSIONID")?.expiresAt;
+    return typeof expiresAt === "number" && expiresAt > Date.now()
+      ? expiresAt
+      : Date.now() + DEFAULT_SESSION_TTL_MS;
   }
 }
 
@@ -206,6 +206,37 @@ const saveSession = async (
   await pool.query(q.sql, q.values);
 };
 
+const deleteSession = async (userId: number) => {
+  const q = authQueries.deleteRead365SessionByUserId(userId);
+  await pool.query(q.sql, q.values);
+};
+
+const findSession = async (userId: number) => {
+  const q = authQueries.findRead365SessionByUserId(userId);
+  const [sessions] = await pool.query<Read365SessionRow[]>(q.sql, q.values);
+  return sessions[0];
+};
+
+const assertStoredSession = async (userId: number) => {
+  const session = await findSession(userId);
+  if (!session) {
+    throw new ApiError(401, 4014, "read365 세션이 없습니다. 다시 로그인해 주세요.");
+  }
+
+  const expiresAt = Date.parse(session.sessionExpiresAt);
+  if (!Number.isFinite(expiresAt) || expiresAt <= Date.now()) {
+    await deleteSession(userId);
+    throw new ApiError(401, 4014, "read365 세션이 만료되었습니다. 다시 로그인해 주세요.");
+  }
+
+  if (!session.cookieHeader) {
+    await deleteSession(userId);
+    throw new ApiError(401, 4014, "read365 세션 정보가 불완전합니다. 다시 로그인해 주세요.");
+  }
+
+  return session;
+};
+
 export const registerRead365Session = async (
   userId: number,
   cookieHeader: string,
@@ -251,9 +282,55 @@ export const registerRead365Session = async (
   const requestedExpiresAt = requestedSessionExpiresAt ? Date.parse(requestedSessionExpiresAt) : NaN;
   const sessionExpiresAt = new Date(
     Number.isFinite(requestedExpiresAt) && requestedExpiresAt > Date.now()
-      ? Math.min(requestedExpiresAt, jar.getLatestExpiry())
-      : jar.getLatestExpiry()
+      ? Math.min(requestedExpiresAt, jar.getSessionExpiry())
+      : jar.getSessionExpiry()
   ).toISOString();
+  await saveSession(userId, read365Id, refreshedCookieHeader, sessionExpiresAt, refreshBody);
+
+  return {
+    read365Id,
+    sessionExpiresAt,
+    profile: toPublicProfile(refreshBody.data)
+  };
+};
+
+export const extendRead365Session = async (userId: number) => {
+  const session = await assertStoredSession(userId);
+  const jar = new CookieJar();
+  jar.absorbCookieHeader(session.cookieHeader);
+
+  if (!jar.toHeader()) {
+    await deleteSession(userId);
+    throw new ApiError(401, 4014, "read365 세션 Cookie가 유효하지 않습니다. 다시 로그인해 주세요.");
+  }
+
+  const refreshResponse = await request(jar, `${READ365_BASE_URL}/schome/auth/member/refresh`, {
+    method: "GET",
+    headers: {
+      accept: "application/json, text/plain, */*",
+      referer: `${READ365_BASE_URL}/`
+    }
+  });
+  await assertOk(refreshResponse, "read365 세션 연장에 실패했습니다.");
+  const refreshBody = await parseJson<RefreshResponse>(refreshResponse);
+  if (refreshBody.status && refreshBody.status !== "OK") {
+    await deleteSession(userId);
+    throw new ApiError(401, 4014, refreshBody.message || "read365 세션이 유효하지 않습니다. 다시 로그인해 주세요.");
+  }
+
+  if (refreshBody.data?.id && refreshBody.data.id !== session.read365Id) {
+    await deleteSession(userId);
+    throw new ApiError(401, 4014, "read365 세션 사용자 정보가 일치하지 않습니다. 다시 로그인해 주세요.");
+  }
+
+  const refreshedCookieHeader = jar.toHeader();
+  if (!refreshedCookieHeader) {
+    await deleteSession(userId);
+    throw new ApiError(401, 4014, "read365 세션 Cookie가 유효하지 않습니다. 다시 로그인해 주세요.");
+  }
+
+  const read365Id = refreshBody.data?.id ?? session.read365Id;
+  const sessionExpiresAt = new Date(jar.getSessionExpiry()).toISOString();
   await saveSession(userId, read365Id, refreshedCookieHeader, sessionExpiresAt, refreshBody);
 
   return {
@@ -348,7 +425,7 @@ export const loginRead365Session = async (userId: number, read365Id: string, pas
     throw new ApiError(502, 5023, "read365 세션 쿠키를 받지 못했습니다.");
   }
 
-  const sessionExpiresAt = new Date(jar.getLatestExpiry()).toISOString();
+  const sessionExpiresAt = new Date(jar.getSessionExpiry()).toISOString();
   await saveSession(userId, read365Id, cookieHeader, sessionExpiresAt, refreshBody);
 
   return {

@@ -8,7 +8,7 @@ import { ApiError, sendSuccess } from "../lib/api";
 import { hashPassword, verifyPassword } from "../lib/password";
 import { createAccessToken, createRefreshToken, hashToken } from "../lib/token";
 import { sendPasswordResetCode, sendRegisterVerificationCode } from "../services/mail";
-import { loginRead365Session } from "../services/read365-session";
+import { loginRead365Session, registerRead365Session } from "../services/read365-session";
 import { UserRow } from "../types/user.types";
 
 const passwordPattern = /^(?=.*[a-zA-Z])(?=.*[!@#$%^&?~])[a-zA-Z0-9!@#$%^&?~]{6,15}$/;
@@ -319,6 +319,30 @@ export const loginRead365 = async (req: Request, res: Response) => {
 
   const session = await loginRead365Session(req.userId, id.trim(), password);
   sendSuccess(res, 200, "read365 개인 계정 로그인에 성공했습니다.", session);
+};
+
+export const registerRead365ExternalSession = async (req: Request, res: Response) => {
+  const { cookieHeader, read365Id, sessionExpiresAt } = req.body ?? {};
+  if (typeof req.userId !== "number") {
+    throw new ApiError(401, 4010, "로그인이 필요합니다.");
+  }
+  if (typeof cookieHeader !== "string" || !cookieHeader.trim()) {
+    throw new ApiError(422, 4222, "read365 세션 Cookie를 입력해 주세요.", { field: "cookieHeader" });
+  }
+  if (read365Id !== undefined && typeof read365Id !== "string") {
+    throw new ApiError(422, 4222, "read365 아이디 형식이 올바르지 않습니다.", { field: "read365Id" });
+  }
+  if (sessionExpiresAt !== undefined && typeof sessionExpiresAt !== "string") {
+    throw new ApiError(422, 4222, "세션 만료 시간 형식이 올바르지 않습니다.", { field: "sessionExpiresAt" });
+  }
+
+  const session = await registerRead365Session(
+    req.userId,
+    cookieHeader,
+    read365Id?.trim() || undefined,
+    sessionExpiresAt
+  );
+  sendSuccess(res, 200, "read365 간편로그인 세션을 등록했습니다.", session);
 };
 
 export const resetPassword = async (req: Request, res: Response) => {

@@ -177,7 +177,7 @@ const request = async (
     ...init,
     headers,
     redirect: "manual",
-    signal: AbortSignal.timeout(15000)
+    signal: AbortSignal.timeout(env.read365.timeoutMs)
   }).catch(() => {
     throw new ApiError(502, 5023, "read365 로그인 서버에 연결하지 못했습니다.");
   });
@@ -237,6 +237,23 @@ const assertStoredSession = async (userId: number) => {
   return session;
 };
 
+const assertValidRefresh = (
+  refresh: RefreshResponse,
+  invalidMessage: string,
+  missingProfileMessage: string
+) => {
+  if (refresh.status !== "OK") {
+    throw new ApiError(401, 4014, refresh.message || invalidMessage);
+  }
+
+  const read365Id = refresh.data?.id;
+  if (!read365Id) {
+    throw new ApiError(401, 4014, missingProfileMessage);
+  }
+
+  return read365Id;
+};
+
 export const registerRead365Session = async (
   userId: number,
   cookieHeader: string,
@@ -262,15 +279,12 @@ export const registerRead365Session = async (
   });
   await assertOk(refreshResponse, "read365 세션 확인에 실패했습니다.");
   const refreshBody = await parseJson<RefreshResponse>(refreshResponse);
-  if (refreshBody.status && refreshBody.status !== "OK") {
-    throw new ApiError(401, 4014, refreshBody.message || "read365 세션이 유효하지 않습니다.");
-  }
-
-  const read365Id = refreshBody.data?.id ?? expectedRead365Id;
-  if (!read365Id) {
-    throw new ApiError(401, 4014, "read365 세션에서 사용자 정보를 확인할 수 없습니다.");
-  }
-  if (expectedRead365Id && refreshBody.data?.id && expectedRead365Id !== refreshBody.data.id) {
+  const read365Id = assertValidRefresh(
+    refreshBody,
+    "read365 세션이 유효하지 않습니다.",
+    "read365 세션에서 사용자 정보를 확인할 수 없습니다."
+  );
+  if (expectedRead365Id && expectedRead365Id !== read365Id) {
     throw new ApiError(401, 4014, "read365 세션 사용자 정보가 일치하지 않습니다.");
   }
 
@@ -313,12 +327,19 @@ export const extendRead365Session = async (userId: number) => {
   });
   await assertOk(refreshResponse, "read365 세션 연장에 실패했습니다.");
   const refreshBody = await parseJson<RefreshResponse>(refreshResponse);
-  if (refreshBody.status && refreshBody.status !== "OK") {
+  let read365Id: string;
+  try {
+    read365Id = assertValidRefresh(
+      refreshBody,
+      "read365 세션이 유효하지 않습니다. 다시 로그인해 주세요.",
+      "read365 세션에서 사용자 정보를 확인할 수 없습니다. 다시 로그인해 주세요."
+    );
+  } catch (error) {
     await deleteSession(userId);
-    throw new ApiError(401, 4014, refreshBody.message || "read365 세션이 유효하지 않습니다. 다시 로그인해 주세요.");
+    throw error;
   }
 
-  if (refreshBody.data?.id && refreshBody.data.id !== session.read365Id) {
+  if (read365Id !== session.read365Id) {
     await deleteSession(userId);
     throw new ApiError(401, 4014, "read365 세션 사용자 정보가 일치하지 않습니다. 다시 로그인해 주세요.");
   }
@@ -329,7 +350,6 @@ export const extendRead365Session = async (userId: number) => {
     throw new ApiError(401, 4014, "read365 세션 Cookie가 유효하지 않습니다. 다시 로그인해 주세요.");
   }
 
-  const read365Id = refreshBody.data?.id ?? session.read365Id;
   const sessionExpiresAt = new Date(jar.getSessionExpiry()).toISOString();
   await saveSession(userId, read365Id, refreshedCookieHeader, sessionExpiresAt, refreshBody);
 
@@ -416,8 +436,15 @@ export const loginRead365Session = async (userId: number, read365Id: string, pas
   });
   await assertOk(refreshResponse, "read365 세션 확인에 실패했습니다.");
   const refreshBody = await parseJson<RefreshResponse>(refreshResponse);
-  if (refreshBody.status && refreshBody.status !== "OK") {
+  if (refreshBody.status !== "OK") {
     throw new ApiError(401, 4013, refreshBody.message || "read365 로그인에 실패했습니다.");
+  }
+  const refreshedRead365Id = refreshBody.data?.id;
+  if (!refreshedRead365Id) {
+    throw new ApiError(401, 4013, "read365 사용자 정보를 확인할 수 없습니다.");
+  }
+  if (refreshedRead365Id !== read365Id) {
+    throw new ApiError(401, 4013, "read365 사용자 정보가 일치하지 않습니다.");
   }
 
   const cookieHeader = jar.toHeader();
@@ -426,10 +453,10 @@ export const loginRead365Session = async (userId: number, read365Id: string, pas
   }
 
   const sessionExpiresAt = new Date(jar.getSessionExpiry()).toISOString();
-  await saveSession(userId, read365Id, cookieHeader, sessionExpiresAt, refreshBody);
+  await saveSession(userId, refreshedRead365Id, cookieHeader, sessionExpiresAt, refreshBody);
 
   return {
-    read365Id,
+    read365Id: refreshedRead365Id,
     cookie: cookieHeader,
     sessionExpiresAt,
     profile: toPublicProfile(refreshBody.data),

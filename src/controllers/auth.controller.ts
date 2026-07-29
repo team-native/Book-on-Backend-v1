@@ -8,7 +8,7 @@ import { ApiError, sendSuccess } from "../lib/api";
 import { hashPassword, verifyPassword } from "../lib/password";
 import { createAccessToken, createRefreshToken, hashToken } from "../lib/token";
 import { sendPasswordResetCode, sendRegisterVerificationCode } from "../services/mail";
-import { loginRead365Session, registerRead365Session } from "../services/read365-session";
+import { extendRead365Session, loginRead365Session, registerRead365Session } from "../services/read365-session";
 import { UserRow } from "../types/user.types";
 
 const passwordPattern = /^(?=.*[a-zA-Z])(?=.*[!@#$%^&?~])[a-zA-Z0-9!@#$%^&?~]{6,15}$/;
@@ -343,6 +343,15 @@ export const registerRead365ExternalSession = async (req: Request, res: Response
     sessionExpiresAt
   );
   sendSuccess(res, 200, "read365 간편로그인 세션을 등록했습니다.", session);
+};
+
+export const extendRead365 = async (req: Request, res: Response) => {
+  if (typeof req.userId !== "number") {
+    throw new ApiError(401, 4010, "로그인이 필요합니다.");
+  }
+
+  const session = await extendRead365Session(req.userId);
+  sendSuccess(res, 200, "read365 세션을 연장했습니다.", session);
 };
 
 export const resetPassword = async (req: Request, res: Response) => {

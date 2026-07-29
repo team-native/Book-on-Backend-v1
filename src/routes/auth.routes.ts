@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  extendRead365,
   login,
   loginRead365,
   logout,
@@ -22,5 +23,6 @@ authRouter.post("/logout", asyncHandler(logout));
 authRouter.post("/refresh", asyncHandler(refresh));
 authRouter.post("/read365/login", requireAuth, asyncHandler(loginRead365));
 authRouter.post("/read365/session", requireAuth, asyncHandler(registerRead365ExternalSession));
+authRouter.post("/read365/session/extend", requireAuth, asyncHandler(extendRead365));
 authRouter.post("/password-reset/email", asyncHandler(sendResetEmail));
 authRouter.patch("/password-reset", asyncHandler(resetPassword));

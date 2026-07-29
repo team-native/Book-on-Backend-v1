@@ -515,6 +515,57 @@ Example response:
 | 401 | 4014 | read365 세션 무효/만료 | 만료된 WebView Cookie |
 | 502 | 5023 | read365 세션 확인 서버 연결/응답 오류 | read365 장애 또는 응답 파싱 실패 |
 
+## POST /auth/read365/session/extend
+
+저장된 read365 세션 Cookie로 read365 세션을 검증하고 서버 DB의 세션 만료 시간을 갱신한다. 응답에는 원본 Cookie와 `JSESSIONID`를 포함하지 않는다.
+
+| 항목 | 값 |
+|---|---|
+| 인증 | 필요 |
+| params | 없음 |
+| body | 없음 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+
+Status codes:
+
+| code | message |
+|---:|---|
+| 200 | read365 세션을 연장했습니다. |
+| 401 | 로그인이 필요합니다. / read365 세션이 없습니다. 다시 로그인해 주세요. / read365 세션이 만료되었습니다. 다시 로그인해 주세요. / read365 세션이 유효하지 않습니다. 다시 로그인해 주세요. |
+| 502 | read365 세션 연장에 실패했습니다. / read365 응답을 해석하지 못했습니다. |
+
+Example response:
+
+```json
+{
+  "errorCode": 0,
+  "message": "read365 세션을 연장했습니다.",
+  "data": {
+    "read365Id": "read365-id",
+    "sessionExpiresAt": "2026-07-20T15:00:00.000Z",
+    "profile": {
+      "memberKey": "123",
+      "schKey": "456",
+      "id": "read365-id",
+      "name": "홍길동"
+    }
+  }
+}
+```
+
+오류 반례:
+
+| HTTP status | errorCode | 조건 | 예시 |
+|---:|---:|---|---|
+| 401 | 4010 | 서비스 JWT 없음/만료 | `Authorization` 없음 |
+| 401 | 4014 | 저장된 read365 세션 없음/만료/무효 | `/auth/read365/session` 전 호출 |
+| 502 | 5023 | read365 세션 연장 서버 연결/응답 오류 | read365 장애 또는 응답 파싱 실패 |
+
 ## POST /auth/password-reset/email
 
 비밀번호 재설정 인증 메일 발송.

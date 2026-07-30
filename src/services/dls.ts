@@ -14,9 +14,10 @@ import {
 export type { DlsBook, DlsBookState, DlsCategory };
 
 type DlsProxyEnvelope<T> = {
-  success: boolean;
-  status: "SUCCESS" | "WARNING" | string;
-  data: T;
+  success?: boolean;
+  status?: "SUCCESS" | "WARNING" | string;
+  message?: string;
+  data?: T;
 };
 
 type DlsProxyBook = {
@@ -50,10 +51,102 @@ type DlsProxyBookList = {
 
 export type DlsProxyData = Record<string, unknown>;
 
+type DlsErrorReason =
+  | "CONNECTION_FAILED"
+  | "TIMEOUT"
+  | "HTTP_ERROR"
+  | "INVALID_RESPONSE"
+  | "LOOKUP_FAILED";
+
+type DlsErrorDetail = {
+  service: "DLS";
+  reason: DlsErrorReason;
+  path: string;
+  httpStatus?: number;
+  proxyStatus?: string;
+  timeout?: boolean;
+  responseBody?: string;
+};
+
+const dlsErrorCodes: Record<DlsErrorReason, number> = {
+  CONNECTION_FAILED: 5021,
+  TIMEOUT: 5022,
+  HTTP_ERROR: 5023,
+  INVALID_RESPONSE: 5024,
+  LOOKUP_FAILED: 5025
+};
+
+const dlsErrorMessages: Record<DlsErrorReason, string> = {
+  CONNECTION_FAILED: "학교 도서관 프록시에 연결할 수 없습니다.",
+  TIMEOUT: "학교 도서관 프록시 요청 시간이 초과되었습니다.",
+  HTTP_ERROR: "학교 도서관 프록시가 오류 응답을 반환했습니다.",
+  INVALID_RESPONSE: "학교 도서관 서버 응답이 올바르지 않습니다.",
+  LOOKUP_FAILED: "학교 도서관 조회에 실패했습니다."
+};
+
+const buildDlsUrl = (path: string) => {
+  const base = new URL(env.dls.baseUrl);
+  const input = new URL(path, "http://book-on.local");
+  const basePath = base.pathname === "/" ? "" : base.pathname.replace(/\/$/, "");
+  const inputPath = input.pathname.replace(/^\//, "");
+  base.pathname = [basePath, inputPath].filter(Boolean).join("/");
+  base.search = input.search;
+  return base;
+};
+
+const toBodyPreview = (body: string) => body.replace(/\s+/g, " ").trim().slice(0, 500);
+
+const toSafePath = (url: URL) => {
+  const query = [...url.searchParams.keys()].map((key) => `${key}=...`).join("&");
+  return `${url.pathname}${query ? `?${query}` : ""}`;
+};
+
+const createDlsError = (
+  reason: DlsErrorReason,
+  url: URL,
+  options: {
+    httpStatus?: number;
+    proxyStatus?: string;
+    timeout?: boolean;
+    responseBody?: string;
+    message?: string;
+  } = {}
+) => {
+  const detail: DlsErrorDetail = {
+    service: "DLS",
+    reason,
+    path: toSafePath(url),
+    httpStatus: options.httpStatus,
+    proxyStatus: options.proxyStatus,
+    timeout: options.timeout,
+    responseBody: options.responseBody ? toBodyPreview(options.responseBody) : undefined
+  };
+
+  console.error("[DLS_PROXY_ERROR]", JSON.stringify(detail));
+
+  return new ApiError(
+    502,
+    dlsErrorCodes[reason],
+    options.message || dlsErrorMessages[reason],
+    detail
+  );
+};
+
+const isTimeoutError = (error: unknown) =>
+  error instanceof Error && (error.name === "AbortError" || error.name === "TimeoutError");
+
+export const isDlsServiceError = (error: unknown) =>
+  error instanceof ApiError &&
+  error.status === 502 &&
+  typeof error.data === "object" &&
+  error.data !== null &&
+  (error.data as { service?: unknown }).service === "DLS";
+
 const request = async <T>(path: string, init?: RequestInit) => {
+  const url = buildDlsUrl(path);
   let response: globalThis.Response;
   try {
-    response = await fetch(new URL(path, env.dls.baseUrl), {
+    response = await fetch(url, {
       ...init,
       headers: {
         accept: "application/json",
@@ -62,18 +155,49 @@ const request = async <T>(path: string, init?: RequestInit) => {
       },
       signal: AbortSignal.timeout(env.dls.timeoutMs)
     });
-  } catch {
-    throw new ApiError(502, 5021, "학교 도서관 서버에 연결할 수 없습니다.");
+  } catch (error) {
+    throw createDlsError(isTimeoutError(error) ? "TIMEOUT" : "CONNECTION_FAILED", url, {
+      timeout: isTimeoutError(error)
+    });
   }
 
+  const responseBody = await response.text().catch(() => "");
   if (!response.ok) {
-    throw new ApiError(502, 5021, "학교 도서관 서버 응답이 올바르지 않습니다.");
+    throw createDlsError("HTTP_ERROR", url, {
+      httpStatus: response.status,
+      responseBody
+    });
   }
 
-  const body = (await response.json()) as DlsProxyEnvelope<T>;
-  if (body.status !== "SUCCESS" && body.status !== "WARNING") {
-    throw new ApiError(502, 5021, "학교 도서관 조회에 실패했습니다.");
+  let body: DlsProxyEnvelope<T>;
+  try {
+    body = JSON.parse(responseBody) as DlsProxyEnvelope<T>;
+  } catch {
+    throw createDlsError("INVALID_RESPONSE", url, {
+      httpStatus: response.status,
+      responseBody
+    });
   }
+
+  const proxyStatus = typeof body.status === "string" ? body.status : undefined;
+  const successStatus = body.status === "SUCCESS" || body.status === "WARNING";
+  if (body.success === false || (body.status !== undefined && !successStatus)) {
+    throw createDlsError("LOOKUP_FAILED", url, {
+      httpStatus: response.status,
+      proxyStatus,
+      responseBody,
+      message: body.message
+    });
+  }
+
+  if (body.data === undefined || body.data === null) {
+    throw createDlsError("INVALID_RESPONSE", url, {
+      httpStatus: response.status,
+      proxyStatus,
+      responseBody
+    });
+  }
+
   return body.data;
 };
 
@@ -140,6 +264,21 @@ export const searchDlsBooks = async (options: SearchOptions) => {
   const page = options.page ?? 1;
   const size = options.size ?? 20;
   const query = new URLSearchParams({ query: options.keyword || "" });
+  if (options.searchType) {
+    query.set("searchType", options.searchType);
+  }
+  if (options.categoryCode) {
+    query.set("categoryCode", options.categoryCode);
+  }
+  if (options.kdcCode) {
+    query.set("kdcCode", options.kdcCode);
+  }
+  if (options.sort) {
+    query.set("sort", options.sort);
+  }
+  if (options.order) {
+    query.set("order", options.order);
+  }
   const data = await request<DlsProxyBookList>(`/searchBook?${query}`);
   return toSearchResult(data, page, size);
 };
@@ -216,7 +355,7 @@ export const getDlsBookDetail = (bookKey: string, speciesKey: string) => {
 
 export const getDlsPopularBooks = async () => {
   const result = await searchDlsBooks({
-    keyword: env.dls.schoolName || "",
+    keyword: env.dls.popularKeyword,
     page: 1,
     size: 50
   });

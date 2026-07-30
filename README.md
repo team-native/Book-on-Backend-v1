@@ -21,6 +21,7 @@ npm run dev
 - `DLS_PROV_CODE`: 기본값 `F10`
 - `DLS_NEIS_CODE`: 기본값 `F100000120`
 - `DLS_SCHOOL_NAME`: 학교명
+- `DLS_POPULAR_KEYWORD`: 인기/추천 도서 조회에 사용할 검색어. 비어 있으면 `DLS_SCHOOL_NAME`, 그다음 `소프트웨어`를 사용
 - `DLS_TIMEOUT_MS`: DLS 프록시 요청 타임아웃
 
 ## read365 기능

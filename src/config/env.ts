@@ -11,6 +11,11 @@ const getRequiredEnv = (key: string) => {
   return value;
 };
 
+const getOptionalEnv = (key: string) => {
+  const value = process.env[key]?.trim();
+  return value || undefined;
+};
+
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   port: Number(process.env.PORT ?? 3000),
@@ -41,7 +46,8 @@ export const env = {
     baseUrl: process.env.DLS_PROXY_BASE_URL ?? process.env.DLS_BASE_URL ?? "http://localhost:3001",
     provCode: process.env.DLS_PROV_CODE ?? "F10",
     neisCode: process.env.DLS_NEIS_CODE ?? "F100000120",
-    schoolName: process.env.DLS_SCHOOL_NAME ?? "",
+    schoolName: getOptionalEnv("DLS_SCHOOL_NAME") ?? "",
+    popularKeyword: getOptionalEnv("DLS_POPULAR_KEYWORD") ?? getOptionalEnv("DLS_SCHOOL_NAME") ?? "소프트웨어",
     timeoutMs: Number(process.env.DLS_TIMEOUT_MS ?? 30000)
   }
 };

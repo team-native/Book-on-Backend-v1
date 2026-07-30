@@ -3,7 +3,7 @@ import { publicQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { RowDataPacket } from "../db/types";
 import { ApiError, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
-import { enrichDlsBooks, getDlsPopularBooks, serializeDlsBook } from "../services/dls";
+import { enrichDlsBooks, getDlsPopularBooks, isDlsServiceError, serializeDlsBook } from "../services/dls";
 import { findProfileImageByFile, findProfileImageMetaByEmail } from "../services/profile-image";
 
 export const listNotices = async (req: Request, res: Response) => {
@@ -72,21 +72,46 @@ export const getHome = async (req: Request, res: Response) => {
 
   const q = publicQueries.listBanners(limit);
   const [banners] = await pool.query<RowDataPacket[]>(q.sql, q.values);
-  const popularBooks = (await getDlsPopularBooks()).slice(0, 1);
-  const recommendations = await enrichDlsBooks(popularBooks);
+  let todayRecommendation: Record<string, unknown> | null = null;
+  let dlsStatus: {
+    status: "OK" | "UNAVAILABLE";
+    errorCode?: number;
+    message?: string;
+    data?: unknown;
+  } = { status: "OK" };
 
-  sendSuccess(res, 200, "메인 화면 조회 성공", {
-    banners,
-    todayRecommendation: recommendations[0]
+  try {
+    const popularBooks = (await getDlsPopularBooks()).slice(0, 1);
+    const recommendations = await enrichDlsBooks(popularBooks);
+    todayRecommendation = recommendations[0]
       ? {
           ...serializeDlsBook(recommendations[0].book, recommendations[0].state),
           reason: "학교 도서관의 실제 대출 통계를 기반으로 추천되었습니다."
         }
-      : null,
+      : null;
+  } catch (error) {
+    if (!isDlsServiceError(error)) {
+      throw error;
+    }
+    const dlsError = error as ApiError;
+    dlsStatus = {
+      status: "UNAVAILABLE",
+      errorCode: dlsError.errorCode,
+      message: dlsError.message,
+      data: dlsError.data
+    };
+  }
+
+  sendSuccess(res, 200, "메인 화면 조회 성공", {
+    banners,
+    todayRecommendation,
     menus: [
       { code: "RANKING", name: "랭킹", path: "/ranking" },
       { code: "LIBRARY", name: "도서실", path: "/library" },
       { code: "NEW_BOOKS", name: "신간추천", path: "/new-books" }
-    ]
+    ],
+    externalServices: {
+      dls: dlsStatus
+    }
   });
 };

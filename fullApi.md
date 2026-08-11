@@ -444,7 +444,7 @@ Example response:
 
 ## POST /auth/read365/session
 
-앱/WebView에서 완료한 read365 간편로그인 세션을 검증 후 저장. 응답에는 원본 Cookie와 `JSESSIONID`를 포함하지 않는다.
+앱/WebView/OAuth 흐름에서 완료한 read365 간편로그인 세션을 검증 후 저장. 응답에는 원본 Cookie와 `JSESSIONID`를 포함하지 않는다.
 
 | 항목 | 값 |
 |---|---|
@@ -472,8 +472,8 @@ Request body:
 ```json
 {
   "cookieHeader": "string",
-  "read365Id": "string",
-  "sessionExpiresAt": "string"
+  "read365Id": "string (optional)",
+  "sessionExpiresAt": "string (optional)"
 }
 ```
 
@@ -512,7 +512,7 @@ Example response:
 |---:|---:|---|---|
 | 401 | 4010 | 서비스 JWT 없음/만료 | `Authorization` 없음 |
 | 422 | 4222 | Cookie 누락/형식 오류 | `{ "cookieHeader": "" }` |
-| 401 | 4014 | read365 세션 무효/만료 | 만료된 WebView Cookie |
+| 401 | 4014 | read365 세션 무효/만료/사용자 불일치/Cookie 무효 | 만료된 WebView Cookie 또는 다른 read365 사용자 Cookie |
 | 502 | 5023 | read365 세션 확인 서버 연결/응답 오류 | read365 장애 또는 응답 파싱 실패 |
 
 ## POST /auth/read365/session/extend

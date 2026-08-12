@@ -243,6 +243,15 @@ const json = (value: unknown) => JSON.stringify(value);
 const getRegCode = (item: { reg_code?: unknown; reg_no?: unknown }) =>
   toText(item.reg_code || item.reg_no).trim();
 
+const isMissingRegCode = (regCode: string) => {
+  const match = /^KM0*(\d+)$/i.exec(regCode);
+  if (!match) {
+    return false;
+  }
+  const number = Number(match[1]);
+  return number >= 4100 && number <= 4200;
+};
+
 const getStableNumericBookKey = (regCode: string) => {
   const prefix = (regCode.match(/^[A-Za-z]+/)?.[0] ?? "DLS").toUpperCase();
   const number = Number(regCode.match(/\d+$/)?.[0] ?? 0);
@@ -337,7 +346,7 @@ const resolveBookCategory = async (book: DlsProxyBook, regCode: string) => {
 
 const upsertCachedBook = async (book: DlsProxyBook) => {
   const regCode = getRegCode(book);
-  if (!regCode) {
+  if (!regCode || isMissingRegCode(regCode)) {
     return;
   }
   const category = await resolveBookCategory(book, regCode);
@@ -436,7 +445,9 @@ const hideStaleSearchBooks = async (
   categoryCode: string | undefined,
   data: DlsProxyBookList
 ) => {
-  const returnedRegCodes = (data.bookList ?? []).map(getRegCode).filter(Boolean);
+  const returnedRegCodes = (data.bookList ?? [])
+    .map(getRegCode)
+    .filter((regCode) => regCode && !isMissingRegCode(regCode));
   const values: unknown[] = [`%${queryText}%`, `%${queryText}%`, `%${queryText}%`, `%${queryText}%`, `%${queryText}%`];
   const filters = [
     "deleted_at IS NULL",
@@ -466,7 +477,11 @@ const hideMissingBookInfos = async (regNos: string, data: DlsProxyBookList) => {
   if (requested.length === 0) {
     return;
   }
-  const returned = new Set((data.bookList ?? []).map(getRegCode).filter(Boolean));
+  const returned = new Set(
+    (data.bookList ?? [])
+      .map(getRegCode)
+      .filter((regCode) => regCode && !isMissingRegCode(regCode))
+  );
   const missing = requested.filter((regCode) => !returned.has(regCode));
   if (missing.length === 0) {
     return;
@@ -621,7 +636,9 @@ const fallbackBookInfo = async (regNos: string): Promise<DlsProxyBookList> => {
   );
   const bookList = rows
     .map((row) => parseRaw<DlsProxyBook>(row.raw_json))
-    .filter((book): book is DlsProxyBook => Boolean(book));
+    .filter((book): book is DlsProxyBook =>
+      book !== null && !isMissingRegCode(getRegCode(book))
+    );
   if (bookList.length === 0) {
     throw new ApiError(502, 5025, "DLS 프록시를 사용할 수 없고 저장된 도서 정보도 없습니다.", { source: "DLS_CACHE" });
   }
@@ -652,7 +669,9 @@ const fallbackSearchBook = async (queryText: string, categoryCode?: string): Pro
   );
   const bookList = rows
     .map((row) => parseRaw<DlsProxyBook>(row.raw_json))
-    .filter((book): book is DlsProxyBook => Boolean(book));
+    .filter((book): book is DlsProxyBook =>
+      book !== null && !isMissingRegCode(getRegCode(book))
+    );
   if (bookList.length === 0) {
     throw new ApiError(502, 5025, "DLS 프록시를 사용할 수 없고 저장된 검색 결과도 없습니다.", { source: "DLS_CACHE" });
   }
@@ -781,7 +800,9 @@ const mapProxyBook = (book: DlsProxyBook): DlsBook => {
 };
 
 const toSearchResult = (data: DlsProxyBookList, page: number, size: number): DlsSearchResult => {
-  const books = (data.bookList ?? []).map(mapProxyBook);
+  const books = (data.bookList ?? [])
+    .filter((book) => !isMissingRegCode(getRegCode(book)))
+    .map(mapProxyBook);
   const totalCount = Number(data.count ?? books.length);
   const start = (page - 1) * size;
   const bookList = books.slice(start, start + size);

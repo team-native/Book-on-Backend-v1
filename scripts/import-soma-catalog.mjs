@@ -28,6 +28,15 @@ const categoryNames = {
 
 const missingTitle = "\uc81c\ubaa9 \uc5c6\uc74c";
 
+const isMissingRegCode = (regCode) => {
+  const match = /^KM0*(\d+)$/.exec(String(regCode || "").toUpperCase());
+  if (!match) {
+    return false;
+  }
+  const number = Number(match[1]);
+  return number >= 4100 && number <= 4200;
+};
+
 const categoryStatement = database.prepare(`
   INSERT INTO dls_categories (code, name, source, updated_at)
   VALUES (?, ?, 'CALL_NO', CURRENT_TIMESTAMP)
@@ -88,15 +97,21 @@ try {
   database.exec(`
     DELETE FROM dls_catalog_books;
     DELETE FROM dls_books
-    WHERE holding_key IS NULL
+    WHERE (
+      holding_key IS NULL
       AND bib_key IS NULL
       AND reg_code NOT IN (SELECT DISTINCT reg_code FROM dls_current_loans)
-      AND reg_code NOT IN (SELECT DISTINCT reg_code FROM dls_loan_histories);
+      AND reg_code NOT IN (SELECT DISTINCT reg_code FROM dls_loan_histories)
+    )
+    OR (reg_code >= 'KM00004100' AND reg_code <= 'KM00004200');
   `);
 
   const lines = fs.readFileSync(inputPath, "utf8").split(/\r?\n/).filter(Boolean);
   for (const line of lines) {
     const item = JSON.parse(line);
+    if (isMissingRegCode(item.regCode)) {
+      continue;
+    }
     if (item.categoryCode) {
       item.categoryName = categoryNames[item.categoryCode] || item.categoryName || null;
     }

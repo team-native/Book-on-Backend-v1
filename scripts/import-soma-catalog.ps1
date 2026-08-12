@@ -68,10 +68,16 @@ try {
       $callNo = Read-Text $values $rows $cols $r ($regCol + 5)
       $status = ""
       $registeredAt = ""
+      $tail = @()
       for ($c = $regCol + 8; $c -le [Math]::Min($cols, $regCol + 13); $c++) {
         $text = Read-Text $values $rows $cols $r $c
-        if (-not $status -and $text) { $status = $text }
-        if ($text -match "^[0-9]{4}-[0-9]{2}-[0-9]{2}$") { $registeredAt = $text }
+        if ($text) { $tail += $text }
+        if ($text -match "^[0-9]{4}-[0-9]{2}-[0-9]{2}$") {
+          $registeredAt = $text
+          if ($tail.Count -ge 2) {
+            $status = $tail[$tail.Count - 2]
+          }
+        }
       }
 
       $category = Get-Category $callNo

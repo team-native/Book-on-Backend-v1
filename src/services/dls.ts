@@ -243,6 +243,13 @@ const json = (value: unknown) => JSON.stringify(value);
 const getRegCode = (item: { reg_code?: unknown; reg_no?: unknown }) =>
   toText(item.reg_code || item.reg_no).trim();
 
+const getStableNumericBookKey = (regCode: string) => {
+  const prefix = (regCode.match(/^[A-Za-z]+/)?.[0] ?? "DLS").toUpperCase();
+  const number = Number(regCode.match(/\d+$/)?.[0] ?? 0);
+  const prefixHash = [...prefix].reduce((sum, char) => sum + char.charCodeAt(0), 0) % 100;
+  return String((prefixHash + 1) * 1000000000 + number);
+};
+
 const callNoCategoryNames: Record<string, string> = {
   "0": "총류",
   "1": "철학",
@@ -359,6 +366,7 @@ const upsertCachedBook = async (book: DlsProxyBook) => {
         holding_key = excluded.holding_key,
         bib_key = excluded.bib_key,
         raw_json = excluded.raw_json,
+        deleted_at = NULL,
         last_synced_at = CURRENT_TIMESTAMP
     `,
     [
@@ -421,6 +429,56 @@ const upsertCachedStudent = async (student: DlsProxyStudent) => {
 
 const cacheBookList = async (data: DlsProxyBookList) => {
   await Promise.all((data.bookList ?? []).map(upsertCachedBook));
+};
+
+const hideStaleSearchBooks = async (
+  queryText: string,
+  categoryCode: string | undefined,
+  data: DlsProxyBookList
+) => {
+  const returnedRegCodes = (data.bookList ?? []).map(getRegCode).filter(Boolean);
+  const values: unknown[] = [`%${queryText}%`, `%${queryText}%`, `%${queryText}%`, `%${queryText}%`, `%${queryText}%`];
+  const filters = [
+    "deleted_at IS NULL",
+    "(title LIKE ? OR author LIKE ? OR publisher LIKE ? OR reg_code LIKE ? OR category_name LIKE ?)"
+  ];
+  if (categoryCode) {
+    filters.push("category_code = ?");
+    values.push(categoryCode);
+  }
+  if (returnedRegCodes.length > 0) {
+    filters.push(`reg_code NOT IN (${returnedRegCodes.map(() => "?").join(", ")})`);
+    values.push(...returnedRegCodes);
+  }
+
+  await pool.query(
+    `
+      UPDATE dls_books
+      SET deleted_at = CURRENT_TIMESTAMP
+      WHERE ${filters.join(" AND ")}
+    `,
+    values
+  );
+};
+
+const hideMissingBookInfos = async (regNos: string, data: DlsProxyBookList) => {
+  const requested = regNos.split(/[,\s]+/).map((item) => item.trim()).filter(Boolean);
+  if (requested.length === 0) {
+    return;
+  }
+  const returned = new Set((data.bookList ?? []).map(getRegCode).filter(Boolean));
+  const missing = requested.filter((regCode) => !returned.has(regCode));
+  if (missing.length === 0) {
+    return;
+  }
+  await pool.query(
+    `
+      UPDATE dls_books
+      SET deleted_at = CURRENT_TIMESTAMP
+      WHERE reg_code IN (${missing.map(() => "?").join(", ")})
+    `,
+    missing
+  );
 };
 
 const cacheSearchStudent = async (data: DlsProxyData) => {
@@ -554,7 +612,9 @@ const parseRaw = <T>(value: unknown): T | null => {
 const fallbackBookInfo = async (regNos: string): Promise<DlsProxyBookList> => {
   const requested = regNos.split(/[,\s]+/).map((item) => item.trim()).filter(Boolean);
   const placeholders = requested.map(() => "?").join(", ");
-  const where = requested.length > 0 ? `WHERE reg_code IN (${placeholders})` : "";
+  const where = requested.length > 0
+    ? `WHERE deleted_at IS NULL AND reg_code IN (${placeholders})`
+    : "WHERE deleted_at IS NULL";
   const [rows] = await pool.query<RowDataPacket[]>(
     `SELECT raw_json FROM dls_books ${where} ORDER BY last_synced_at DESC`,
     requested
@@ -584,7 +644,7 @@ const fallbackSearchBook = async (queryText: string, categoryCode?: string): Pro
     `
       SELECT raw_json
       FROM dls_books
-      WHERE ${filters.join(" AND ")}
+      WHERE deleted_at IS NULL AND ${filters.join(" AND ")}
       ORDER BY last_synced_at DESC
       LIMIT 100
     `,
@@ -685,7 +745,7 @@ const normalizeDlsDate = (value: unknown) => {
 
 const mapProxyBook = (book: DlsProxyBook): DlsBook => {
   const regNo = getRegCode(book);
-  const holdingKey = toText(book.holding_key || book.bib_key || regNo);
+  const holdingKey = toText(book.holding_key || book.bib_key || getStableNumericBookKey(regNo));
   const bibKey = toText(book.bib_key || book.holding_key || regNo);
   const locationName = toText(book.location_desc || book.location || book.location_nm);
   const classNo = toText(book.class_no);
@@ -756,6 +816,7 @@ export const searchDlsBooks = async (options: SearchOptions) => {
   const data = await withCacheFallback(
     () => request<DlsProxyBookList>(`/searchBook?${query}`).then(async (liveData) => {
       await cacheBookList(liveData);
+      await hideStaleSearchBooks(options.keyword || "", options.categoryCode, liveData);
       return liveData;
     }),
     () => fallbackSearchBook(options.keyword || "", options.categoryCode)
@@ -792,6 +853,7 @@ export const getDlsBookInfo = (regNos: string) => {
   return withCacheFallback(
     () => request<DlsProxyBookList>(`/bookInfo?${query}`).then(async (data) => {
       await cacheBookList(data);
+      await hideMissingBookInfos(regNos, data);
       return data;
     }),
     () => fallbackBookInfo(regNos)
@@ -833,6 +895,7 @@ export const searchDlsBookRaw = (queryText: string) => {
   return withCacheFallback(
     () => request<DlsProxyBookList>(`/searchBook?${query}`).then(async (data) => {
       await cacheBookList(data);
+      await hideStaleSearchBooks(queryText, undefined, data);
       return data;
     }),
     () => fallbackSearchBook(queryText)

@@ -62,19 +62,38 @@ const bookStatement = database.prepare(`
     return_plan_date, holding_key, bib_key, raw_json, last_synced_at
   ) VALUES (?, ?, ?, ?, ?, NULL, ?, NULL, ?, ?, NULL, NULL, ?, NULL, NULL, NULL, ?, CURRENT_TIMESTAMP)
   ON CONFLICT(reg_code) DO UPDATE SET
-    title = COALESCE(dls_books.title, excluded.title),
-    author = COALESCE(dls_books.author, excluded.author),
-    publisher = COALESCE(dls_books.publisher, excluded.publisher),
-    pub_year = COALESCE(dls_books.pub_year, excluded.pub_year),
-    call_no = COALESCE(dls_books.call_no, excluded.call_no),
-    category_code = COALESCE(dls_books.category_code, excluded.category_code),
-    category_name = COALESCE(dls_books.category_name, excluded.category_name),
-    status = COALESCE(dls_books.status, excluded.status)
+    title = COALESCE(excluded.title, dls_books.title),
+    author = COALESCE(excluded.author, dls_books.author),
+    publisher = COALESCE(excluded.publisher, dls_books.publisher),
+    pub_year = COALESCE(excluded.pub_year, dls_books.pub_year),
+    call_no = COALESCE(excluded.call_no, dls_books.call_no),
+    category_code = COALESCE(excluded.category_code, dls_books.category_code),
+    category_name = COALESCE(excluded.category_name, dls_books.category_name),
+    status = CASE
+      WHEN dls_books.holding_key IS NULL AND dls_books.bib_key IS NULL
+      THEN COALESCE(excluded.status, dls_books.status)
+      ELSE dls_books.status
+    END,
+    raw_json = CASE
+      WHEN dls_books.holding_key IS NULL AND dls_books.bib_key IS NULL
+      THEN excluded.raw_json
+      ELSE dls_books.raw_json
+    END,
+    last_synced_at = CURRENT_TIMESTAMP
 `);
 
 let count = 0;
 database.exec("BEGIN IMMEDIATE");
 try {
+  database.exec(`
+    DELETE FROM dls_catalog_books;
+    DELETE FROM dls_books
+    WHERE holding_key IS NULL
+      AND bib_key IS NULL
+      AND reg_code NOT IN (SELECT DISTINCT reg_code FROM dls_current_loans)
+      AND reg_code NOT IN (SELECT DISTINCT reg_code FROM dls_loan_histories);
+  `);
+
   const lines = fs.readFileSync(inputPath, "utf8").split(/\r?\n/).filter(Boolean);
   for (const line of lines) {
     const item = JSON.parse(line);

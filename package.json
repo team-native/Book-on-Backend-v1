@@ -7,7 +7,9 @@
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "db:migrate": "tsx src/db/migrate.ts"
+    "db:migrate": "tsx src/db/migrate.ts",
+    "dls:catalog:export": "powershell -ExecutionPolicy Bypass -File scripts/import-soma-catalog.ps1",
+    "dls:catalog:import": "node --experimental-sqlite scripts/import-soma-catalog.mjs"
   },
   "dependencies": {
     "cors": "^2.8.5",

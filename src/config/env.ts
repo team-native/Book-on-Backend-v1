@@ -49,5 +49,14 @@ export const env = {
     schoolName: getOptionalEnv("DLS_SCHOOL_NAME") ?? "",
     popularKeyword: getOptionalEnv("DLS_POPULAR_KEYWORD") ?? getOptionalEnv("DLS_SCHOOL_NAME") ?? "소프트웨어",
     timeoutMs: Number(process.env.DLS_TIMEOUT_MS ?? 30000)
+  },
+  fcm: {
+    projectId: getOptionalEnv("FCM_PROJECT_ID"),
+    clientEmail: getOptionalEnv("FCM_CLIENT_EMAIL"),
+    privateKey: getOptionalEnv("FCM_PRIVATE_KEY")?.replace(/\\n/g, "\n"),
+    serviceAccountJson: getOptionalEnv("FCM_SERVICE_ACCOUNT_JSON"),
+    schedulerEnabled: process.env.FCM_SCHEDULER_ENABLED !== "false",
+    dueReminderHour: Math.min(23, Math.max(0, Number(process.env.FCM_DUE_REMINDER_HOUR ?? 9))),
+    noticePollIntervalMs: Math.max(60000, Number(process.env.FCM_NOTICE_POLL_INTERVAL_MS ?? 300000))
   }
 };

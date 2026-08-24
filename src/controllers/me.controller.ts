@@ -26,7 +26,7 @@ export const getMe = async (req: Request, res: Response) => {
   const q4 = meQueries.listUserCurrentLoans(req.userId!);
   const [currentLoans] = await pool.query<RowDataPacket[]>(q4.sql, q4.values);
 
-  const { dueDateReminder, newBookReminder, ...profile } = user;
+  const { dueDateReminder, newBookReminder, noticeReminder, ...profile } = user;
   const profileImage = findProfileImageMetaByEmail(user.email);
   sendSuccess(res, 200, "마이페이지 조회 성공", {
     user: {
@@ -45,7 +45,8 @@ export const getMe = async (req: Request, res: Response) => {
     })),
     notificationSettings: {
       dueDateReminder: Boolean(dueDateReminder),
-      newBookReminder: Boolean(newBookReminder)
+      newBookReminder: Boolean(newBookReminder),
+      noticeReminder: Boolean(noticeReminder)
     }
   });
 };
@@ -87,13 +88,14 @@ export const deleteMyProfileImage = async (req: Request, res: Response) => {
 };
 
 export const updateNotificationSettings = async (req: Request, res: Response) => {
-  const { dueDateReminder, newBookReminder } = req.body ?? {};
-  if (dueDateReminder === undefined && newBookReminder === undefined) {
+  const { dueDateReminder, newBookReminder, noticeReminder } = req.body ?? {};
+  if (dueDateReminder === undefined && newBookReminder === undefined && noticeReminder === undefined) {
     throw new ApiError(400, 4001, "변경할 알림 설정을 입력해 주세요.");
   }
   if (
     (dueDateReminder !== undefined && typeof dueDateReminder !== "boolean") ||
-    (newBookReminder !== undefined && typeof newBookReminder !== "boolean")
+    (newBookReminder !== undefined && typeof newBookReminder !== "boolean") ||
+    (noticeReminder !== undefined && typeof noticeReminder !== "boolean")
   ) {
     throw new ApiError(400, 4001, "알림 설정 값이 올바르지 않습니다.");
   }
@@ -101,6 +103,7 @@ export const updateNotificationSettings = async (req: Request, res: Response) =>
   const updates: Record<string, unknown> = {};
   if (dueDateReminder !== undefined) updates.due_date_reminder = dueDateReminder;
   if (newBookReminder !== undefined) updates.new_book_reminder = newBookReminder;
+  if (noticeReminder !== undefined) updates.notice_reminder = noticeReminder;
 
   const q1 = meQueries.updateNotificationSettings(updates, req.userId!);
   await pool.query(q1.sql, q1.values);
@@ -109,6 +112,7 @@ export const updateNotificationSettings = async (req: Request, res: Response) =>
   const [users] = await pool.query<RowDataPacket[]>(q2.sql, q2.values);
   sendSuccess(res, 200, "알림 설정이 변경되었습니다.", {
     dueDateReminder: Boolean(users[0].dueDateReminder),
-    newBookReminder: Boolean(users[0].newBookReminder)
+    newBookReminder: Boolean(users[0].newBookReminder),
+    noticeReminder: Boolean(users[0].noticeReminder)
   });
 };

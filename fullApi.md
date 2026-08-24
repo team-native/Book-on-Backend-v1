@@ -35,6 +35,51 @@
 | 404 | 4040 | 등록되지 않은 path | `GET /unknown` |
 | 500 | 5000 | 처리되지 않은 서버 내부 오류 | DB/런타임 예외 |
 
+## 푸시 알림 규칙
+
+앱은 로그인 후 FCM 토큰을 `POST /me/fcm-token`으로 등록해야 푸시 알림을 받을 수 있다. 로그아웃하거나 FCM 토큰이 폐기되면 `DELETE /me/fcm-token`을 호출한다.
+
+서버가 보내는 알림:
+
+| 알림 | 조건 | 사용자 설정 | FCM data.type |
+|---|---|---|---|
+| 반납 3일 전 알림 | 대출 반납 예정일이 오늘 기준 3일 뒤인 경우 | `dueDateReminder=true` | `loan_due` |
+| 반납 당일 알림 | 대출 반납 예정일이 오늘인 경우 | `dueDateReminder=true` | `loan_due` |
+| 도서부 공지 알림 | 아직 해당 사용자에게 발송하지 않은 새 공지가 있는 경우 | `noticeReminder=true` | `notice` |
+
+반납 알림은 서비스 내부 `loans` 데이터와, 토큰 등록 시 `dlsUserKey`가 제공된 경우 DLS 현재 대출 캐시(`dls_current_loans`)를 기준으로 발송한다. 같은 사용자에게 같은 대출/공지 알림은 발송 이력으로 중복 발송을 방지한다.
+
+FCM 알림 payload 예시:
+
+```json
+{
+  "notification": {
+    "title": "반납 3일 전 알림",
+    "body": "\"클린 코드\" 반납일이 3일 남았습니다."
+  },
+  "data": {
+    "type": "loan_due",
+    "loanId": "10",
+    "source": "loan",
+    "dueDate": "2026-08-27",
+    "daysBefore": "3"
+  }
+}
+```
+
+```json
+{
+  "notification": {
+    "title": "도서부 공지: 여름방학 도서관 운영 안내",
+    "body": "방학 중 도서관 운영 시간이 변경됩니다."
+  },
+  "data": {
+    "type": "notice",
+    "noticeId": "1"
+  }
+}
+```
+
 ## GET /life
 
 서버 상태 확인 API.
@@ -1321,7 +1366,8 @@ Example response:
     ],
     "notificationSettings": {
       "dueDateReminder": true,
-      "newBookReminder": false
+      "newBookReminder": false,
+      "noticeReminder": true
     }
   }
 }
@@ -1593,7 +1639,15 @@ Example response:
 
 ## PATCH /me/notification-settings
 
-내 알림 설정 변경.
+내 알림 설정 변경. 포함한 필드만 변경된다.
+
+알림 설정 필드:
+
+| field | 설명 | 기본값 |
+|---|---|---|
+| `dueDateReminder` | 반납 3일 전/당일 알림 수신 여부 | `true` |
+| `newBookReminder` | 신간 도서 알림 수신 여부 | `false` |
+| `noticeReminder` | 도서부 공지 알림 수신 여부 | `true` |
 
 | 항목 | 값 |
 |---|---|
@@ -1619,8 +1673,9 @@ Request body:
 
 ```json
 {
-  "dueDateReminder": "boolean",
-  "newBookReminder": "boolean"
+  "dueDateReminder": "boolean (optional)",
+  "newBookReminder": "boolean (optional)",
+  "noticeReminder": "boolean (optional)"
 }
 ```
 
@@ -1629,7 +1684,8 @@ Example request body:
 ```json
 {
   "dueDateReminder": true,
-  "newBookReminder": false
+  "newBookReminder": false,
+  "noticeReminder": true
 }
 ```
 
@@ -1641,7 +1697,8 @@ Example response:
   "message": "알림 설정이 변경되었습니다.",
   "data": {
     "dueDateReminder": true,
-    "newBookReminder": false
+    "newBookReminder": false,
+    "noticeReminder": true
   }
 }
 ```
@@ -1652,6 +1709,140 @@ Example response:
 |---:|---:|---|---|
 | 400 | 4001 | 변경할 필드 없음 | `{}` |
 | 400 | 4001 | boolean이 아닌 값 | `{ "dueDateReminder": "true" }` |
+| 401 | 4010 | 인증 없음/오류 | 헤더 없음 |
+
+## POST /me/fcm-token
+
+앱 푸시 알림을 받을 FCM 토큰 등록/갱신. 같은 토큰으로 다시 호출하면 기존 토큰 정보를 갱신하고 비활성 상태를 해제한다.
+
+| 항목 | 값 |
+|---|---|
+| 인증 | 필요 |
+| params | 없음 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+| Content-Type | application/json |
+
+Status codes:
+
+| code | message |
+|---:|---|
+| 200 | FCM 토큰이 등록되었습니다. |
+| 400 | FCM 토큰을 입력해 주세요. / FCM 토큰 정보가 올바르지 않습니다. |
+| 401 | 인증이 필요합니다. |
+
+Request body:
+
+```json
+{
+  "token": "string",
+  "dlsUserKey": "string (optional)",
+  "platform": "ios | android | web (optional)",
+  "deviceId": "string (optional)"
+}
+```
+
+Request body fields:
+
+| field | required | 설명 |
+|---|---|---|
+| `token` | required | 앱에서 발급받은 FCM registration token |
+| `dlsUserKey` | optional | DLS 현재 대출 캐시 기반 반납 알림을 받기 위한 DLS 사용자 키 |
+| `platform` | optional | `ios`, `android`, `web` 등 앱 플랫폼 식별값 |
+| `deviceId` | optional | 앱에서 관리하는 기기 식별값 |
+
+Example request body:
+
+```json
+{
+  "token": "fcm-registration-token",
+  "dlsUserKey": "123456",
+  "platform": "android",
+  "deviceId": "device-uuid"
+}
+```
+
+Example response:
+
+```json
+{
+  "errorCode": 0,
+  "message": "FCM 토큰이 등록되었습니다.",
+  "data": {
+    "registered": true
+  }
+}
+```
+
+오류 반례:
+
+| HTTP status | errorCode | 조건 | 예시 |
+|---:|---:|---|---|
+| 400 | 4001 | `token` 누락 또는 길이 오류 | `{}` |
+| 400 | 4001 | 선택 필드 타입/길이 오류 | `{ "token": "valid-token", "platform": 1 }` |
+| 401 | 4010 | 인증 없음/오류 | 헤더 없음 |
+
+## DELETE /me/fcm-token
+
+로그아웃 또는 토큰 폐기 시 FCM 토큰 해제.
+
+| 항목 | 값 |
+|---|---|
+| 인증 | 필요 |
+| params | 없음 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+| Content-Type | application/json |
+
+Status codes:
+
+| code | message |
+|---:|---|
+| 200 | FCM 토큰이 해제되었습니다. |
+| 400 | FCM 토큰을 입력해 주세요. |
+| 401 | 인증이 필요합니다. |
+
+Request body:
+
+```json
+{
+  "token": "string"
+}
+```
+
+Example request body:
+
+```json
+{
+  "token": "fcm-registration-token"
+}
+```
+
+Example response:
+
+```json
+{
+  "errorCode": 0,
+  "message": "FCM 토큰이 해제되었습니다.",
+  "data": {
+    "unregistered": true
+  }
+}
+```
+
+오류 반례:
+
+| HTTP status | errorCode | 조건 | 예시 |
+|---:|---:|---|---|
+| 400 | 4001 | `token` 누락 또는 길이 오류 | `{}` |
 | 401 | 4010 | 인증 없음/오류 | 헤더 없음 |
 
 ## GET /marathon

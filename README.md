@@ -23,6 +23,11 @@ npm run dev
 - `DLS_SCHOOL_NAME`: 학교명
 - `DLS_POPULAR_KEYWORD`: 인기/추천 도서 조회에 사용할 검색어. 비어 있으면 `DLS_SCHOOL_NAME`, 그다음 `소프트웨어`를 사용
 - `DLS_TIMEOUT_MS`: DLS 프록시 요청 타임아웃
+- `FCM_PROJECT_ID`, `FCM_CLIENT_EMAIL`, `FCM_PRIVATE_KEY`: Firebase 서비스 계정 정보
+- `FCM_SERVICE_ACCOUNT_JSON`: Firebase 서비스 계정 JSON 문자열 또는 base64 JSON. 개별 FCM 환경 변수 대신 사용 가능
+- `FCM_SCHEDULER_ENABLED`: 반납/공지 푸시 스케줄러 사용 여부. 기본값 `true`
+- `FCM_DUE_REMINDER_HOUR`: 반납 알림 발송 시각. 기본값 `9`
+- `FCM_NOTICE_POLL_INTERVAL_MS`: 새 공지 감지 주기. 기본값 `300000`
 
 ## read365 기능
 
@@ -42,3 +47,11 @@ npm run dev
 - `GET /dls/execution`
 - `GET /dls/searchBook`
 - `GET /dls/extendLoan`
+
+## 알림 기능
+
+- `POST /me/fcm-token`
+- `DELETE /me/fcm-token`
+- `PATCH /me/notification-settings`
+- 반납 3일 전/당일 푸시 알림
+- 새 도서부 공지 푸시 알림

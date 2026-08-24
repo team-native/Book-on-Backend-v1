@@ -423,7 +423,7 @@ export const meQueries = {
     toQ(
       sb
         .select(
-          "id AS userId, email, name, department, gender, due_date_reminder AS dueDateReminder, new_book_reminder AS newBookReminder"
+          "id AS userId, email, name, department, gender, due_date_reminder AS dueDateReminder, new_book_reminder AS newBookReminder, notice_reminder AS noticeReminder"
         )
         .from("users")
         .where({ id: userId })
@@ -465,10 +465,172 @@ export const meQueries = {
   findNotificationSettings: (userId: number): Q =>
     toQ(
       sb
-        .select("due_date_reminder AS dueDateReminder, new_book_reminder AS newBookReminder")
+        .select("due_date_reminder AS dueDateReminder, new_book_reminder AS newBookReminder, notice_reminder AS noticeReminder")
         .from("users")
         .where({ id: userId })
     ),
+};
+
+// Notifications
+
+export const notificationQueries = {
+  upsertFcmToken: (
+    userId: number,
+    token: string,
+    dlsUserKey: string | null,
+    platform: string | null,
+    deviceId: string | null
+  ): Q => ({
+    sql: `
+      INSERT INTO fcm_tokens (user_id, token, dls_user_key, platform, device_id, disabled_at, last_seen_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+      ON CONFLICT(token) DO UPDATE SET
+        user_id = excluded.user_id,
+        dls_user_key = excluded.dls_user_key,
+        platform = excluded.platform,
+        device_id = excluded.device_id,
+        disabled_at = NULL,
+        last_seen_at = CURRENT_TIMESTAMP,
+        updated_at = CURRENT_TIMESTAMP
+    `,
+    values: [userId, token, dlsUserKey, platform, deviceId],
+  }),
+
+  disableFcmToken: (userId: number, token: string): Q => ({
+    sql: "UPDATE fcm_tokens SET disabled_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND token = ?",
+    values: [userId, token],
+  }),
+
+  disableFcmTokenByToken: (token: string): Q => ({
+    sql: "UPDATE fcm_tokens SET disabled_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE token = ?",
+    values: [token],
+  }),
+
+  listDueLoanReminderTargets: (daysBefore: 0 | 3): Q => ({
+    sql: `
+      SELECT
+        u.id AS userId,
+        t.token,
+        CAST(l.id AS TEXT) AS loanId,
+        'loan' AS source,
+        b.title AS bookTitle,
+        l.due_date AS dueDate
+      FROM loans l
+      JOIN users u ON u.id = l.user_id
+      JOIN books b ON b.id = l.book_id
+      JOIN fcm_tokens t ON t.user_id = u.id AND t.disabled_at IS NULL
+      WHERE u.due_date_reminder = 1
+        AND l.status = 'BORROWED'
+        AND l.due_date = date('now', 'localtime', ?)
+      UNION ALL
+      SELECT
+        u.id AS userId,
+        t.token,
+        d.loan_key AS loanId,
+        'dls' AS source,
+        d.title AS bookTitle,
+        CASE
+          WHEN d.return_plan_date GLOB '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+            THEN substr(d.return_plan_date, 1, 4) || '-' || substr(d.return_plan_date, 5, 2) || '-' || substr(d.return_plan_date, 7, 2)
+          ELSE substr(d.return_plan_date, 1, 10)
+        END AS dueDate
+      FROM dls_current_loans d
+      JOIN fcm_tokens t ON t.dls_user_key = d.user_key AND t.disabled_at IS NULL
+      JOIN users u ON u.id = t.user_id
+      WHERE u.due_date_reminder = 1
+        AND d.return_plan_date IS NOT NULL
+        AND d.return_plan_date <> ''
+        AND CASE
+          WHEN d.return_plan_date GLOB '[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]'
+            THEN substr(d.return_plan_date, 1, 4) || '-' || substr(d.return_plan_date, 5, 2) || '-' || substr(d.return_plan_date, 7, 2)
+          ELSE substr(d.return_plan_date, 1, 10)
+        END = date('now', 'localtime', ?)
+    `,
+    values: [daysBefore === 0 ? "+0 days" : "+3 days", daysBefore === 0 ? "+0 days" : "+3 days"],
+  }),
+
+  listNoticeNotificationTargets: (noticeId: number): Q => ({
+    sql: `
+      SELECT
+        u.id AS userId,
+        t.token
+      FROM users u
+      JOIN fcm_tokens t ON t.user_id = u.id AND t.disabled_at IS NULL
+      WHERE u.notice_reminder = 1
+        AND NOT EXISTS (
+          SELECT 1
+          FROM notification_deliveries d
+          WHERE d.user_id = u.id
+            AND d.kind = 'NOTICE'
+            AND d.reference_type = 'notice'
+            AND d.reference_id = CAST(? AS TEXT)
+        )
+    `,
+    values: [noticeId],
+  }),
+
+  listPendingNoticeNotifications: (limit: number): Q => ({
+    sql: `
+      SELECT n.id AS noticeId, n.title, n.summary
+      FROM notices n
+      WHERE EXISTS (
+        SELECT 1
+        FROM users u
+        JOIN fcm_tokens t ON t.user_id = u.id AND t.disabled_at IS NULL
+        WHERE u.notice_reminder = 1
+          AND NOT EXISTS (
+            SELECT 1
+            FROM notification_deliveries d
+            WHERE d.user_id = u.id
+              AND d.kind = 'NOTICE'
+              AND d.reference_type = 'notice'
+              AND d.reference_id = CAST(n.id AS TEXT)
+          )
+      )
+      ORDER BY n.created_at ASC, n.id ASC
+      LIMIT ?
+    `,
+    values: [limit],
+  }),
+
+  insertNotificationDelivery: (
+    userId: number,
+    kind: string,
+    referenceType: string,
+    referenceId: string,
+    targetDate: string | null,
+    title: string,
+    body: string
+  ): Q => ({
+    sql: `
+      INSERT OR IGNORE INTO notification_deliveries (
+        user_id, kind, reference_type, reference_id, target_date, title, body
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `,
+    values: [userId, kind, referenceType, referenceId, targetDate, title, body],
+  }),
+
+  markNotificationDeliverySent: (
+    userId: number,
+    kind: string,
+    referenceType: string,
+    referenceId: string,
+    targetDate: string | null
+  ): Q => ({
+    sql: `
+      UPDATE notification_deliveries
+      SET sent_at = CURRENT_TIMESTAMP
+      WHERE user_id = ?
+        AND kind = ?
+        AND reference_type = ?
+        AND reference_id = ?
+        AND (
+          (target_date IS NULL AND ? IS NULL)
+          OR target_date = ?
+        )
+    `,
+    values: [userId, kind, referenceType, referenceId, targetDate, targetDate],
+  }),
 };
 
 // Public

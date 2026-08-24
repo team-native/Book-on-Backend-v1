@@ -2,6 +2,7 @@ import { Router, raw } from "express";
 import { listFavoriteBooks } from "../controllers/books.controller";
 import { listCurrentLoans, listLoanHistory } from "../controllers/loans.controller";
 import { deleteMyProfileImage, getMe, updateNotificationSettings, updateProfileImage } from "../controllers/me.controller";
+import { registerFcmToken, unregisterFcmToken } from "../controllers/notifications.controller";
 import { asyncHandler } from "../lib/api";
 import { requireAuth } from "../middleware/auth";
 
@@ -19,3 +20,5 @@ meRouter.post(
 );
 meRouter.delete("/profile-image", asyncHandler(deleteMyProfileImage));
 meRouter.patch("/notification-settings", asyncHandler(updateNotificationSettings));
+meRouter.post("/fcm-token", asyncHandler(registerFcmToken));
+meRouter.delete("/fcm-token", asyncHandler(unregisterFcmToken));

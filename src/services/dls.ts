@@ -28,6 +28,15 @@ type DlsProxyBook = {
   publisher?: string | null;
   pblcn_yr?: string | number | null;
   cover_img_path?: string | null;
+  coverImageUrl?: string | null;
+  coverUrl?: string | null;
+  image_url?: string | null;
+  imageUrl?: string | null;
+  thumbnail?: string | null;
+  thumbnail_url?: string | null;
+  thumbnailUrl?: string | null;
+  book_image_url?: string | null;
+  bookImageUrl?: string | null;
   ea_isbn?: string | null;
   call_no?: string | null;
   location?: string | null;
@@ -243,6 +252,24 @@ const json = (value: unknown) => JSON.stringify(value);
 const getRegCode = (item: { reg_code?: unknown; reg_no?: unknown }) =>
   toText(item.reg_code || item.reg_no).trim();
 
+const getCoverImageUrl = (book?: DlsProxyBook | null) => {
+  if (!book) {
+    return "";
+  }
+  return toText(
+    book.cover_img_path ||
+      book.coverImageUrl ||
+      book.coverUrl ||
+      book.image_url ||
+      book.imageUrl ||
+      book.thumbnail_url ||
+      book.thumbnailUrl ||
+      book.thumbnail ||
+      book.book_image_url ||
+      book.bookImageUrl
+  );
+};
+
 const isMissingRegCode = (regCode: string) => {
   const match = /^KM0*(\d+)$/i.exec(regCode);
   if (!match) {
@@ -389,7 +416,7 @@ const upsertCachedBook = async (book: DlsProxyBook) => {
       toNullableText(book.class_no),
       category.code,
       category.name,
-      toNullableText(book.cover_img_path),
+      toNullableText(getCoverImageUrl(book)),
       toNullableText(book.location_desc || book.location || book.location_nm),
       toNullableText(book.status_desc || book.status),
       toNullableText(book.rtn_plan_date),
@@ -779,7 +806,7 @@ const mapProxyBook = (book: DlsProxyBook): DlsBook => {
     author: toText(book.aut_nm),
     publisher: toText(book.publisher),
     pubYear: toText(book.pblcn_yr),
-    coverUrl: toText(book.cover_img_path),
+    coverUrl: getCoverImageUrl(book),
     isbn: toText(book.ea_isbn),
     regNo,
     classNo,
@@ -815,6 +842,13 @@ const toSearchResult = (data: DlsProxyBookList, page: number, size: number): Dls
   };
 };
 
+const syncDlsBookListToBookCache = async (data: DlsProxyBookList) => {
+  const books = (data.bookList ?? [])
+    .filter((book) => !isMissingRegCode(getRegCode(book)))
+    .map(mapProxyBook);
+  await syncDlsBooks(books);
+};
+
 export const searchDlsBooks = async (options: SearchOptions) => {
   const page = options.page ?? 1;
   const size = options.size ?? 20;
@@ -837,6 +871,7 @@ export const searchDlsBooks = async (options: SearchOptions) => {
   const data = await withCacheFallback(
     () => request<DlsProxyBookList>(`/searchBook?${query}`).then(async (liveData) => {
       await cacheBookList(liveData);
+      await syncDlsBookListToBookCache(liveData);
       await hideStaleSearchBooks(options.keyword || "", options.categoryCode, liveData);
       return liveData;
     }),
@@ -874,6 +909,7 @@ export const getDlsBookInfo = (regNos: string) => {
   return withCacheFallback(
     () => request<DlsProxyBookList>(`/bookInfo?${query}`).then(async (data) => {
       await cacheBookList(data);
+      await syncDlsBookListToBookCache(data);
       await hideMissingBookInfos(regNos, data);
       return data;
     }),
@@ -916,6 +952,7 @@ export const searchDlsBookRaw = (queryText: string) => {
   return withCacheFallback(
     () => request<DlsProxyBookList>(`/searchBook?${query}`).then(async (data) => {
       await cacheBookList(data);
+      await syncDlsBookListToBookCache(data);
       await hideStaleSearchBooks(queryText, undefined, data);
       return data;
     }),
@@ -935,7 +972,7 @@ export const getDlsBookState = (
   return request<DlsProxyBookList>(`/bookInfo?${query}`).then((data) => {
     const found = (data.bookList ?? [])[0];
     return {
-      coverUrl: toText(found?.cover_img_path),
+      coverUrl: getCoverImageUrl(found),
       status: toText(found?.status_desc || found?.status),
       locationName: toText(found?.location_desc || found?.location || found?.location_nm),
       returnPlanDate: toText(found?.rtn_plan_date)

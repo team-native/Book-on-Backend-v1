@@ -28,7 +28,9 @@ type DlsProxyBook = {
   publisher?: string | null;
   pblcn_yr?: string | number | null;
   cover_img_path?: string | null;
+  cover_image_url?: string | null;
   coverImageUrl?: string | null;
+  cover_url?: string | null;
   coverUrl?: string | null;
   image_url?: string | null;
   imageUrl?: string | null;
@@ -258,7 +260,9 @@ const getCoverImageUrl = (book?: DlsProxyBook | null) => {
   }
   return toText(
     book.cover_img_path ||
+      book.cover_image_url ||
       book.coverImageUrl ||
+      book.cover_url ||
       book.coverUrl ||
       book.image_url ||
       book.imageUrl ||
@@ -968,7 +972,8 @@ export const getDlsBookState = (
   book: Pick<DlsBook, "bookKey" | "provCode" | "neisCode"> & { regNo?: string }
 ) => {
   const query = new URLSearchParams({ reg_nos: book.regNo || book.bookKey });
-  return request<DlsProxyBookList>(`/bookInfo?${query}`).then((data) => {
+  return request<DlsProxyBookList>(`/bookInfo?${query}`).then(async (data) => {
+    await cacheBookList(data);
     const found = (data.bookList ?? [])[0];
     return {
       coverUrl: getCoverImageUrl(found),
@@ -982,12 +987,15 @@ export const getDlsBookState = (
 export const getDlsBookDetail = (bookKey: string, speciesKey: string) => {
   const regNo = speciesKey || bookKey;
   const query = new URLSearchParams({ reg_nos: regNo });
-  return request<DlsProxyBookList>(`/bookInfo?${query}`).then((data) => {
+  return request<DlsProxyBookList>(`/bookInfo?${query}`).then(async (data) => {
+    await cacheBookList(data);
     const found = (data.bookList ?? [])[0];
     if (!found) {
       throw new ApiError(404, 4042, "도서를 찾을 수 없습니다.");
     }
-    return mapProxyBook(found);
+    const mapped = mapProxyBook(found);
+    await syncDlsBooks([mapped]);
+    return mapped;
   });
 };
 

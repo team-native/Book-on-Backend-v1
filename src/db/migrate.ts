@@ -3,7 +3,7 @@ import path from "node:path";
 import { pool } from "./pool";
 import { RowDataPacket } from "./types";
 
-const run = async () => {
+export const runMigrations = async () => {
   await pool.exec(`
     CREATE TABLE IF NOT EXISTS schema_migrations (
       name TEXT NOT NULL PRIMARY KEY,
@@ -40,10 +40,13 @@ const run = async () => {
     }
   }
 
-  await pool.end();
 };
 
-run().catch((error) => {
-  console.error(error);
-  process.exit(1);
-});
+if (require.main === module) {
+  runMigrations()
+    .then(() => pool.end())
+    .catch((error) => {
+      console.error(error);
+      process.exit(1);
+    });
+}

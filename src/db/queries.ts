@@ -464,6 +464,25 @@ export const meQueries = {
     values: [userId],
   }),
 
+  findDlsIdentity: (userId: number): Q => ({
+    sql: `
+      SELECT
+        COALESCE(rs.access_token, t.dls_user_key) AS userKey,
+        COALESCE(du.user_no, rs.read365_id) AS userNo
+      FROM users u
+      LEFT JOIN read365_sessions rs ON rs.user_id = u.id
+      LEFT JOIN fcm_tokens t ON t.user_id = u.id
+        AND t.disabled_at IS NULL
+        AND t.dls_user_key IS NOT NULL
+        AND t.dls_user_key <> ''
+      LEFT JOIN dls_users du ON du.user_key = COALESCE(rs.access_token, t.dls_user_key)
+      WHERE u.id = ?
+      ORDER BY rs.updated_at DESC, t.last_seen_at DESC
+      LIMIT 1
+    `,
+    values: [userId],
+  }),
+
   updateNotificationSettings: (updates: Record<string, unknown>, userId: number): Q =>
     toQ(sb.update("users").set(updates).where({ id: userId })),
 

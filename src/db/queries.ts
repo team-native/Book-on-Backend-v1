@@ -263,6 +263,11 @@ export const bookQueries = {
     values: [id],
   }),
 
+  findBookIdByLibraryNumber: (libraryNumber: string): Q => ({
+    sql: "SELECT id FROM books WHERE library_number = ?",
+    values: [libraryNumber],
+  }),
+
   findUserFavorite: (userId: number, bookId: number): Q =>
     toQ(sb.select("1").from("favorites").where({ user_id: userId, book_id: bookId })),
 

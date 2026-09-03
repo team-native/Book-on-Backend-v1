@@ -690,7 +690,6 @@ const fallbackSearchBook = async (queryText: string, categoryCode?: string): Pro
       FROM dls_books
       WHERE deleted_at IS NULL AND ${filters.join(" AND ")}
       ORDER BY last_synced_at DESC
-      LIMIT 100
     `,
     values
   );
@@ -1038,18 +1037,26 @@ export const syncDlsBooks = async (books: DlsBook[]) => {
     return;
   }
   const categoryId = await getLocalDlsCategoryId();
-  await Promise.all(books.map((book) => {
+  const booksByLibraryNumber = new Map<string, DlsBook>();
+  for (const book of books) {
+    booksByLibraryNumber.set(`DLS:${book.speciesKey}:${book.regNo || book.bookKey}`, book);
+  }
+
+  await Promise.all(Array.from(booksByLibraryNumber.entries()).map(async ([libraryNumber, book]) => {
     const bookId = Number(book.bookKey);
     if (!Number.isSafeInteger(bookId)) {
       throw new ApiError(502, 5021, "학교 도서 식별자가 올바르지 않습니다.");
     }
+    const existingBookQuery = bookQueries.findBookIdByLibraryNumber(libraryNumber);
+    const [existingBooks] = await pool.query<RowDataPacket[]>(existingBookQuery.sql, existingBookQuery.values);
+    const targetBookId = existingBooks[0]?.id ? Number(existingBooks[0].id) : bookId;
     const q = bookQueries.upsertBook(
-      bookId,
+      targetBookId,
       book.title,
       book.author || "",
       book.publisher || "",
       categoryId,
-      `DLS:${book.speciesKey}:${book.regNo || book.bookKey}`,
+      libraryNumber,
       book.description || null,
       book.coverUrl || null,
       parseDate(book)

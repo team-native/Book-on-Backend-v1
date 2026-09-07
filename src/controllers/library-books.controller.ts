@@ -9,6 +9,7 @@ import {
   getDlsBookDetail,
   getDlsCategories,
   getDlsPopularBooks,
+  getCatalogBooks,
   searchDlsBooks,
   serializeDlsBook,
   syncDlsBooks
@@ -42,6 +43,18 @@ const mapBooks = async (books: DlsBook[]) => {
 
 let recentCache: { expiresAt: number; books: DlsBook[] } | undefined;
 
+const mergeCatalogBooks = async (liveBooks: DlsBook[]) => {
+  const catalogBooks = await getCatalogBooks();
+  const merged = new Map<string, DlsBook>();
+  [...liveBooks, ...catalogBooks].forEach((book) => {
+    const key = book.regNo || book.speciesKey || book.bookKey;
+    if (!merged.has(key)) {
+      merged.set(key, book);
+    }
+  });
+  return [...merged.values()];
+};
+
 const getRecentBooks = async () => {
   if (recentCache && recentCache.expiresAt > Date.now()) {
     return recentCache.books;
@@ -59,11 +72,12 @@ const getRecentBooks = async () => {
   ));
   const unique = new Map<string, DlsBook>();
   results.flatMap((result) => result.bookList).forEach((book) => unique.set(book.bookKey, book));
-  const books = [...unique.values()].sort((a, b) => {
+  const liveBooks = [...unique.values()].sort((a, b) => {
     const aDate = a.regDate || a.pubYear || "";
     const bDate = b.regDate || b.pubYear || "";
     return bDate.localeCompare(aDate);
   });
+  const books = await mergeCatalogBooks(liveBooks);
   recentCache = { expiresAt: Date.now() + 60000, books };
   return books;
 };
@@ -126,7 +140,9 @@ export const listSchoolBooks = async (req: Request, res: Response) => {
     return;
   }
 
-  const books = sort === "NEW" ? await getRecentBooks() : await getDlsPopularBooks();
+  const books = sort === "NEW"
+    ? await getRecentBooks()
+    : await mergeCatalogBooks(await getDlsPopularBooks());
   const start = (page - 1) * size;
   const pageBooks = books.slice(start, start + size);
   sendSuccess(res, 200, "도서 목록 조회 성공", {

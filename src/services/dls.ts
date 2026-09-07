@@ -1008,6 +1008,52 @@ export const getDlsPopularBooks = async () => {
   return result.bookList;
 };
 
+export const getCatalogBooks = async (): Promise<DlsBook[]> => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `
+      SELECT
+        reg_code AS regCode,
+        title,
+        author,
+        publisher,
+        pub_year AS pubYear,
+        call_no AS callNo,
+        category_code AS categoryCode,
+        category_name AS categoryName,
+        status,
+        registered_at AS registeredAt
+      FROM dls_catalog_books
+      ORDER BY registered_at DESC, reg_code ASC
+    `
+  );
+
+  return rows.map((row) => {
+    const regCode = toText(row.regCode);
+    const categoryCode = toNullableText(row.categoryCode);
+    const categoryName = toNullableText(row.categoryName);
+    return {
+      bookKey: getStableNumericBookKey(regCode),
+      speciesKey: regCode,
+      provCode: env.dls.provCode,
+      neisCode: env.dls.neisCode,
+      title: toText(row.title),
+      author: toText(row.author),
+      publisher: toText(row.publisher),
+      pubYear: toText(row.pubYear),
+      coverUrl: "",
+      isbn: "",
+      regNo: regCode,
+      callNo: toText(row.callNo),
+      regDate: normalizeDlsDate(row.registeredAt),
+      status: toText(row.status),
+      categoryInfo: {
+        lcode: categoryCode || undefined,
+        ldesc: categoryName || undefined
+      }
+    };
+  });
+};
+
 export const getDlsCategories = async () => {
   return Object.entries(callNoCategoryNames).map(([code, name]) => ({
     lCategoryCode: code,

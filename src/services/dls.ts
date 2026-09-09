@@ -137,6 +137,29 @@ const toSafePath = (url: URL) => {
   return `${url.pathname}${query ? `?${query}` : ""}`;
 };
 
+const toErrorLog = (error: unknown, depth = 0): Record<string, unknown> | undefined => {
+  if (error === undefined || depth > 3) {
+    return undefined;
+  }
+  if (typeof error !== "object" || error === null) {
+    return { message: toBodyPreview(String(error)) };
+  }
+  const source = error as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+  for (const key of ["name", "message", "code", "errno", "syscall"]) {
+    const value = source[key];
+    if (typeof value === "string" || typeof value === "number") {
+      result[key] = typeof value === "string" ? toBodyPreview(value) : value;
+    }
+  }
+  result.cause = toErrorLog(source.cause, depth + 1);
+  // Node fetch can wrap connection failures in an AggregateError.
+  if (Array.isArray(source.errors)) {
+    result.errors = source.errors.slice(0, 10).map((item) => toErrorLog(item, depth + 1));
+  }
+  return result;
+};
+
 const createDlsError = (
   reason: DlsErrorReason,
   url: URL,
@@ -146,6 +169,7 @@ const createDlsError = (
     timeout?: boolean;
     responseBody?: string;
     message?: string;
+    error?: unknown;
   } = {}
 ) => {
   const detail: DlsErrorDetail = {
@@ -158,7 +182,11 @@ const createDlsError = (
     responseBody: options.responseBody ? toBodyPreview(options.responseBody) : undefined
   };
 
-  console.error("[DLS_PROXY_ERROR]", JSON.stringify(detail));
+  console.error("[DLS_PROXY_ERROR]", JSON.stringify({
+    ...detail,
+    url: url.href,
+    error: toErrorLog(options.error)
+  }));
 
   return new ApiError(
     502,
@@ -193,7 +221,8 @@ const request = async <T>(path: string, init?: RequestInit) => {
     });
   } catch (error) {
     throw createDlsError(isTimeoutError(error) ? "TIMEOUT" : "CONNECTION_FAILED", url, {
-      timeout: isTimeoutError(error)
+      timeout: isTimeoutError(error),
+      error
     });
   }
 

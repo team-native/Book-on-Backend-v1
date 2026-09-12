@@ -709,6 +709,60 @@ const fallbackBookInfo = async (regNos: string): Promise<DlsProxyBookList> => {
   };
 };
 
+/**
+ * Resolve a book detail from the persistent DLS cache only.
+ *
+ * This is intentionally separate from getDlsBookDetail(): the public
+ * /books/:bookId endpoint must remain available while the DLS tunnel is down.
+ */
+export const getCachedDlsBookDetail = async (regCode: string): Promise<DlsBook> => {
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `
+      SELECT
+        reg_code AS regCode,
+        title,
+        author,
+        publisher,
+        pub_year AS pubYear,
+        isbn,
+        call_no AS callNo,
+        class_no AS classNo,
+        cover_image_url AS coverImageUrl,
+        location_name AS locationName,
+        status,
+        return_plan_date AS returnPlanDate,
+        raw_json AS rawJson
+      FROM dls_books
+      WHERE reg_code = ? AND deleted_at IS NULL
+      LIMIT 1
+    `,
+    [regCode]
+  );
+
+  const row = rows[0];
+  if (!row) {
+    throw new ApiError(404, 4042, "?꾩꽌瑜?李얠쓣 ???놁뒿?덈떎.");
+  }
+
+  const cached = parseRaw<DlsProxyBook>(row.rawJson);
+  const book = cached ?? {
+    reg_code: toText(row.regCode),
+    title: toText(row.title),
+    aut_nm: toText(row.author),
+    publisher: toText(row.publisher),
+    pblcn_yr: toText(row.pubYear),
+    ea_isbn: toText(row.isbn),
+    call_no: toText(row.callNo),
+    class_no: toText(row.classNo),
+    cover_image_url: toText(row.coverImageUrl),
+    location_desc: toText(row.locationName),
+    status: toText(row.status),
+    rtn_plan_date: toText(row.returnPlanDate)
+  } satisfies DlsProxyBook;
+
+  return mapProxyBook(book);
+};
+
 const fallbackSearchBook = async (queryText: string, categoryCode?: string): Promise<DlsProxyBookList> => {
   const like = `%${queryText}%`;
   const filters = ["(title LIKE ? OR author LIKE ? OR publisher LIKE ? OR reg_code LIKE ? OR category_name LIKE ?)"];

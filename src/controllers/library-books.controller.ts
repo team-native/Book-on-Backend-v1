@@ -6,13 +6,12 @@ import { ApiError, parseId, pagination, parsePositiveInteger, sendSuccess } from
 import {
   DlsBook,
   enrichDlsBooks,
-  getDlsBookDetail,
+  getCachedDlsBookDetail,
   getDlsCategories,
   getDlsPopularBooks,
   getCatalogBooks,
   searchDlsBooks,
-  serializeDlsBook,
-  syncDlsBooks
+  serializeDlsBook
 } from "../services/dls";
 
 const categoryAliases: Record<string, string> = {
@@ -191,8 +190,9 @@ export const getSchoolBook = async (req: Request, res: Response) => {
     throw new ApiError(404, 4042, "도서를 찾을 수 없습니다.");
   }
 
-  const book = await getDlsBookDetail(String(bookId), speciesKey);
-  await syncDlsBooks([book]);
+  // Detail data is served from the crawler/DLS persistent cache. Do not call
+  // DLS here: a dead Cloudflare tunnel must not turn a cached book into 5023.
+  const book = await getCachedDlsBookDetail(speciesKey);
 
   const q2 = bookQueries.findUserFavorite(req.userId!, bookId);
   const [favorites] = req.userId
@@ -200,7 +200,7 @@ export const getSchoolBook = async (req: Request, res: Response) => {
     : [[] as RowDataPacket[], []];
 
   sendSuccess(res, 200, "도서 상세 조회 성공", {
-    ...serializeDlsBook(book, {
+    ...serializeDlsBook({ ...book, bookKey: String(bookId) }, {
       coverUrl: book.coverUrl,
       status: book.status || "",
       locationName: book.locationName || "",

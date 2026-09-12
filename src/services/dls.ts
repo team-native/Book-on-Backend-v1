@@ -1215,14 +1215,22 @@ export const syncDlsBooks = async (books: DlsBook[]) => {
     booksByLibraryNumber.set(`DLS:${book.speciesKey}:${book.regNo || book.bookKey}`, book);
   }
 
+  const libraryNumbers = [...booksByLibraryNumber.keys()];
+  const placeholders = libraryNumbers.map(() => "?").join(", ");
+  const [existingBookRows] = await pool.query<RowDataPacket[]>(
+    `SELECT id, library_number AS libraryNumber FROM books WHERE library_number IN (${placeholders})`,
+    libraryNumbers
+  );
+  const existingBookIds = new Map(
+    existingBookRows.map((row) => [String(row.libraryNumber), Number(row.id)])
+  );
+
   await Promise.all(Array.from(booksByLibraryNumber.entries()).map(async ([libraryNumber, book]) => {
     const bookId = Number(book.bookKey);
     if (!Number.isSafeInteger(bookId)) {
       throw new ApiError(502, 5021, "학교 도서 식별자가 올바르지 않습니다.");
     }
-    const existingBookQuery = bookQueries.findBookIdByLibraryNumber(libraryNumber);
-    const [existingBooks] = await pool.query<RowDataPacket[]>(existingBookQuery.sql, existingBookQuery.values);
-    const targetBookId = existingBooks[0]?.id ? Number(existingBooks[0].id) : bookId;
+    const targetBookId = existingBookIds.get(libraryNumber) ?? bookId;
     const q = bookQueries.upsertBook(
       targetBookId,
       book.title,
@@ -1239,20 +1247,46 @@ export const syncDlsBooks = async (books: DlsBook[]) => {
 };
 
 export const enrichDlsBooks = async (books: DlsBook[], concurrency = 5) => {
-  const result: Array<{ book: DlsBook; state: DlsBookState | null }> = new Array(books.length);
-  let index = 0;
-  const workers = Array.from({ length: Math.min(concurrency, books.length) }, async () => {
-    while (index < books.length) {
-      const current = index++;
-      const book = books[current];
-      try {
-        result[current] = { book, state: await getDlsBookState(book) };
-      } catch {
-        result[current] = { book, state: null };
+  void concurrency;
+  const regCodes = [...new Set(books.map((book) => book.regNo || book.bookKey))];
+  const stateByRegCode = new Map<string, DlsBookState>();
+  if (regCodes.length > 0) {
+    const placeholders = regCodes.map(() => "?").join(", ");
+    const [rows] = await pool.query<RowDataPacket[]>(
+      `
+        SELECT
+          reg_code AS regCode,
+          cover_image_url AS coverUrl,
+          location_name AS locationName,
+          status,
+          return_plan_date AS returnPlanDate
+        FROM dls_books
+        WHERE deleted_at IS NULL AND reg_code IN (${placeholders})
+      `,
+      regCodes
+    );
+    rows.forEach((row) => {
+      stateByRegCode.set(String(row.regCode), {
+        coverUrl: toText(row.coverUrl),
+        status: toText(row.status),
+        locationName: toText(row.locationName),
+        returnPlanDate: toText(row.returnPlanDate)
+      });
+    });
+  }
+
+  const result = books.map((book) => {
+    const cachedState = stateByRegCode.get(book.regNo || book.bookKey);
+    return {
+      book,
+      state: cachedState ?? {
+        coverUrl: book.coverUrl || "",
+        status: book.status || "",
+        locationName: book.locationName || "",
+        returnPlanDate: ""
       }
-    }
+    };
   });
-  await Promise.all(workers);
   await syncDlsBooks(result.map(({ book, state }) => ({
     ...book,
     coverUrl: state?.coverUrl || book.coverUrl,

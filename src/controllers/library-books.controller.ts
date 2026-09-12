@@ -169,14 +169,25 @@ export const listSchoolBooks = async (req: Request, res: Response) => {
     return;
   }
 
-  const books = sort === "NEW"
-    ? await getRecentBooks()
-    : await mergeCatalogBooks(await getDlsPopularBooks());
-  const items = await mapBooks(books);
   const start = (page - 1) * size;
+  let books: DlsBook[];
+  if (sort === "NEW") {
+    books = await getRecentBooks();
+  } else {
+    // The cached popular result is already ordered. Avoid loading and merging
+    // the entire catalog when it can fill the requested page by itself.
+    const popularBooks = await getDlsPopularBooks();
+    books = popularBooks.length >= start + size
+      ? popularBooks
+      : await mergeCatalogBooks(popularBooks);
+  }
+
+  // Apply pagination before enrichment/serialization. The old flow processed
+  // every cached/catalog book and sliced the result only at the end.
+  const items = await mapBooks(books.slice(start, start + size));
   sendSuccess(res, 200, "도서 목록 조회 성공", {
-    items: items.slice(start, start + size),
-    pagination: pagination(page, size, items.length)
+    items,
+    pagination: pagination(page, size, books.length)
   });
 };
 

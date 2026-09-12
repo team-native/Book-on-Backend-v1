@@ -137,6 +137,9 @@ const toSafePath = (url: URL) => {
   return `${url.pathname}${query ? `?${query}` : ""}`;
 };
 
+const DLS_ERROR_LOG_SUPPRESSION_MS = 10_000;
+const lastDlsErrorLogAt = new Map<string, number>();
+
 const toErrorLog = (error: unknown, depth = 0): Record<string, unknown> | undefined => {
   if (error === undefined || depth > 3) {
     return undefined;
@@ -182,11 +185,22 @@ const createDlsError = (
     responseBody: options.responseBody ? toBodyPreview(options.responseBody) : undefined
   };
 
-  console.error("[DLS_PROXY_ERROR]", JSON.stringify({
-    ...detail,
-    url: url.href,
-    error: toErrorLog(options.error)
-  }));
+  const logKey = [
+    detail.reason,
+    detail.path,
+    detail.httpStatus ?? "",
+    detail.proxyStatus ?? ""
+  ].join("|");
+  const now = Date.now();
+  const lastLoggedAt = lastDlsErrorLogAt.get(logKey) ?? 0;
+  if (now - lastLoggedAt >= DLS_ERROR_LOG_SUPPRESSION_MS) {
+    console.error("[DLS_PROXY_ERROR]", JSON.stringify({
+      ...detail,
+      url: url.href,
+      error: toErrorLog(options.error)
+    }));
+    lastDlsErrorLogAt.set(logKey, now);
+  }
 
   return new ApiError(
     502,
@@ -1052,17 +1066,28 @@ export const extendDlsLoan = (userKey: string, loanKey: string) => {
 };
 
 export const getDlsBookState = (
-  book: Pick<DlsBook, "bookKey" | "provCode" | "neisCode"> & { regNo?: string }
+  book: Pick<DlsBook, "bookKey" | "provCode" | "neisCode" | "coverUrl" | "status" | "locationName"> & { regNo?: string }
 ) => {
-  const query = new URLSearchParams({ reg_nos: book.regNo || book.bookKey });
-  return request<DlsProxyBookList>(`/bookInfo?${query}`).then(async (data) => {
-    await cacheBookList(data);
-    const found = (data.bookList ?? [])[0];
+  const regCode = book.regNo || book.bookKey;
+  return pool.query<RowDataPacket[]>(
+    `
+      SELECT
+        cover_image_url AS coverUrl,
+        location_name AS locationName,
+        status,
+        return_plan_date AS returnPlanDate
+      FROM dls_books
+      WHERE reg_code = ? AND deleted_at IS NULL
+      LIMIT 1
+    `,
+    [regCode]
+  ).then(([rows]) => {
+    const cached = rows[0];
     return {
-      coverUrl: getCoverImageUrl(found),
-      status: toText(found?.status_desc || found?.status),
-      locationName: toText(found?.location_desc || found?.location || found?.location_nm),
-      returnPlanDate: toText(found?.rtn_plan_date)
+      coverUrl: toText(cached?.coverUrl || book.coverUrl),
+      status: toText(cached?.status || book.status),
+      locationName: toText(cached?.locationName || book.locationName),
+      returnPlanDate: toText(cached?.returnPlanDate)
     };
   });
 };
@@ -1083,6 +1108,17 @@ export const getDlsBookDetail = (bookKey: string, speciesKey: string) => {
 };
 
 export const getDlsPopularBooks = async () => {
+  try {
+    const cached = await fallbackSearchBook(env.dls.popularKeyword);
+    return (cached.bookList ?? [])
+      .filter((book) => !isMissingRegCode(getRegCode(book)))
+      .map(mapProxyBook);
+  } catch (error) {
+    if (!(error instanceof ApiError) || error.errorCode !== 5025) {
+      throw error;
+    }
+  }
+
   const result = await searchDlsBooks({
     keyword: env.dls.popularKeyword,
     page: 1,

@@ -36,9 +36,38 @@ const resolveCategory = async (value: string) => {
   return category;
 };
 
-const mapBooks = async (books: DlsBook[]) => {
+const mapBooks = async (books: DlsBook[], options: { requireCover?: boolean } = {}) => {
   const enriched = await enrichDlsBooks(books);
-  return enriched.map(({ book, state }) => serializeDlsBook(book, state));
+  if (enriched.length === 0) {
+    return [];
+  }
+
+  // /books/:bookId resolves through the local books table. Return only rows
+  // with that mapping and use its canonical id in every list response.
+  const libraryNumbers = enriched.map(({ book }) =>
+    `DLS:${book.speciesKey}:${book.regNo || book.bookKey}`
+  );
+  const placeholders = libraryNumbers.map(() => "?").join(", ");
+  const [rows] = await pool.query<RowDataPacket[]>(
+    `SELECT id, library_number AS libraryNumber FROM books WHERE library_number IN (${placeholders})`,
+    libraryNumbers
+  );
+  const ids = new Map(rows.map((row) => [String(row.libraryNumber), Number(row.id)]));
+
+  return enriched
+    .map(({ book, state }) => {
+      const libraryNumber = `DLS:${book.speciesKey}:${book.regNo || book.bookKey}`;
+      const id = ids.get(libraryNumber);
+      if (id === undefined) {
+        return null;
+      }
+      const serialized = serializeDlsBook({ ...book, bookKey: String(id) }, state);
+      if (options.requireCover && !serialized.coverImageUrl?.trim()) {
+        return null;
+      }
+      return serialized;
+    })
+    .filter((book): book is NonNullable<typeof book> => book !== null);
 };
 
 let recentCache: { expiresAt: number; books: DlsBook[] } | undefined;
@@ -133,8 +162,9 @@ export const listSchoolBooks = async (req: Request, res: Response) => {
       sort: sort === "NEW" ? "RECENT" : "SCORE",
       order: "DESC"
     });
+    const categoryItems = await mapBooks(result.bookList);
     sendSuccess(res, 200, "도서 목록 조회 성공", {
-      items: await mapBooks(result.bookList),
+      items: categoryItems,
       pagination: pagination(page, size, result.allTotalCount)
     });
     return;
@@ -143,11 +173,11 @@ export const listSchoolBooks = async (req: Request, res: Response) => {
   const books = sort === "NEW"
     ? await getRecentBooks()
     : await mergeCatalogBooks(await getDlsPopularBooks());
+  const items = await mapBooks(books);
   const start = (page - 1) * size;
-  const pageBooks = books.slice(start, start + size);
   sendSuccess(res, 200, "도서 목록 조회 성공", {
-    items: await mapBooks(pageBooks),
-    pagination: pagination(page, size, books.length)
+    items: items.slice(start, start + size),
+    pagination: pagination(page, size, items.length)
   });
 };
 
@@ -199,20 +229,21 @@ export const listSchoolNewBooks = async (req: Request, res: Response) => {
   const page = parsePositiveInteger(req.query.page, 1);
   const size = parsePositiveInteger(req.query.size, 20, 100);
   const books = await getRecentBooks();
+  const items = await mapBooks(books);
   const start = (page - 1) * size;
   sendSuccess(res, 200, "신간 도서 목록 조회 성공", {
-    items: await mapBooks(books.slice(start, start + size)),
-    pagination: pagination(page, size, books.length)
+    items: items.slice(start, start + size),
+    pagination: pagination(page, size, items.length)
   });
 };
 
 export const getSchoolRecommendations = async (_req: Request, res: Response) => {
-  const books = (await getDlsPopularBooks()).slice(0, 5);
-  const items = await mapBooks(books);
+  const items = await mapBooks(await getDlsPopularBooks(), { requireCover: true });
+  const recommendations = items.slice(0, 5);
   const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
   sendSuccess(res, 200, "오늘의 책 추천 조회 성공", {
     recommendedAt: date,
-    items: items.map((book) => ({
+    items: recommendations.map((book) => ({
       ...book,
       reason: "학교 도서관의 실제 대출 통계를 기반으로 추천되었습니다."
     }))

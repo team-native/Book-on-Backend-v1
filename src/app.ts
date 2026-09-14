@@ -9,6 +9,7 @@ import { loansRouter } from "./routes/loans.routes";
 import { marathonRouter } from "./routes/marathon.routes";
 import { meRouter } from "./routes/me.routes";
 import { publicRouter } from "./routes/public.routes";
+import { recommendationRouter } from "./routes/recommendation.routes";
 
 export const app = express();
 
@@ -27,6 +28,7 @@ app.use("/dls", dlsRouter);
 app.use("/marathon", marathonRouter);
 app.use("/loans", loansRouter);
 app.use("/me", meRouter);
+app.use("/recommend", recommendationRouter);
 app.use(publicRouter);
 
 app.use((_req: Request, res: Response) => {

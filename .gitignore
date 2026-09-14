@@ -4,3 +4,4 @@ dist
 data
 *.xls
 *.xlsx
+school_book_embeddings.npy

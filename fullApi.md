@@ -2753,3 +2753,80 @@ Example response:
 | `GET /dls/extendLoan?user_key=&loan_key=` | `GET /extendLoan?...` | `/loanReturn/updateExtendMultiLoan.do` |
 
 백엔드에서 DLS 프록시 응답은 `status`가 `SUCCESS` 또는 `WARNING`일 때만 성공으로 취급한다. 그 외 상태, HTTP 실패, 연결 실패는 `502 / 5021`로 변환된다.
+
+## POST /recommend/user
+
+인증된 사용자의 독서 목록을 기반으로 학교 도서 임베딩과 cosine similarity를 계산해 도서를 추천한다. 일반 추천 요청에서는 Gemini API를 호출하지 않는다.
+
+| 항목 | 값 |
+|---|---|
+| 인증 | 필요 (`Authorization: Bearer <accessToken>`) |
+| Content-Type | `application/json` |
+| `top_k` | 선택값, 1~20, 기본값 5 |
+| Gemini 호출 횟수 | 0회 |
+
+Request headers:
+
+| key | value |
+|---|---|
+| Authorization | Bearer <accessToken> |
+| Content-Type | application/json |
+
+Request body:
+
+```json
+{
+  "user_id": "user-123",
+  "top_k": 5,
+  "books": [
+    {
+      "isbn": "9788936434267",
+      "title": "아몬드",
+      "author": "손원평",
+      "publisher": "창비",
+      "category_name": "문학",
+      "class_no": "813.7"
+    }
+  ]
+}
+```
+
+도서 매칭은 ISBN을 우선 사용하며, ISBN이 없으면 제목·저자·출판사를 함께 정규화해 매칭한다. 매칭된 도서 벡터의 평균을 사용자 취향 벡터로 만들고, 이미 읽은 도서는 추천 결과에서 제외한다.
+
+Example response:
+
+```json
+{
+  "errorCode": 0,
+  "message": "AI 도서 추천 조회 성공",
+  "data": {
+    "user_id": "user-123",
+    "user_book_count": 1,
+    "user_embedding_match_count": 1,
+    "gemini_calls_per_recommendation": 0,
+    "recommended_books": [
+      {
+        "title": "추천 도서 제목",
+        "author": "저자",
+        "publisher": "출판사",
+        "isbn": "9780000000000",
+        "category_name": "문학",
+        "class_no": "813.7",
+        "score": 0.8542
+      }
+    ]
+  }
+}
+```
+
+임베딩 파일은 서버 시작 시 한 번 로드한다. 기본 경로는 `school_book_embeddings.npy`, `school_book_metadata.json`이며 `school_book_embeddings/` 하위 경로도 지원한다. 두 파일은 동일 버전이어야 하며, 현재 기준 metadata 책 수는 14,377권, shape은 `14377 x 3072`, dtype은 `float32`, source table은 `dls_books`다. 일반 추천 요청에는 `book-on.sqlite`와 `GEMINI_API_KEY`가 필요하지 않다.
+
+Error cases:
+
+| HTTP status | errorCode | 조건 |
+|---:|---:|---|
+| 400 | 4001 | `books` 누락/형식 오류 또는 `top_k`가 1~20 범위 밖임 |
+| 401 | 4010 | access token 누락 또는 잘못됨 |
+| 503 | 5031 | 추천 임베딩이 로드되지 않음 |
+
+사용자 도서가 학교 metadata와 매칭되지 않으면 안내 메시지와 빈 `recommended_books` 배열을 반환한다. 기존 API는 변경하지 않는다.

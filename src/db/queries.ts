@@ -530,11 +530,78 @@ export const notificationQueries = {
     values: [token],
   }),
 
+  listActiveFcmTokens: (userId: number): Q => ({
+    sql: "SELECT token FROM fcm_tokens WHERE user_id = ? AND disabled_at IS NULL",
+    values: [userId],
+  }),
+
+  insertNotification: (
+    userId: number,
+    notificationKey: string,
+    type: "loan_due" | "notice" | "new_book",
+    title: string,
+    body: string,
+    deepLink: string | null,
+    payload: string | null
+  ): Q => ({
+    sql: `
+      INSERT OR IGNORE INTO notifications
+        (user_id, notification_key, type, title, body, deep_link, payload)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `,
+    values: [userId, notificationKey, type, title, body, deepLink, payload],
+  }),
+
+  findNotificationIdByKey: (userId: number, notificationKey: string): Q => ({
+    sql: "SELECT id FROM notifications WHERE user_id = ? AND notification_key = ? LIMIT 1",
+    values: [userId, notificationKey],
+  }),
+
+  countNotifications: (userId: number): Q => ({
+    sql: "SELECT COUNT(*) AS totalCount FROM notifications WHERE user_id = ?",
+    values: [userId],
+  }),
+
+  listNotifications: (userId: number, limit: number, offset: number): Q => ({
+    sql: `
+      SELECT id, type, title, body, is_read AS isRead,
+        created_at AS createdAt, deep_link AS deepLink
+      FROM notifications
+      WHERE user_id = ?
+      ORDER BY created_at DESC, id DESC
+      LIMIT ? OFFSET ?
+    `,
+    values: [userId, limit, offset],
+  }),
+
+  markNotificationRead: (userId: number, notificationId: number): Q => ({
+    sql: `
+      UPDATE notifications
+      SET is_read = 1, read_at = COALESCE(read_at, CURRENT_TIMESTAMP)
+      WHERE id = ? AND user_id = ?
+    `,
+    values: [notificationId, userId],
+  }),
+
+  findNotification: (userId: number, notificationId: number): Q => ({
+    sql: "SELECT id, is_read AS isRead FROM notifications WHERE id = ? AND user_id = ? LIMIT 1",
+    values: [notificationId, userId],
+  }),
+
+  markAllNotificationsRead: (userId: number): Q => ({
+    sql: "UPDATE notifications SET is_read = 1, read_at = COALESCE(read_at, CURRENT_TIMESTAMP) WHERE user_id = ? AND is_read = 0",
+    values: [userId],
+  }),
+
+  countUnreadNotifications: (userId: number): Q => ({
+    sql: "SELECT COUNT(*) AS count FROM notifications WHERE user_id = ? AND is_read = 0",
+    values: [userId],
+  }),
+
   listDueLoanReminderTargets: (daysBefore: 0 | 3): Q => ({
     sql: `
       SELECT
         u.id AS userId,
-        t.token,
         CAST(l.id AS TEXT) AS loanId,
         'loan' AS source,
         b.title AS bookTitle,
@@ -542,14 +609,12 @@ export const notificationQueries = {
       FROM loans l
       JOIN users u ON u.id = l.user_id
       JOIN books b ON b.id = l.book_id
-      JOIN fcm_tokens t ON t.user_id = u.id AND t.disabled_at IS NULL
       WHERE u.due_date_reminder = 1
         AND l.status = 'BORROWED'
         AND l.due_date = date('now', 'localtime', ?)
       UNION ALL
       SELECT
         u.id AS userId,
-        t.token,
         d.loan_key AS loanId,
         'dls' AS source,
         d.title AS bookTitle,
@@ -559,8 +624,8 @@ export const notificationQueries = {
           ELSE substr(d.return_plan_date, 1, 10)
         END AS dueDate
       FROM dls_current_loans d
-      JOIN fcm_tokens t ON t.dls_user_key = d.user_key AND t.disabled_at IS NULL
-      JOIN users u ON u.id = t.user_id
+      JOIN fcm_tokens ft ON ft.dls_user_key = d.user_key AND ft.disabled_at IS NULL
+      JOIN users u ON u.id = ft.user_id
       WHERE u.due_date_reminder = 1
         AND d.return_plan_date IS NOT NULL
         AND d.return_plan_date <> ''
@@ -576,10 +641,8 @@ export const notificationQueries = {
   listNoticeNotificationTargets: (noticeId: number): Q => ({
     sql: `
       SELECT
-        u.id AS userId,
-        t.token
+        u.id AS userId
       FROM users u
-      JOIN fcm_tokens t ON t.user_id = u.id AND t.disabled_at IS NULL
       WHERE u.notice_reminder = 1
         AND NOT EXISTS (
           SELECT 1
@@ -593,6 +656,11 @@ export const notificationQueries = {
     values: [noticeId],
   }),
 
+  listNewBookNotificationTargets: (): Q => ({
+    sql: "SELECT id AS userId FROM users WHERE new_book_reminder = 1",
+    values: [],
+  }),
+
   listPendingNoticeNotifications: (limit: number): Q => ({
     sql: `
       SELECT n.id AS noticeId, n.title, n.summary
@@ -600,7 +668,6 @@ export const notificationQueries = {
       WHERE EXISTS (
         SELECT 1
         FROM users u
-        JOIN fcm_tokens t ON t.user_id = u.id AND t.disabled_at IS NULL
         WHERE u.notice_reminder = 1
           AND NOT EXISTS (
             SELECT 1

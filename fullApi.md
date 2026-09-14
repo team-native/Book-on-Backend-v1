@@ -1,5 +1,88 @@
 # Book-on-Backend-v1 Full API
 
+## 알림 이력 API
+
+알림은 FCM 발송 여부와 관계없이 대상 사용자별로 `notifications` 테이블에 먼저 저장됩니다. 이후 활성 FCM 토큰으로 푸시를 발송하며, FCM이 `UNREGISTERED`, `INVALID_ARGUMENT` 등 만료·잘못된 토큰을 반환하면 해당 토큰을 비활성화합니다. 푸시 data에는 최소한 `type`을 포함합니다.
+
+### GET /me/notifications?page=1&size=20
+
+- 인증: 필요 (`Authorization: Bearer <accessToken>`)
+- 정렬: `createdAt DESC`, 동일 시 `id DESC`
+- `size`는 1~100입니다.
+
+```json
+{
+  "errorCode": 0,
+  "message": "success",
+  "data": {
+    "notifications": [
+      {
+        "id": 1,
+        "type": "loan_due",
+        "title": "반납 예정 알림",
+        "body": "대출한 도서의 반납일이 내일입니다.",
+        "isRead": false,
+        "createdAt": "2026-09-14T16:00:00+09:00",
+        "deepLink": null
+      }
+    ],
+    "pagination": {
+      "page": 1,
+      "size": 20,
+      "totalCount": 1,
+      "totalPages": 1,
+      "hasNext": false
+    }
+  }
+}
+```
+
+### PATCH /me/notifications/{notificationId}/read
+
+인증된 사용자의 알림만 읽음 처리합니다. 다른 사용자의 알림 ID는 조회되지 않으며 404를 반환합니다.
+
+```json
+{
+  "errorCode": 0,
+  "message": "success",
+  "data": { "id": 1, "isRead": true }
+}
+```
+
+### PATCH /me/notifications/read-all
+
+인증된 사용자의 읽지 않은 알림을 모두 읽음 처리합니다.
+
+```json
+{
+  "errorCode": 0,
+  "message": "success",
+  "data": { "updated": true }
+}
+```
+
+### GET /me/notifications/unread-count
+
+홈 알림 버튼에 사용할 읽지 않은 알림 수를 반환합니다.
+
+```json
+{
+  "errorCode": 0,
+  "message": "success",
+  "data": { "count": 3 }
+}
+```
+
+알림 type별 FCM data 규칙은 다음과 같습니다.
+
+| type | data | iOS 이동 화면 |
+|---|---|---|
+| `loan_due` | `loanId`, `source`, `dueDate`, `daysBefore` | 대출 내역 |
+| `notice` | `noticeId` | 공지 |
+| `new_book` | 이벤트 payload | 신간 |
+
+기존 `POST /me/fcm-token` 및 `DELETE /me/fcm-token` API의 응답 형식과 인증 요구사항은 유지합니다.
+
 ## 공통 규칙
 
 - Base URL: 서버 실행 환경 기준. 기본 포트는 `PORT` 미설정 시 `3000`.

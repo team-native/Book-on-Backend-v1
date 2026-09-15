@@ -42,6 +42,10 @@ export const registerFcmToken = async (req: Request, res: Response) => {
     parseOptionalString(deviceId, 100)
   );
   await pool.query(q.sql, q.values);
+  if (typeof dlsUserKey === "string" && dlsUserKey.trim()) {
+    const dlsKeyQuery = notificationQueries.updateUserDlsKey(req.userId!, dlsUserKey.trim());
+    await pool.query(dlsKeyQuery.sql, dlsKeyQuery.values);
+  }
 
   sendSuccess(res, 200, "FCM 토큰이 등록되었습니다.", {
     registered: true,
@@ -75,6 +79,7 @@ export const listMyNotifications = async (req: Request, res: Response) => {
     notifications: rows.map((row) => ({
       id: Number(row.id), type: row.type, title: row.title, body: row.body,
       isRead: Boolean(row.isRead), createdAt: formatCreatedAt(row.createdAt), deepLink: row.deepLink ?? null,
+      payload: row.payload ? JSON.parse(row.payload) : null,
     })),
     pagination: pagination(page, size, totalCount),
   });

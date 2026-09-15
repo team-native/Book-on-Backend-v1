@@ -11,6 +11,8 @@ npm run db:migrate
 npm run dev
 ```
 
+배포 시에도 `npm start`가 시작 전에 `npm run db:migrate`를 실행하므로 운영 DB의 미적용 마이그레이션을 자동 적용합니다. 현재 알림 이력 기능에 필요한 `007_notification_history.sql`도 이 방식으로 적용됩니다.
+
 ## 환경 변수
 
 - `SQLITE_PATH`: SQLite DB 경로

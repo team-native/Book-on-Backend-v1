@@ -228,7 +228,7 @@ export const sendNewBookNotification = async (book: { bookId: number; title: str
       "new_book",
       title,
       body,
-      "/new-books",
+      `/books/${book.bookId}`,
       payload
     );
     const sentCount = await sendToTokens(await getTokens(row.userId), title, body, payload);

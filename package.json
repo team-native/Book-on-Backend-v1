@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "prestart": "npm run db:migrate",
     "start": "node dist/server.js",
     "test:recommendation": "tsx scripts/test-book-recommendation.ts",
     "db:migrate": "tsx src/db/migrate.ts",

@@ -11,7 +11,9 @@ export const runMigrations = async () => {
     )
   `);
 
-  const directory = path.join(process.cwd(), "migrations");
+  // Resolve from the source/compiled module location so production startup
+  // works even when the process working directory is different.
+  const directory = path.resolve(__dirname, "../../migrations");
   const files = (await fs.readdir(directory)).filter((file) => file.endsWith(".sql")).sort();
 
   for (const file of files) {

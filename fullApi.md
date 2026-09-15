@@ -23,7 +23,8 @@
         "body": "대출한 도서의 반납일이 내일입니다.",
         "isRead": false,
         "createdAt": "2026-09-14T16:00:00+09:00",
-        "deepLink": null
+        "deepLink": null,
+        "payload": null
       }
     ],
     "pagination": {
@@ -79,7 +80,7 @@
 |---|---|---|
 | `loan_due` | `loanId`, `source`, `dueDate`, `daysBefore` | 대출 내역 |
 | `notice` | `noticeId` | 공지 |
-| `new_book` | 이벤트 payload | 신간 |
+| `new_book` | `bookId` | 신간 상세 (`/books/{bookId}`) |
 
 기존 `POST /me/fcm-token` 및 `DELETE /me/fcm-token` API의 응답 형식과 인증 요구사항은 유지합니다.
 

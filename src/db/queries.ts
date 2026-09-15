@@ -520,6 +520,11 @@ export const notificationQueries = {
     values: [userId, token, dlsUserKey, platform, deviceId],
   }),
 
+  updateUserDlsKey: (userId: number, dlsUserKey: string): Q => ({
+    sql: "UPDATE users SET dls_user_key = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+    values: [dlsUserKey, userId],
+  }),
+
   disableFcmToken: (userId: number, token: string): Q => ({
     sql: "UPDATE fcm_tokens SET disabled_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP WHERE user_id = ? AND token = ?",
     values: [userId, token],
@@ -565,7 +570,7 @@ export const notificationQueries = {
   listNotifications: (userId: number, limit: number, offset: number): Q => ({
     sql: `
       SELECT id, type, title, body, is_read AS isRead,
-        created_at AS createdAt, deep_link AS deepLink
+        created_at AS createdAt, deep_link AS deepLink, payload
       FROM notifications
       WHERE user_id = ?
       ORDER BY created_at DESC, id DESC
@@ -624,8 +629,12 @@ export const notificationQueries = {
           ELSE substr(d.return_plan_date, 1, 10)
         END AS dueDate
       FROM dls_current_loans d
-      JOIN fcm_tokens ft ON ft.dls_user_key = d.user_key AND ft.disabled_at IS NULL
-      JOIN users u ON u.id = ft.user_id
+      JOIN users u ON u.dls_user_key = d.user_key
+        OR EXISTS (
+          SELECT 1
+          FROM read365_sessions rs
+          WHERE rs.user_id = u.id AND rs.access_token = d.user_key
+        )
       WHERE u.due_date_reminder = 1
         AND d.return_plan_date IS NOT NULL
         AND d.return_plan_date <> ''

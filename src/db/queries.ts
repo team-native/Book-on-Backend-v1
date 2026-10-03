@@ -746,15 +746,37 @@ export const publicQueries = {
 
   getReaderRankings: (year: number, limit: number): Q => ({
     sql: `
+      WITH all_loans AS (
+        SELECT
+          l.user_id AS userId,
+          l.borrowed_at AS borrowedAt
+        FROM loans l
+
+        UNION ALL
+
+        SELECT
+          u.id AS userId,
+          h.loan_date AS borrowedAt
+        FROM dls_loan_histories h
+        JOIN users u ON u.dls_user_key = h.user_key
+
+        UNION ALL
+
+        SELECT
+          u.id AS userId,
+          d.loan_date AS borrowedAt
+        FROM dls_current_loans d
+        JOIN users u ON u.dls_user_key = d.user_key
+      )
       SELECT
         u.id AS userId,
         u.email,
         u.name,
         u.department,
-        COUNT(l.id) AS loanCount
+        COUNT(*) AS loanCount
       FROM users u
-      JOIN loans l ON l.user_id = u.id
-      WHERE strftime('%Y', l.borrowed_at) = ?
+      JOIN all_loans l ON l.userId = u.id
+      WHERE substr(l.borrowedAt, 1, 4) = ?
       GROUP BY u.id, u.email
       ORDER BY loanCount DESC, u.id ASC
       LIMIT ?

@@ -3,6 +3,7 @@ import { bookQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { RowDataPacket } from "../db/types";
 import { ApiError } from "../lib/api";
+import { sendNewBookNotification } from "./notifications";
 import {
   DlsBook,
   DlsBookState,
@@ -1224,13 +1225,18 @@ export const syncDlsBooks = async (books: DlsBook[]) => {
   const existingBookIds = new Map(
     existingBookRows.map((row) => [String(row.libraryNumber), Number(row.id)])
   );
+  const newBooks: Array<{ bookId: number; title: string }> = [];
 
   await Promise.all(Array.from(booksByLibraryNumber.entries()).map(async ([libraryNumber, book]) => {
     const bookId = Number(book.bookKey);
     if (!Number.isSafeInteger(bookId)) {
       throw new ApiError(502, 5021, "학교 도서 식별자가 올바르지 않습니다.");
     }
-    const targetBookId = existingBookIds.get(libraryNumber) ?? bookId;
+    const existingBookId = existingBookIds.get(libraryNumber);
+    const targetBookId = existingBookId ?? bookId;
+    if (existingBookId === undefined) {
+      newBooks.push({ bookId: targetBookId, title: book.title });
+    }
     const q = bookQueries.upsertBook(
       targetBookId,
       book.title,
@@ -1243,6 +1249,14 @@ export const syncDlsBooks = async (books: DlsBook[]) => {
       parseDate(book)
     );
     return pool.query(q.sql, q.values);
+  }));
+
+  void Promise.all(newBooks.map(async (book) => {
+    try {
+      await sendNewBookNotification(book);
+    } catch (error) {
+      console.error("Failed to send new book notification.", error);
+    }
   }));
 };
 

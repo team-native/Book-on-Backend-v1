@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
+import { mapCanonicalDlsBooks } from "../services/library-book-mapper";
 import { bookQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { RowDataPacket } from "../db/types";
 import { ApiError, parseId, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
 import {
   DlsBook,
-  enrichDlsBooks,
   getCachedDlsBookDetail,
   getDlsCategories,
   getDlsPopularBooks,
@@ -33,40 +33,6 @@ const resolveCategory = async (value: string) => {
     throw new ApiError(400, 4001, "도서 카테고리가 올바르지 않습니다.");
   }
   return category;
-};
-
-const mapBooks = async (books: DlsBook[], options: { requireCover?: boolean } = {}) => {
-  const enriched = await enrichDlsBooks(books);
-  if (enriched.length === 0) {
-    return [];
-  }
-
-  // /books/:bookId resolves through the local books table. Return only rows
-  // with that mapping and use its canonical id in every list response.
-  const libraryNumbers = enriched.map(({ book }) =>
-    `DLS:${book.speciesKey}:${book.regNo || book.bookKey}`
-  );
-  const placeholders = libraryNumbers.map(() => "?").join(", ");
-  const [rows] = await pool.query<RowDataPacket[]>(
-    `SELECT id, library_number AS libraryNumber FROM books WHERE library_number IN (${placeholders})`,
-    libraryNumbers
-  );
-  const ids = new Map(rows.map((row) => [String(row.libraryNumber), Number(row.id)]));
-
-  return enriched
-    .map(({ book, state }) => {
-      const libraryNumber = `DLS:${book.speciesKey}:${book.regNo || book.bookKey}`;
-      const id = ids.get(libraryNumber);
-      if (id === undefined) {
-        return null;
-      }
-      const serialized = serializeDlsBook({ ...book, bookKey: String(id) }, state);
-      if (options.requireCover && !serialized.coverImageUrl?.trim()) {
-        return null;
-      }
-      return serialized;
-    })
-    .filter((book): book is NonNullable<typeof book> => book !== null);
 };
 
 let recentCache: { expiresAt: number; books: DlsBook[] } | undefined;
@@ -129,7 +95,7 @@ export const searchSchoolBooks = async (req: Request, res: Response) => {
     page,
     size
   });
-  let items = await mapBooks(result.bookList);
+  let items = await mapCanonicalDlsBooks(result.bookList);
   if (libraryNumber) {
     const normalized = libraryNumber.replaceAll(" ", "").toLowerCase();
     items = items.filter((book) =>
@@ -161,7 +127,7 @@ export const listSchoolBooks = async (req: Request, res: Response) => {
       sort: sort === "NEW" ? "RECENT" : "SCORE",
       order: "DESC"
     });
-    const categoryItems = await mapBooks(result.bookList);
+    const categoryItems = await mapCanonicalDlsBooks(result.bookList);
     sendSuccess(res, 200, "도서 목록 조회 성공", {
       items: categoryItems,
       pagination: pagination(page, size, result.allTotalCount)
@@ -184,7 +150,7 @@ export const listSchoolBooks = async (req: Request, res: Response) => {
 
   // Apply pagination before enrichment/serialization. The old flow processed
   // every cached/catalog book and sliced the result only at the end.
-  const items = await mapBooks(books.slice(start, start + size));
+  const items = await mapCanonicalDlsBooks(books.slice(start, start + size));
   sendSuccess(res, 200, "도서 목록 조회 성공", {
     items,
     pagination: pagination(page, size, books.length)
@@ -240,7 +206,7 @@ export const listSchoolNewBooks = async (req: Request, res: Response) => {
   const page = parsePositiveInteger(req.query.page, 1);
   const size = parsePositiveInteger(req.query.size, 20, 100);
   const books = await getRecentBooks();
-  const items = await mapBooks(books);
+  const items = await mapCanonicalDlsBooks(books);
   const start = (page - 1) * size;
   sendSuccess(res, 200, "신간 도서 목록 조회 성공", {
     items: items.slice(start, start + size),
@@ -249,7 +215,7 @@ export const listSchoolNewBooks = async (req: Request, res: Response) => {
 };
 
 export const getSchoolRecommendations = async (_req: Request, res: Response) => {
-  const items = await mapBooks(await getDlsPopularBooks(), { requireCover: true });
+  const items = await mapCanonicalDlsBooks(await getDlsPopularBooks(), { requireCover: true });
   const recommendations = items.slice(0, 5);
   const date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(new Date());
   sendSuccess(res, 200, "오늘의 책 추천 조회 성공", {

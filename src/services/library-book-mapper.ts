@@ -35,4 +35,3 @@ export const mapCanonicalDlsBooks = async (books: DlsBook[], options: { requireC
     })
     .filter((book): book is NonNullable<typeof book> => book !== null);
 };
-

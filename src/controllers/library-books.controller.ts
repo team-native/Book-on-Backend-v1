@@ -35,6 +35,7 @@ const resolveCategory = async (value: string) => {
   return category;
 };
 
+
 let recentCache: { expiresAt: number; books: DlsBook[] } | undefined;
 
 const mergeCatalogBooks = async (liveBooks: DlsBook[]) => {
@@ -49,11 +50,7 @@ const mergeCatalogBooks = async (liveBooks: DlsBook[]) => {
   return [...merged.values()];
 };
 
-const getRecentBooks = async () => {
-  if (recentCache && recentCache.expiresAt > Date.now()) {
-    return recentCache.books;
-  }
-
+const loadRecentBooks = async () => {
   const roots = Array.from({ length: 10 }, (_, index) => `${index}00`);
   const results = await Promise.all(roots.map((kdcCode) =>
     searchDlsBooks({
@@ -74,6 +71,44 @@ const getRecentBooks = async () => {
   const books = await mergeCatalogBooks(liveBooks);
   recentCache = { expiresAt: Date.now() + 60000, books };
   return books;
+};
+
+let recentRequest: Promise<DlsBook[]> | undefined;
+const recentMappingRequests = new WeakMap<DlsBook[], ReturnType<typeof mapCanonicalDlsBooks>>();
+
+const getRecentBooks = async () => {
+  if (recentCache && recentCache.expiresAt > Date.now()) {
+    return recentCache.books;
+  }
+  if (recentRequest) {
+    return recentRequest;
+  }
+  const request = loadRecentBooks();
+  recentRequest = request;
+  try {
+    return await request;
+  } finally {
+    if (recentRequest === request) {
+      recentRequest = undefined;
+    }
+  }
+};
+
+// 동시 요청만 공유하고 다음 요청에서는 최신 대출 상태를 다시 조회한다.
+const mapRecentBooks = async (books: DlsBook[]) => {
+  const pending = recentMappingRequests.get(books);
+  if (pending) {
+    return pending;
+  }
+  const request = mapCanonicalDlsBooks(books);
+  recentMappingRequests.set(books, request);
+  try {
+    return await request;
+  } finally {
+    if (recentMappingRequests.get(books) === request) {
+      recentMappingRequests.delete(books);
+    }
+  }
 };
 
 export const searchSchoolBooks = async (req: Request, res: Response) => {
@@ -206,7 +241,7 @@ export const listSchoolNewBooks = async (req: Request, res: Response) => {
   const page = parsePositiveInteger(req.query.page, 1);
   const size = parsePositiveInteger(req.query.size, 20, 100);
   const books = await getRecentBooks();
-  const items = await mapCanonicalDlsBooks(books);
+  const items = await mapRecentBooks(books);
   const start = (page - 1) * size;
   sendSuccess(res, 200, "신간 도서 목록 조회 성공", {
     items: items.slice(start, start + size),

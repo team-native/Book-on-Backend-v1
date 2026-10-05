@@ -57,3 +57,20 @@ npm run dev
 - `PATCH /me/notification-settings`
 - 반납 3일 전/당일 푸시 알림
 - 새 도서부 공지 푸시 알림
+
+## 도서 조회 회귀 검증
+
+의존성 설치 후 다음 명령으로 TypeScript 빌드와 도서 조회 회귀 검증을 실행합니다. 검증 스크립트는 Node.js 24.15.0 환경에서 확인했으며 기존 개발 의존성인 TypeScript가 필요합니다.
+
+```bash
+npm run build
+npm run test:library-discovery
+```
+
+`scripts/test-library-discovery.cjs`는 실제 TypeScript controller와 mapper를 VM에서 실행하며 DB·DLS 의존성을 모의 구현으로 대체해 외부 I/O를 차단합니다. 다음 항목을 검증합니다.
+
+- 홈 추천 도서의 canonical ID와 상세 조회 ID 일치, 빈 추천 목록, 표지가 없는 도서 필터링, DB에 매핑되지 않은 도서 제외.
+- 신간 조회 동시 cold 요청 4개의 DLS 검색 10회 및 enrichment 1회 공유, warm 요청의 추가 DLS 검색 0회.
+- warm 요청에서 대출 상태 재조회, 페이지별 결과·페이지 정보, enrichment 및 캐시 생성 실패 후 재시도.
+
+이 검증은 실제 DB, DLS 서버, 운영 FCM, 배포 서버 또는 Android 앱의 전체 기능 테스트를 대신하지 않습니다.

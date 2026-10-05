@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
+import { mapCanonicalDlsBooks } from "../services/library-book-mapper";
 import { publicQueries } from "../db/queries";
 import { pool } from "../db/pool";
 import { RowDataPacket } from "../db/types";
 import { ApiError, pagination, parsePositiveInteger, sendSuccess } from "../lib/api";
-import { enrichDlsBooks, getDlsPopularBooks, isDlsServiceError, serializeDlsBook } from "../services/dls";
+import { getDlsPopularBooks, isDlsServiceError } from "../services/dls";
 import { findProfileImageByFile, findProfileImageMetaByEmail } from "../services/profile-image";
 
 export const listNotices = async (req: Request, res: Response) => {
@@ -82,10 +83,10 @@ export const getHome = async (req: Request, res: Response) => {
 
   try {
     const popularBooks = (await getDlsPopularBooks()).slice(0, 1);
-    const recommendations = await enrichDlsBooks(popularBooks);
+    const recommendations = await mapCanonicalDlsBooks(popularBooks);
     todayRecommendation = recommendations[0]
       ? {
-          ...serializeDlsBook(recommendations[0].book, recommendations[0].state),
+          ...recommendations[0],
           reason: "학교 도서관의 실제 대출 통계를 기반으로 추천되었습니다."
         }
       : null;

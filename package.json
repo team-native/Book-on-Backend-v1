@@ -9,6 +9,8 @@
     "prestart": "npm run db:migrate",
     "start": "node dist/server.js",
     "test:recommendation": "tsx scripts/test-book-recommendation.ts",
+    "fcm:users": "tsx scripts/list-fcm-users.ts",
+    "fcm:test": "tsx scripts/send-fcm-test.ts",
     "db:migrate": "tsx src/db/migrate.ts",
     "dls:catalog:export": "powershell -ExecutionPolicy Bypass -File scripts/import-soma-catalog.ps1",
     "dls:catalog:import": "node --experimental-sqlite scripts/import-soma-catalog.mjs"

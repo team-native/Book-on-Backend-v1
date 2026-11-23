@@ -57,3 +57,33 @@ npm run dev
 - `PATCH /me/notification-settings`
 - 반납 3일 전/당일 푸시 알림
 - 새 도서부 공지 푸시 알림
+
+## FCM Test Notifications
+
+List users and active FCM token counts:
+
+```bash
+npm run fcm:users
+```
+
+Send a real FCM notification to all active tokens of a user:
+
+```bash
+npm run fcm:test -- --user-id 1 --title "도서부 공지 테스트" --body "테스트 알림입니다."
+```
+
+`--user-id`, `--title`, and `--body` are required. If `--data` is omitted,
+the following notice payload is used:
+
+```json
+{
+  "type": "notice",
+  "noticeId": "0"
+}
+```
+
+To test a specific notice:
+
+```bash
+npm run fcm:test -- --user-id 1 --title "도서부 공지" --body "도서관 운영 안내입니다." --data '{"type":"notice","noticeId":"1"}'
+```

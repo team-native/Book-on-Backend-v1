@@ -498,6 +498,26 @@ export const meQueries = {
 // Notifications
 
 export const notificationQueries = {
+  listUsersForFcmTest: (): Q => ({
+    sql: `
+      SELECT
+        u.id,
+        u.email,
+        u.name,
+        COUNT(CASE WHEN t.disabled_at IS NULL THEN 1 END) AS activeTokenCount
+      FROM users u
+      LEFT JOIN fcm_tokens t ON t.user_id = u.id
+      GROUP BY u.id, u.email, u.name
+      ORDER BY u.id
+    `,
+    values: [],
+  }),
+
+  findUserForFcmTest: (userId: number): Q => ({
+    sql: "SELECT id, email, name FROM users WHERE id = ? LIMIT 1",
+    values: [userId],
+  }),
+
   upsertFcmToken: (
     userId: number,
     token: string,
